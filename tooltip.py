@@ -10,10 +10,32 @@ def add_annotation_store(layout):
     if not any(isinstance(child, dcc.Store) and child.id == 'annotations-to-remove' for child in layout.children):
         layout.children.append(dcc.Store(id="annotations-to-remove"))
 
-def tooltip(app, graph_id='graph1'):
+# Default configuration for tooltip annotations
+DEFAULT_ANNOTATION_CONFIG = {
+    'text_color': 'black',
+    'arrow_color': 'black',
+    'arrow_size': 1.8,
+    'arrow_width': 1,
+    'arrow_head': 3,
+    'x_anchor': 'left',
+    'alignment': 'left'
+}
+
+def tooltip(app, graph_id='graph1', style=DEFAULT_ANNOTATION_CONFIG):
     """
     Adds tooltip functionality to the specified Dash app and graph.
+
+    Parameters:
+    - app: The Dash app instance.
+    - graph_id: The ID of the graph for which the tooltip should be added.
+    - config: A dictionary containing annotation styling properties.
     """
+
+    # Merge default config with the user's custom config
+    config = DEFAULT_ANNOTATION_CONFIG.copy()
+    if style:
+        config.update(style)
+    
     @app.callback(
         Output(component_id=graph_id, component_property='figure'),
         Input(component_id=graph_id, component_property='clickData'),
@@ -25,17 +47,18 @@ def tooltip(app, graph_id='graph1'):
             point = clickData['points'][0]
             x_val = point['x']
             y_val = point['y']
-            custom_data = point['customdata'][0]  # Accessing the custom data
+            custom_data = point['customdata'][0]
             fig.add_annotation(
                 x=x_val, y=y_val,
                 text=f"x: {x_val},<br>y: {y_val},<br>{custom_data}",
                 showarrow=True,
-                arrowcolor="black",
-                arrowsize=1.8,
-                arrowwidth=1,
-                arrowhead=3,
-                xanchor='left',
-                align='left'
+                arrowcolor=config['arrow_color'],
+                arrowsize=config['arrow_size'],
+                arrowwidth=config['arrow_width'],
+                arrowhead=config['arrow_head'],
+                xanchor=config['x_anchor'],
+                align=config['alignment'],
+                font=dict(color=config['text_color'])
             )
         return fig
 
