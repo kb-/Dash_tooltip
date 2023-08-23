@@ -30,55 +30,7 @@ from tooltip import tooltip, add_annotation_store
 
 pio.templates.default = "none"
 
-np.random.seed(42)
-y = np.random.normal(0, 10, 50)
-x = np.arange(0, 50)
-custom_labels = [f"Label {i}" for i in range(50)]
-fig1 = px.scatter(x=x, y=y, custom_data=[custom_labels])
-fig1.update_layout(title_text="Editable Title", title_x=0.5)
-
-app = Dash(__name__)
-
-app.layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations", style={"text-align": "center"})])
-    ]),
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(
-                id='graph1',
-                figure=fig1,
-                config={
-                    'editable': True,
-                    'edits': {
-                        'shapePosition': True,
-                        'annotationPosition': True
-                    }
-                }
-            )
-        ])
-    ])
-])
-
-# Add the required dcc.Store for annotations
-add_annotation_store(app.layout)
-
-# Add the tooltip functionality to the app
-tooltip(app)
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
-
-
-# %%
-from dash import Dash, html, dcc, Input, Output, State
-import plotly.express as px
-import numpy as np
-import dash_bootstrap_components as dbc
-import plotly.io as pio
-from tooltip import tooltip, add_annotation_store
-
-pio.templates.default = "none"
+graphid_1 = 'graph1'
 
 np.random.seed(42)
 y = np.random.normal(0, 10, 50)
@@ -96,7 +48,59 @@ app1.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             dcc.Graph(
-                id='graph1',
+                id=graphid_1,
+                figure=fig1,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ])
+    ])
+])
+
+# # Add the required dcc.Store for annotations
+# add_annotation_store(app1.layout)
+
+# # Add the tooltip functionality to the app
+# tooltip(app1)
+
+if __name__ == '__main__':
+    app1.run_server(debug=True)
+
+
+# %%
+from dash import Dash, html, dcc, Input, Output, State
+import plotly.express as px
+import numpy as np
+import dash_bootstrap_components as dbc
+import plotly.io as pio
+from tooltip import tooltip, add_annotation_store
+
+pio.templates.default = "none"
+
+graphid_2 = 'graph2'
+
+np.random.seed(42)
+y = np.random.normal(0, 10, 50)
+x = np.arange(0, 50)
+custom_labels = [f"Label {i}" for i in range(50)]
+fig1 = px.scatter(x=x, y=y, custom_data=[custom_labels])
+fig1.update_layout(title_text="Editable Title", title_x=0.5)
+
+app2 = Dash(__name__)
+
+app2.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([html.H1("Dynamic and draggable annotations", style={"text-align": "center"})])
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(
+                id=graphid_2,
                 figure=fig1,
                 config={
                     'editable': True,
@@ -111,7 +115,7 @@ app1.layout = dbc.Container([
 ])
 
 # Add the required dcc.Store for annotations
-add_annotation_store(app1.layout)
+add_annotation_store(app2.layout)
 
 # Add the tooltip functionality to the app
 custom_config = {
@@ -121,9 +125,9 @@ custom_config = {
     # ... any other customization
 }
 
-tooltip(app1, style=custom_config)
+tooltip(app2, style=custom_config)
 
 if __name__ == '__main__':
-    app1.run_server(debug=True)
+    app2.run_server(debug=True)
 
 # %%

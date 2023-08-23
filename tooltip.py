@@ -1,5 +1,3 @@
-# tooltip.py
-
 import plotly.graph_objs as go
 from dash import Output, Input, State, dcc
 
@@ -21,21 +19,44 @@ DEFAULT_ANNOTATION_CONFIG = {
     'alignment': 'left'
 }
 
-def tooltip(app, graph_id='graph1', style=DEFAULT_ANNOTATION_CONFIG):
+def find_first_graph_id(layout):
     """
-    Adds tooltip functionality to the specified Dash app and graph.
+    Recursively search the layout for the first dcc.Graph component and return its id.
+    Currently, Dash has a limitation where certain configurations are shared across all graphs. 
+    Therefore any single graph id can be used.
+    """
+    if isinstance(layout, dcc.Graph):
+        return layout.id
+    
+    if hasattr(layout, 'children'):
+        if isinstance(layout.children, list):
+            for child in layout.children:
+                graph_id = find_first_graph_id(child)
+                if graph_id:
+                    return graph_id
+        else:
+            return find_first_graph_id(layout.children)
+    return None
+
+
+def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG):
+    """
+    Adds tooltip functionality to the specified Dash app.
 
     Parameters:
     - app: The Dash app instance.
-    - graph_id: The ID of the graph for which the tooltip should be added.
     - config: A dictionary containing annotation styling properties.
     """
+    # Retrieve the first graph_id from the passed app
+    graph_id = find_first_graph_id(app.layout)
+    if not graph_id:
+        raise ValueError("No dcc.Graph component found in the app layout.")
 
     # Merge default config with the user's custom config
     config = DEFAULT_ANNOTATION_CONFIG.copy()
     if style:
         config.update(style)
-    
+
     @app.callback(
         Output(component_id=graph_id, component_property='figure'),
         Input(component_id=graph_id, component_property='clickData'),
