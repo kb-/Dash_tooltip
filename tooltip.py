@@ -1,18 +1,27 @@
 import plotly.graph_objs as go
 import dash
 from dash import Output, Input, State, dcc
+from typing import List, Optional, Dict, Union
 import re
 
-def add_annotation_store(layout, graph_id=None):
+from typing import Optional
+
+def add_annotation_store(layout: dash.html.Div, graph_id: Optional[str] = None) -> str:
     """
     Add a dcc.Store component to the layout to store annotation removal data.
     
+    If you do not manually call this function, the `tooltip()` function will automatically 
+    call it and generate the store using a default ID or with the provided graph ID.
+    
+    If the graph_id is provided, it will be used as a suffix to the store ID. This can be useful
+    if you want to explicitly manage the store in other parts of your application.
+    
     Parameters:
     - layout: The Dash layout object.
-    - graph_id: The ID of the graph, if available.
+    - graph_id (optional): The ID of the graph. If provided, it will be used as a suffix for the store ID.
     
     Returns:
-    - None
+    - str: The ID of the created or existing dcc.Store.
     """
     store_id = "tooltip-annotations-to-remove"
     if graph_id:
@@ -20,8 +29,11 @@ def add_annotation_store(layout, graph_id=None):
 
     if not any(isinstance(child, dcc.Store) and child.id == store_id for child in layout.children):
         layout.children.append(dcc.Store(id=store_id))
+    
+    return store_id
 
-DEFAULT_ANNOTATION_CONFIG = {
+
+DEFAULT_ANNOTATION_CONFIG: Dict[str, Union[str, float, int]] =  {
     'text_color': 'black',
     'arrow_color': 'black',
     'arrow_size': 1.8,
@@ -31,9 +43,9 @@ DEFAULT_ANNOTATION_CONFIG = {
     'alignment': 'left'
 }
 
-DEFAULT_TEMPLATE = "x: {x},<br>y: {y}"
+DEFAULT_TEMPLATE: str = "x: {x},<br>y: {y}"
 
-def find_first_graph_id(layout):
+def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
     """
     Find the first dcc.Graph component's ID in the given layout.
     
@@ -56,9 +68,23 @@ def find_first_graph_id(layout):
             return find_first_graph_id(layout.children)
     return None
 
-def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE, graph_ids=None):
+def tooltip(app: dash.Dash, 
+            style: Dict[str, Union[str, float, int]] = DEFAULT_ANNOTATION_CONFIG, 
+            template: str = DEFAULT_TEMPLATE, 
+            graph_ids: Optional[List[str]] = None) -> None:
     """
     Add tooltip functionality to a Dash app.
+
+    Note:
+    To ensure annotations are editable, the dcc.Graph component(s) you want to apply the tooltip on 
+    should have the following configuration:
+        config={
+            'editable': True,
+            'edits': {
+                'shapePosition': True,
+                'annotationPosition': True
+            }
+        }
 
     Parameters:
     - app (dash.Dash): The Dash app instance.
@@ -127,7 +153,7 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE, gra
                 current_figure['layout']['annotations'] = updated_annotations
             return current_figure
 
-def _find_all_graph_ids(layout):
+def _find_all_graph_ids(layout: dash.html.Div) -> List[str]:
     """
     Recursively find all dcc.Graph IDs in a Dash layout.
     """
@@ -145,7 +171,11 @@ def _find_all_graph_ids(layout):
     
     return graph_ids
 
-def _display_click_data(clickData, figure, app, template, config):
+def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Union[float, str]]]]], 
+                        figure: go.Figure, 
+                        app: dash.Dash, 
+                        template: str, 
+                        config: Dict[str, Union[str, float, int]]) -> go.Figure:
     """
     Create and display a tooltip based on the clicked data point.
     """

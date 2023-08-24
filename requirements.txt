@@ -5,3 +5,4 @@ dash_bootstrap_components
 jupyterlab
 ipywidgets
 pandas
+plotly-resampler

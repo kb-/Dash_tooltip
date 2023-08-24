@@ -26,7 +26,7 @@ import plotly.express as px
 import numpy as np
 import dash_bootstrap_components as dbc
 import plotly.io as pio
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 pio.templates.default = "none"
 
@@ -43,7 +43,7 @@ app1 = Dash(__name__)
 
 app1.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations", style={"text-align": "center"})])
+        dbc.Col([html.H1("Single Trace with Draggable Annotations", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -61,9 +61,6 @@ app1.layout = dbc.Container([
         ])
     ])
 ])
-
-# # Add the required dcc.Store for annotations
-add_annotation_store(app1.layout)
 
 # Add the tooltip functionality to the app
 tooltip(app1)
@@ -95,7 +92,7 @@ app2 = Dash(__name__)
 
 app2.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations", style={"text-align": "center"})])
+        dbc.Col([html.H1("Single Trace with Custom Data and Stylized Annotations", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -114,8 +111,9 @@ app2.layout = dbc.Container([
     ])
 ])
 
-# Add the required dcc.Store for annotations
-add_annotation_store(app2.layout)
+# Add the dcc.Store for annotations (optional for other uses)
+dcc_store_id = add_annotation_store(app2.layout, graphid_2)
+print("dcc_store_id:", dcc_store_id)
 
 # Add the tooltip functionality to the app
 custom_config = {
@@ -135,7 +133,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 app3 = Dash(__name__)
 
@@ -157,11 +155,11 @@ fig.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Trace 1'))
 fig.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Trace 2'))
 fig.add_trace(go.Scatter(x=x, y=y3, mode='markers', name='Trace 3'))
 
-fig.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
+fig.update_layout(title_text="Multiple Traces with Draggable Annotations", title_x=0.5)
 
 app3.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations with multiple traces", style={"text-align": "center"})])
+        dbc.Col([html.H1("Multiple Traces with Draggable Annotations", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -180,9 +178,6 @@ app3.layout = dbc.Container([
     ])
 ])
 
-# Add the required dcc.Store for annotations
-add_annotation_store(app3.layout)
-
 # Add the tooltip functionality to the app3
 tooltip(app3)
 
@@ -195,7 +190,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 app4 = Dash(__name__)
 
@@ -221,7 +216,7 @@ fig.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
 
 app4.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations with multiple traces", style={"text-align": "center"})])
+        dbc.Col([html.H1("Multiple Traces with Custom Data and Stylized Annotations", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -239,9 +234,6 @@ app4.layout = dbc.Container([
         ])
     ])
 ])
-
-# Add the required dcc.Store for annotations
-add_annotation_store(app4.layout)
 
 # Add the tooltip functionality to the app
 custom_config = {
@@ -262,7 +254,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 app5 = Dash(__name__)
 
@@ -288,7 +280,7 @@ fig.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
 
 app5.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Dynamic and draggable annotations with multiple traces", style={"text-align": "center"})])
+        dbc.Col([html.H1("Multiple Traces with Toggable Tooltip function", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -306,9 +298,6 @@ app5.layout = dbc.Container([
         ])
     ])
 ])
-
-# Add the required dcc.Store for annotations
-add_annotation_store(app5.layout)
 
 # Add the tooltip functionality to the app
 custom_config = {
@@ -356,7 +345,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 app6 = Dash(__name__)
 
@@ -375,7 +364,7 @@ fig6.update_layout(title_text="Two Traces with Multiple Custom Data", title_x=0.
 
 app6.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Two Traces with Multiple Custom Data Tooltip", style={"text-align": "center"})])
+        dbc.Col([html.H1("Two Traces with Multiple Data Points in Tooltips", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -393,10 +382,6 @@ app6.layout = dbc.Container([
         ])
     ])
 ])
-
-
-# Add the required dcc.Store for annotations
-add_annotation_store(app6.layout)
 
 template6 = "x: {x},<br>y: {y},<br>Label1: {customdata[0]},<br>Label2: {customdata[1]}"
 tooltip(app6, template=template6)
@@ -418,7 +403,7 @@ from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import dash_bootstrap_components as dbc
-from tooltip import tooltip, add_annotation_store
+from tooltip import tooltip
 
 app7 = Dash(__name__)
 
@@ -438,7 +423,7 @@ fig7_2.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Graph 2 Trace 1', c
 
 app7.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Two Graphs with Custom Data Tooltips", style={"text-align": "center"})])
+        dbc.Col([html.H1("Two Graphs with Draggable Tooltips for Custom Data", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
@@ -470,14 +455,101 @@ app7.layout = dbc.Container([
     ])
 ])
 
-# Add the required dcc.Store for annotations
-add_annotation_store(app7.layout)
-
 template7 = "x: {x},<br>y: {y},<br>Label1: {customdata[0]},<br>Label2: {customdata[1]}"
 tooltip(app7, template=template7)
 
 if __name__ == '__main__':
     app7.run_server(debug=True, port=8092)
 
+
+# %% jupyter={"source_hidden": true}
+import pandas as pd
+import numpy as np
+from plotly_resampler import FigureResampler
+
+#plotly_resampler allows to display very large dataset with dynamic selective downsampling
+#it also ads the Dash app "fig8._app" used here, but does not activate editable options (may not be possible)
+
+# Generate random time series data
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
+ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+
+# Create a DataFrame to hold the time series
+df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
+
+# Plotting the time series
+import plotly.express as px
+
+fig8 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
+fig8.show_dash(mode='inline', port=8093)
+fig8.update_layout(title_text="Pandas Time Series Plot (not editable)")
+tooltip(fig8._app)
+
+
+# %% jupyter={"source_hidden": true}
+from dash import Dash, html, dcc, Input, Output, State
+import plotly.graph_objects as go
+import numpy as np
+import dash_bootstrap_components as dbc
+from tooltip import tooltip
+
+app9 = Dash(__name__)
+
+# Random data for two graphs
+np.random.seed(0)
+y1 = np.random.normal(0, 10, 50)
+custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+y2 = np.random.normal(5, 5, 50)
+custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+x = np.arange(0, 50)
+
+fig9_1 = go.Figure()
+fig9_1.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Graph 1 Trace 1', customdata=custom_labels1))
+fig9_1.update_layout(title_text="Graph without Tooltip Functionality")
+
+fig9_2 = go.Figure()
+fig9_2.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Graph 2 Trace 1', customdata=custom_labels2))
+fig9_2.update_layout(title_text="Graph with Tooltip Functionality")
+
+app9.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([html.H1("Comparison of Graphs with and without Tooltip Functionality", style={"text-align": "center"})])
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(
+                id='app9-graph1',
+                figure=fig9_1,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ]),
+        dbc.Col([
+            dcc.Graph(
+                id='app9-graph2',
+                figure=fig9_2,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ])
+    ])
+])
+
+template9 = "x: {x},<br>y: {y},<br>Label1: {customdata[0]},<br>Label2: {customdata[1]}"
+tooltip(app9, template=template9, graph_ids=['app9-graph2'])
+
+if __name__ == '__main__':
+    app9.run_server(debug=True, port=8094)
 
 # %% jupyter={"source_hidden": true}
