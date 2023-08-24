@@ -257,7 +257,7 @@ if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     app5.run_server(debug=True, port=8090)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 import ipywidgets as widgets
 from IPython.display import display
 
@@ -350,8 +350,13 @@ display(toggle)
 toggle.observe(toggle_tooltip, 'value')
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 # Two Traces with Multiple Custom Data
+from dash import Dash, html, dcc, Input, Output, State
+import plotly.graph_objects as go
+import numpy as np
+import dash_bootstrap_components as dbc
+from tooltip import tooltip, add_annotation_store
 
 app6 = Dash(__name__)
 
@@ -399,4 +404,80 @@ tooltip(app6, template=template6)
 if __name__ == '__main__':
     app6.run_server(debug=True, port=8091)
 
-# %% jupyter={"source_hidden": true}
+# %% [markdown] language="html"
+# <style>
+# .output_wrapper .output {
+#   overflow-y: visible;
+#   height: fit-content;
+# }
+# </style>
+#
+
+# %%
+from dash import Dash, html, dcc, Input, Output, State
+import plotly.graph_objects as go
+import numpy as np
+import dash_bootstrap_components as dbc
+from tooltip import tooltip, add_annotation_store
+
+app7 = Dash(__name__)
+
+# Random data for two graphs
+np.random.seed(0)
+y1 = np.random.normal(0, 10, 50)
+custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+y2 = np.random.normal(5, 5, 50)
+custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+x = np.arange(0, 50)
+
+fig7_1 = go.Figure()
+fig7_1.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Graph 1 Trace 1', customdata=custom_labels1))
+
+fig7_2 = go.Figure()
+fig7_2.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Graph 2 Trace 1', customdata=custom_labels2))
+
+app7.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([html.H1("Two Graphs with Custom Data Tooltips", style={"text-align": "center"})])
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(
+                id='app7-graph1',
+                figure=fig7_1,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ]),
+        dbc.Col([
+            dcc.Graph(
+                id='app7-graph2',
+                figure=fig7_2,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ])
+    ])
+])
+
+# Add the required dcc.Store for annotations
+add_annotation_store(app7.layout)
+
+template7 = "x: {x},<br>y: {y},<br>Label1: {customdata[0]},<br>Label2: {customdata[1]}"
+tooltip(app7, template=template7)
+
+if __name__ == '__main__':
+    app7.run_server(debug=True, port=8092)
+
+
+# %%
