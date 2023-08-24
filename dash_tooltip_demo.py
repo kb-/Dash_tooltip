@@ -62,7 +62,7 @@ app1.layout = dbc.Container([
     ])
 ])
 
-# Add the required dcc.Store for annotations
+# # Add the required dcc.Store for annotations
 add_annotation_store(app1.layout)
 
 # Add the tooltip functionality to the app
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -125,7 +125,7 @@ custom_config = {
     # ... any other customization
 }
 
-tooltip(app2, style=custom_config, template="x: {x},<br>y: {y},<br>{customdata}")
+tooltip(app2, style=custom_config, template="x: {x},<br>y: {y},<br>{customdata[0]}")
 
 if __name__ == '__main__':
     app2.run(debug=True, port=8087)
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     app3.run(debug=True, port=8088)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -250,14 +250,14 @@ custom_config = {
     'arrow_size': 2.5,
     # ... any other customization
 }
-template = "x: {x},<br>y: {y},<br>{customdata}"
+template = "x: {x},<br>y: {y},<br>{customdata[0]}"
 tooltip(app4, style=custom_config, template=template)
 
 if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -317,13 +317,13 @@ custom_config = {
     'arrow_size': 2.5,
     # ... any other customization
 }
-template = "x: {x},<br>y: {y},<br>{customdata}"
+template = "x: {x},<br>y: {y},<br>{customdata[0]}"
 tooltip(app5, style=custom_config, template=template)
 
 app5.tooltip_active = False
 
 if __name__ == '__main__':
-    app5.run_server(debug=True, port=8089)
+    app5.run_server(debug=True, port=8090)
 
 
 # %% jupyter={"source_hidden": true}
@@ -350,4 +350,56 @@ display(toggle)
 toggle.observe(toggle_tooltip, 'value')
 
 
-# %% jupyter={"source_hidden": true}
+# %%
+# Two Traces with Multiple Custom Data
+
+app6 = Dash(__name__)
+
+# Random data for two traces
+np.random.seed(0)
+y1 = np.random.normal(0, 10, 50)
+custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+y2 = np.random.normal(5, 5, 50)
+custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+x = np.arange(0, 50)
+
+fig6 = go.Figure()
+fig6.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Trace 1', customdata=custom_labels1))
+fig6.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Trace 2', customdata=custom_labels2))
+fig6.update_layout(title_text="Two Traces with Multiple Custom Data", title_x=0.5)
+
+app6.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([html.H1("Two Traces with Multiple Custom Data Tooltip", style={"text-align": "center"})])
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(
+                id='double-customdata-graph',
+                figure=fig6,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ])
+    ])
+])
+
+
+# Add the required dcc.Store for annotations
+add_annotation_store(app6.layout)
+
+template6 = "x: {x},<br>y: {y},<br>Label1: {customdata[0]},<br>Label2: {customdata[1]}"
+tooltip(app6, template=template6)
+
+if __name__ == '__main__':
+    app6.run_server(debug=True, port=8091)
+
+# %%
+custom_labels2
+
+# %%

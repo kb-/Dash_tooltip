@@ -6,10 +6,9 @@ def add_annotation_store(layout):
     """
     Adds an dcc.Store component to the layout for storing annotation removal data.
     """
-    if not any(isinstance(child, dcc.Store) and child.id == 'annotations-to-remove' for child in layout.children):
-        layout.children.append(dcc.Store(id="annotations-to-remove"))
+    if not any(isinstance(child, dcc.Store) and child.id == 'tooltip-annotations-to-remove' for child in layout.children):
+        layout.children.append(dcc.Store(id="tooltip-annotations-to-remove"))
 
-# Default configuration for tooltip annotations
 DEFAULT_ANNOTATION_CONFIG = {
     'text_color': 'black',
     'arrow_color': 'black',
@@ -20,14 +19,9 @@ DEFAULT_ANNOTATION_CONFIG = {
     'alignment': 'left'
 }
 
-DEFAULT_TEMPLATE = "x: {x},<br>y: {y}"  # Users can add ",<br>{customdata}" if they have custom data
+DEFAULT_TEMPLATE = "x: {x},<br>y: {y}"
 
 def find_first_graph_id(layout):
-    """
-    Recursively search the layout for the first dcc.Graph component and return its id.
-    Currently, Dash has a limitation where certain configurations are shared across all graphs. 
-    Therefore any single graph id can be used.
-    """
     if isinstance(layout, dcc.Graph):
         return layout.id
     
@@ -42,24 +36,16 @@ def find_first_graph_id(layout):
     return None
 
 def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
-    """
-    Adds tooltip functionality to the specified Dash app.
-
-    Parameters:
-    - app: The Dash app instance.
-    - style: A dictionary containing annotation styling properties.
-    - template: A string defining how the tooltip should be displayed. Uses Python string formatting syntax.
-                - Default: "x: {x},<br>y: {y}"
-                - If the graph has custom data, you can extend the template to incorporate it like:
-                  "x: {x},<br>y: {y},<br>{customdata}". 
-                  Note that `{customdata}` will concatenate all elements in the customdata list.
-                  To access specific items in customdata, use indexing, e.g., "{customdata[0]}" for the first item.
-    """
-
-    # Retrieve the first graph_id from the passed app
     graph_id = find_first_graph_id(app.layout)
     if not graph_id:
         raise ValueError("No dcc.Graph component found in the app layout.")
+
+    # Automatically add the required dcc.Store for annotations if it doesn't exist
+    if not any(isinstance(child, dcc.Store) and child.id == 'tooltip-annotations-to-remove' for child in getattr(app.layout, 'children', [])):
+        if hasattr(app.layout, 'children') and isinstance(app.layout.children, list):
+            app.layout.children.append(dcc.Store(id="tooltip-annotations-to-remove"))
+        else:
+            app.layout.children = [app.layout.children, dcc.Store(id="tooltip-annotations-to-remove")]
 
     # Merge default config with the user's custom config
     config = DEFAULT_ANNOTATION_CONFIG.copy()
@@ -72,42 +58,7 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
         State(component_id=graph_id, component_property='figure')
     )
     def display_click_data(clickData, figure):
-        # Check if the tooltip is active
-        if not getattr(app, 'tooltip_active', True):
-            raise dash.exceptions.PreventUpdate
-        
-        fig = go.Figure(figure)
-        if clickData:
-            point = clickData['points'][0]
-            x_val = point['x']
-            y_val = point['y']
-            
-            # Check if customdata key exists and get it
-            custom_data = point.get('customdata')
-            if custom_data and isinstance(custom_data, list):
-                custom_data = custom_data[0]
-            
-            # If a template is provided, use it
-            if template:
-                text = template.format(x=x_val, y=y_val, customdata=custom_data)
-            else:
-                text = f"x: {x_val},<br>y: {y_val}"
-                if custom_data:
-                    text += f",<br>{custom_data}"
-            
-            fig.add_annotation(
-                x=x_val, y=y_val,
-                text=text,
-                showarrow=True,
-                arrowcolor=config['arrow_color'],
-                arrowsize=config['arrow_size'],
-                arrowwidth=config['arrow_width'],
-                arrowhead=config['arrow_head'],
-                xanchor=config['x_anchor'],
-                align=config['alignment'],
-                font=dict(color=config['text_color'])
-            )
-        return fig
+        return _display_click_data(clickData, figure, app, template, config)
 
     app.clientside_callback(
         """
@@ -123,13 +74,13 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
             return indicesToRemove;
         }
         """,
-        Output('annotations-to-remove', 'data'),
+        Output('tooltip-annotations-to-remove', 'data'),
         Input(graph_id, 'relayoutData')
     )
 
     @app.callback(
         Output(graph_id, 'figure', allow_duplicate=True),
-        Input('annotations-to-remove', 'data'),
+        Input('tooltip-annotations-to-remove', 'data'),
         State(graph_id, 'figure'),
         prevent_initial_call=True
     )
@@ -139,3 +90,56 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
             updated_annotations = [anno for idx, anno in enumerate(annotations) if idx not in indices_to_remove]
             current_figure['layout']['annotations'] = updated_annotations
         return current_figure
+
+import re
+
+def _display_click_data(clickData, figure, app, template, config):
+    fig = go.Figure(figure)
+    
+    # If the tooltip is not active, prevent the update
+    if not getattr(app, 'tooltip_active', True):
+        raise dash.exceptions.PreventUpdate
+    
+    if clickData:
+        point = clickData['points'][0]
+        x_val = point['x']
+        y_val = point['y']
+        
+        # Check if customdata key exists and get it
+        custom_data = point.get('customdata', [])
+        
+        # Prepare the template data
+        template_data = {'x': x_val, 'y': y_val}
+        
+        # Handle customdata
+        for idx, data in enumerate(custom_data):
+            key = f"customdata[{idx}]"
+            template_data[key] = data
+        
+        # Detect placeholders in the template
+        placeholders = re.findall(r"\{(.*?)\}", template)
+        
+        missing_keys = [key for key in placeholders if key not in template_data]
+        if missing_keys:
+            raise ValueError(f"Missing keys in template_data: {', '.join(missing_keys)}. Available keys are: {', '.join(template_data.keys())}")
+        
+        # Use the template data to format the tooltip text
+        for placeholder, value in template_data.items():
+            template = template.replace("{" + placeholder + "}", str(value))
+        
+        fig.add_annotation(
+            x=x_val, y=y_val,
+            text=template,
+            showarrow=True,
+            arrowcolor=config['arrow_color'],
+            arrowsize=config['arrow_size'],
+            arrowwidth=config['arrow_width'],
+            arrowhead=config['arrow_head'],
+            xanchor=config['x_anchor'],
+            align=config['alignment'],
+            font=dict(color=config['text_color'])
+        )
+    return fig
+
+
+
