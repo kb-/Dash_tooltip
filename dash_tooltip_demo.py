@@ -72,7 +72,7 @@ if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     app3.run(debug=True, port=8088)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -350,7 +350,7 @@ display(toggle)
 toggle.observe(toggle_tooltip, 'value')
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 # Two Traces with Multiple Custom Data
 
 app6 = Dash(__name__)
@@ -399,7 +399,4 @@ tooltip(app6, template=template6)
 if __name__ == '__main__':
     app6.run_server(debug=True, port=8091)
 
-# %%
-custom_labels2
-
-# %%
+# %% jupyter={"source_hidden": true}
