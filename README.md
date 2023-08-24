@@ -9,7 +9,7 @@ Easily add tooltips to your Plotly Dash applications with the `dash_tooltip` mod
 - **Customizable**: Customize tooltip appearance including text color, arrow color, arrow size, and more.
 - **Template-based**: Define your own tooltip content using a template string.
 - **Supports Custom Data**: If your graph has custom data, the tooltip can display it seamlessly.
-- **Annotation Removal**: Tooltips (annotations) can be removed by the user by clicking on them.
+- **Annotation Removal**: Tooltips (annotations) can be removed by the user (click, delete text, press enter).
 
 ## Installation
 
