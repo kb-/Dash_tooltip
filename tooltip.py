@@ -61,12 +61,18 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE, gra
     Add tooltip functionality to a Dash app.
 
     Parameters:
-        app (dash.Dash): The Dash app instance.
-        style (dict, optional): Configuration for the tooltip's appearance.
-        template (str, optional): A string defining how the tooltip should be displayed. 
-                                  Uses Python string formatting syntax.
-        graph_ids (list, optional): A list of graph IDs to apply the tooltip to. 
-                                    If not provided, tooltips will be added to all graphs in the app.
+    - app (dash.Dash): The Dash app instance.
+    - style (dict, optional): Configuration for the tooltip's appearance.
+    - template (str, optional): A string defining how the tooltip should be displayed. 
+                                Uses Python string formatting syntax.
+                                - Default: "x: {x},<br>y: {y}"
+                                - If the graph has custom data, you can extend the template to incorporate it like:
+                                  "x: {x},<br>y: {y},<br>{customdata[0]}". 
+                                  Use "{customdata[index]}" to access specific items in the customdata list, 
+                                  where index corresponds to the custom data's position.
+
+    - graph_ids (list, optional): A list of graph IDs to apply the tooltip to. 
+                                  If not provided, tooltips will be added to all graphs in the app.
     """
     
     if graph_ids is None:
@@ -121,9 +127,10 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE, gra
                 current_figure['layout']['annotations'] = updated_annotations
             return current_figure
 
-
 def _find_all_graph_ids(layout):
-    """Recursively find all dcc.Graph IDs in a Dash layout."""
+    """
+    Recursively find all dcc.Graph IDs in a Dash layout.
+    """
     graph_ids = []
 
     if isinstance(layout, dcc.Graph):
@@ -137,7 +144,6 @@ def _find_all_graph_ids(layout):
             graph_ids.extend(_find_all_graph_ids(layout.children))
     
     return graph_ids
-
 
 def _display_click_data(clickData, figure, app, template, config):
     """

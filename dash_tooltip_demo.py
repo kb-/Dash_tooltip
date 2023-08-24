@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -326,7 +326,7 @@ if __name__ == '__main__':
     app5.run_server(debug=True, port=8090)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 import ipywidgets as widgets
 from IPython.display import display
 
@@ -350,7 +350,7 @@ display(toggle)
 toggle.observe(toggle_tooltip, 'value')
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 # Two Traces with Multiple Custom Data
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
@@ -413,7 +413,7 @@ if __name__ == '__main__':
 # </style>
 #
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -480,4 +480,4 @@ if __name__ == '__main__':
     app7.run_server(debug=True, port=8092)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
