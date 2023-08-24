@@ -3,18 +3,23 @@ import dash
 from dash import Output, Input, State, dcc
 import re
 
-def add_annotation_store(layout):
+def add_annotation_store(layout, graph_id=None):
     """
     Add a dcc.Store component to the layout to store annotation removal data.
     
     Parameters:
     - layout: The Dash layout object.
+    - graph_id: The ID of the graph, if available.
     
     Returns:
     - None
     """
-    if not any(isinstance(child, dcc.Store) and child.id == 'tooltip-annotations-to-remove' for child in layout.children):
-        layout.children.append(dcc.Store(id="tooltip-annotations-to-remove"))
+    store_id = "tooltip-annotations-to-remove"
+    if graph_id:
+        store_id += f"-{graph_id}"
+
+    if not any(isinstance(child, dcc.Store) and child.id == store_id for child in layout.children):
+        layout.children.append(dcc.Store(id=store_id))
 
 DEFAULT_ANNOTATION_CONFIG = {
     'text_color': 'black',
@@ -51,108 +56,97 @@ def find_first_graph_id(layout):
             return find_first_graph_id(layout.children)
     return None
 
-def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
+def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE, graph_ids=None):
     """
-    Add a tooltip callback to the app to display data when a point is clicked.
-    
+    Add tooltip functionality to a Dash app.
+
     Parameters:
-    - app: The Dash app object.
-    - style: A dictionary with custom styles for the tooltip.
-    - template: A string defining how the tooltip should be displayed. Uses Python string formatting syntax.
-                - Default: "x: {x},<br>y: {y}"
-                - If the graph has custom data, you can extend the template to incorporate it like:
-                  "x: {x},<br>y: {y},<br>{customdata}". 
-                  Note that `{customdata}` will concatenate all elements in the customdata list.
-                  To access specific items in customdata, use indexing, e.g., "{customdata[0]}" for the first item.
-    
-    Returns:
-    - None
+        app (dash.Dash): The Dash app instance.
+        style (dict, optional): Configuration for the tooltip's appearance.
+        template (str, optional): A string defining how the tooltip should be displayed. 
+                                  Uses Python string formatting syntax.
+        graph_ids (list, optional): A list of graph IDs to apply the tooltip to. 
+                                    If not provided, tooltips will be added to all graphs in the app.
     """
-    graph_id = find_first_graph_id(app.layout)
-    if not graph_id:
-        raise ValueError("No dcc.Graph component found in the app layout.")
+    
+    if graph_ids is None:
+        # If no graph_ids are provided, find all graph IDs in the layout
+        graph_ids = _find_all_graph_ids(app.layout)
+        if not graph_ids:
+            raise ValueError("No graphs found in the app layout. Please provide a graph ID.")
+    
+    for graph_id in graph_ids:
+        # Add the required dcc.Store for annotations if it isn't already present
+        add_annotation_store(app.layout, graph_id)
 
-    # Automatically add the required dcc.Store for annotations if it doesn't exist
-    add_annotation_store(app.layout)
+        # Register the main callback for displaying click data as annotations
+        @app.callback(
+            Output(component_id=graph_id, component_property='figure'),
+            Input(component_id=graph_id, component_property='clickData'),
+            State(component_id=graph_id, component_property='figure')
+        )
+        def display_click_data(clickData, figure):
+            return _display_click_data(clickData, figure, app, template, style)
 
-    # Merge default config with the user's custom config
-    config = DEFAULT_ANNOTATION_CONFIG.copy()
-    config.update(style)
-
-    @app.callback(
-        Output(component_id=graph_id, component_property='figure'),
-        Input(component_id=graph_id, component_property='clickData'),
-        State(component_id=graph_id, component_property='figure')
-    )
-    def display_click_data(clickData, figure):
-        """
-        Display the tooltip on the graph when a point is clicked.
-        
-        Parameters:
-        - clickData: The data of the clicked point.
-        - figure: The current figure data.
-        
-        Returns:
-        - The updated figure data with the tooltip annotation added.
-        """
-        return _display_click_data(clickData, figure, app, template, config)
-
-    app.clientside_callback(
-        """
-        function(relayoutData) {
-            var annotationPattern = /annotations\[(\d+)\].text/;
-            var indicesToRemove = [];
-            for (var key in relayoutData) {
-                var match = key.match(annotationPattern);
-                if (match && relayoutData[key] === "") {
-                    indicesToRemove.push(parseInt(match[1]));
+        # Register the clientside callback for capturing annotation removal
+        app.clientside_callback(
+            """
+            function(relayoutData) {
+                var annotationPattern = /annotations\[(\d+)\].text/;
+                var indicesToRemove = [];
+                for (var key in relayoutData) {
+                    var match = key.match(annotationPattern);
+                    if (match && relayoutData[key] === "") {
+                        indicesToRemove.push(parseInt(match[1]));
+                    }
                 }
+                return indicesToRemove;
             }
-            return indicesToRemove;
-        }
-        """,
-        Output('tooltip-annotations-to-remove', 'data'),
-        Input(graph_id, 'relayoutData')
-    )
+            """,
+            Output(f'tooltip-annotations-to-remove-{graph_id}', 'data'),
+            Input(graph_id, 'relayoutData')
+        )
 
-    @app.callback(
-        Output(graph_id, 'figure', allow_duplicate=True),
-        Input('tooltip-annotations-to-remove', 'data'),
-        State(graph_id, 'figure'),
-        prevent_initial_call=True
-    )
-    def remove_empty_annotations(indices_to_remove, current_figure):
-        """
-        Remove annotations that are empty.
-        
-        Parameters:
-        - indices_to_remove: A list of indices of annotations to remove.
-        - current_figure: The current figure data.
-        
-        Returns:
-        - The updated figure data with the specified annotations removed.
-        """
-        if indices_to_remove:
-            annotations = current_figure['layout'].get('annotations', [])
-            updated_annotations = [anno for idx, anno in enumerate(annotations) if idx not in indices_to_remove]
-            current_figure['layout']['annotations'] = updated_annotations
-        return current_figure
+        # Register the callback for removing annotations
+        @app.callback(
+            Output(graph_id, 'figure', allow_duplicate=True),
+            Input(f'tooltip-annotations-to-remove-{graph_id}', 'data'),
+            State(graph_id, 'figure'),
+            prevent_initial_call=True
+        )
+        def remove_empty_annotations(indices_to_remove, current_figure):
+            if indices_to_remove:
+                annotations = current_figure['layout'].get('annotations', [])
+                updated_annotations = [anno for idx, anno in enumerate(annotations) if idx not in indices_to_remove]
+                current_figure['layout']['annotations'] = updated_annotations
+            return current_figure
+
+
+def _find_all_graph_ids(layout):
+    """Recursively find all dcc.Graph IDs in a Dash layout."""
+    graph_ids = []
+
+    if isinstance(layout, dcc.Graph):
+        return [layout.id]
+    
+    if hasattr(layout, 'children'):
+        if isinstance(layout.children, list):
+            for child in layout.children:
+                graph_ids.extend(_find_all_graph_ids(child))
+        else:
+            graph_ids.extend(_find_all_graph_ids(layout.children))
+    
+    return graph_ids
+
 
 def _display_click_data(clickData, figure, app, template, config):
     """
     Create and display a tooltip based on the clicked data point.
-    
-    Parameters:
-    - clickData: The data of the clicked point.
-    - figure: The current figure data.
-    - app: The Dash app object.
-    - template: A string template for formatting the tooltip content.
-    - config: A dictionary with styles for the tooltip.
-    
-    Returns:
-    - The updated figure data with the tooltip annotation added.
     """
     fig = go.Figure(figure)
+    
+    # Merge the provided config with the default one
+    merged_config = {**DEFAULT_ANNOTATION_CONFIG, **config}
     
     # If the tooltip is not active, prevent the update
     if not getattr(app, 'tooltip_active', True):
@@ -182,12 +176,12 @@ def _display_click_data(clickData, figure, app, template, config):
             x=x_val, y=y_val,
             text=template,
             showarrow=True,
-            arrowcolor=config['arrow_color'],
-            arrowsize=config['arrow_size'],
-            arrowwidth=config['arrow_width'],
-            arrowhead=config['arrow_head'],
-            xanchor=config['x_anchor'],
-            align=config['alignment'],
-            font=dict(color=config['text_color'])
+            arrowcolor=merged_config['arrow_color'],
+            arrowsize=merged_config['arrow_size'],
+            arrowwidth=merged_config['arrow_width'],
+            arrowhead=merged_config['arrow_head'],
+            xanchor=merged_config['x_anchor'],
+            align=merged_config['alignment'],
+            font=dict(color=merged_config['text_color'])
         )
     return fig

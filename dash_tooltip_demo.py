@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
