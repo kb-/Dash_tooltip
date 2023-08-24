@@ -76,11 +76,23 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
             point = clickData['points'][0]
             x_val = point['x']
             y_val = point['y']
-            custom_data = point.get('customdata', [])
-            tooltip_text = template.format(x=x_val, y=y_val, customdata=", ".join(map(str, custom_data)))
+            
+            # Check if customdata key exists and get it
+            custom_data = point.get('customdata')
+            if custom_data and isinstance(custom_data, list):
+                custom_data = custom_data[0]
+            
+            # If a template is provided, use it
+            if template:
+                text = template.format(x=x_val, y=y_val, customdata=custom_data)
+            else:
+                text = f"x: {x_val},<br>y: {y_val}"
+                if custom_data:
+                    text += f",<br>{custom_data}"
+            
             fig.add_annotation(
                 x=x_val, y=y_val,
-                text=tooltip_text,
+                text=text,
                 showarrow=True,
                 arrowcolor=config['arrow_color'],
                 arrowsize=config['arrow_size'],
