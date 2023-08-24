@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
 import numpy as np
@@ -130,7 +130,7 @@ tooltip(app2, style=custom_config, template="x: {x},<br>y: {y},<br>{customdata}"
 if __name__ == '__main__':
     app2.run(debug=True, port=8087)
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     app3.run(debug=True, port=8088)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
@@ -257,7 +257,97 @@ if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
 
 
-# %%
-custom_labels2
+# %% jupyter={"source_hidden": true}
+from dash import Dash, html, dcc, Input, Output, State
+import plotly.graph_objects as go
+import numpy as np
+import dash_bootstrap_components as dbc
+from tooltip import tooltip, add_annotation_store
 
-# %%
+app5 = Dash(__name__)
+
+# Random data for three traces
+np.random.seed(0)
+y1 = np.random.normal(0, 10, 50)
+custom_labels1 = [f"A {i}" for i in range(50)]
+y2 = np.random.normal(5, 5, 50)
+custom_labels2 = [f"B {i}" for i in range(50)]
+y3 = np.random.normal(-5, 15, 50)
+custom_labels3 = [f"C {i}" for i in range(50)]
+x = np.arange(0, 50)
+
+# Using Graph Objects for more flexibility
+fig = go.Figure()
+
+# Adding traces with custom data
+fig.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Trace 1', customdata=custom_labels1))
+fig.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Trace 2', customdata=custom_labels2))
+fig.add_trace(go.Scatter(x=x, y=y3, mode='markers', name='Trace 3', customdata=custom_labels3))
+
+fig.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
+
+app5.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([html.H1("Dynamic and draggable annotations with multiple traces", style={"text-align": "center"})])
+    ]),
+    dbc.Row([
+        dbc.Col([
+            dcc.Graph(
+                id='multi-trace-graph',
+                figure=fig,
+                config={
+                    'editable': True,
+                    'edits': {
+                        'shapePosition': True,
+                        'annotationPosition': True
+                    }
+                }
+            )
+        ])
+    ])
+])
+
+# Add the required dcc.Store for annotations
+add_annotation_store(app5.layout)
+
+# Add the tooltip functionality to the app
+custom_config = {
+    'text_color': 'red',
+    'arrow_color': 'blue',
+    'arrow_size': 2.5,
+    # ... any other customization
+}
+template = "x: {x},<br>y: {y},<br>{customdata}"
+tooltip(app5, style=custom_config, template=template)
+
+app5.tooltip_active = False
+
+if __name__ == '__main__':
+    app5.run_server(debug=True, port=8089)
+
+
+# %% jupyter={"source_hidden": true}
+import ipywidgets as widgets
+from IPython.display import display
+
+def toggle_tooltip(change):
+    app5.tooltip_active = change['new']
+
+# Create a toggle button
+toggle = widgets.ToggleButton(
+    value=app5.tooltip_active,
+    description='Toggle Tooltip',
+    disabled=False,
+    button_style='', # 'success', 'info', 'warning', 'danger' or ''
+    tooltip='Toggle Tooltip Active Status',
+    icon='check' # (FontAwesome names without the `fa-` prefix)
+)
+
+# Display the button
+display(toggle)
+
+# Link the button action to the function
+toggle.observe(toggle_tooltip, 'value')
+
+
+# %% jupyter={"source_hidden": true}

@@ -1,4 +1,5 @@
 import plotly.graph_objs as go
+import dash
 from dash import Output, Input, State, dcc
 
 def add_annotation_store(layout):
@@ -71,6 +72,10 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
         State(component_id=graph_id, component_property='figure')
     )
     def display_click_data(clickData, figure):
+        # Check if the tooltip is active
+        if not getattr(app, 'tooltip_active', True):
+            raise dash.exceptions.PreventUpdate
+        
         fig = go.Figure(figure)
         if clickData:
             point = clickData['points'][0]
