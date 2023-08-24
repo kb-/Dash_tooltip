@@ -19,6 +19,8 @@ DEFAULT_ANNOTATION_CONFIG = {
     'alignment': 'left'
 }
 
+DEFAULT_TEMPLATE = "x: {x},<br>y: {y}"  # Users can add ",<br>{customdata}" if they have custom data
+
 def find_first_graph_id(layout):
     """
     Recursively search the layout for the first dcc.Graph component and return its id.
@@ -38,15 +40,21 @@ def find_first_graph_id(layout):
             return find_first_graph_id(layout.children)
     return None
 
-
-def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG):
+def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG, template=DEFAULT_TEMPLATE):
     """
     Adds tooltip functionality to the specified Dash app.
 
     Parameters:
     - app: The Dash app instance.
-    - config: A dictionary containing annotation styling properties.
+    - style: A dictionary containing annotation styling properties.
+    - template: A string defining how the tooltip should be displayed. Uses Python string formatting syntax.
+                - Default: "x: {x},<br>y: {y}"
+                - If the graph has custom data, you can extend the template to incorporate it like:
+                  "x: {x},<br>y: {y},<br>{customdata}". 
+                  Note that `{customdata}` will concatenate all elements in the customdata list.
+                  To access specific items in customdata, use indexing, e.g., "{customdata[0]}" for the first item.
     """
+
     # Retrieve the first graph_id from the passed app
     graph_id = find_first_graph_id(app.layout)
     if not graph_id:
@@ -68,10 +76,11 @@ def tooltip(app, style=DEFAULT_ANNOTATION_CONFIG):
             point = clickData['points'][0]
             x_val = point['x']
             y_val = point['y']
-            custom_data = point['customdata'][0]
+            custom_data = point.get('customdata', [])
+            tooltip_text = template.format(x=x_val, y=y_val, customdata=", ".join(map(str, custom_data)))
             fig.add_annotation(
                 x=x_val, y=y_val,
-                text=f"x: {x_val},<br>y: {y_val},<br>{custom_data}",
+                text=tooltip_text,
                 showarrow=True,
                 arrowcolor=config['arrow_color'],
                 arrowsize=config['arrow_size'],

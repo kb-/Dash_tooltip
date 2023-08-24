@@ -32,11 +32,11 @@ pio.templates.default = "none"
 
 graphid_1 = 'graph1'
 
-np.random.seed(42)
-y = np.random.normal(0, 10, 50)
-x = np.arange(0, 50)
-custom_labels = [f"Label {i}" for i in range(50)]
-fig1 = px.scatter(x=x, y=y, custom_data=[custom_labels])
+np.random.seed(20)
+y1 = np.random.normal(0, 10, 50)
+x1 = np.arange(0, 50)
+# custom_labels = [f"Label {i}" for i in range(50)]
+fig1 = px.scatter(x=x1, y=y1)
 fig1.update_layout(title_text="Editable Title", title_x=0.5)
 
 app1 = Dash(__name__)
@@ -62,14 +62,14 @@ app1.layout = dbc.Container([
     ])
 ])
 
-# # Add the required dcc.Store for annotations
-# add_annotation_store(app1.layout)
+# Add the required dcc.Store for annotations
+add_annotation_store(app1.layout)
 
-# # Add the tooltip functionality to the app
-# tooltip(app1)
+# Add the tooltip functionality to the app
+tooltip(app1)
 
 if __name__ == '__main__':
-    app1.run_server(debug=True)
+    app1.run(debug=True, port=8086)
 
 
 # %%
@@ -85,11 +85,11 @@ pio.templates.default = "none"
 graphid_2 = 'graph2'
 
 np.random.seed(42)
-y = np.random.normal(0, 10, 50)
-x = np.arange(0, 50)
+y2 = np.random.normal(0, 10, 50)
+x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
-fig1 = px.scatter(x=x, y=y, custom_data=[custom_labels])
-fig1.update_layout(title_text="Editable Title", title_x=0.5)
+fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels])
+fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app2 = Dash(__name__)
 
@@ -101,7 +101,7 @@ app2.layout = dbc.Container([
         dbc.Col([
             dcc.Graph(
                 id=graphid_2,
-                figure=fig1,
+                figure=fig2,
                 config={
                     'editable': True,
                     'edits': {
@@ -125,9 +125,12 @@ custom_config = {
     # ... any other customization
 }
 
-tooltip(app2, style=custom_config)
+tooltip(app2, style=custom_config, template="x: {x},<br>y: {y},<br>{customdata}")
 
 if __name__ == '__main__':
-    app2.run_server(debug=True)
+    app2.run(debug=True, port=8087)
+
+# %%
+y1, y2
 
 # %%
