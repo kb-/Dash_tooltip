@@ -145,8 +145,12 @@ def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Un
 
         if debug:
             with open('tooltip.log', 'a') as f:
+                f.write("Point data:\n")
                 f.write(json.dumps(point, indent=4))
+                f.write("\nTrace data:\n")
+                f.write(json.dumps(figure['data'][point['curveNumber']], indent=4))
                 f.write("\n" + "="*40 + "\n")
+
             
         placeholders = re.findall(r"\%{(.*?)\}", template)
     

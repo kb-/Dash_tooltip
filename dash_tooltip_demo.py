@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %%
+# %% jupyter={"source_hidden": true}
 
 # ---- Imports ----
 
@@ -39,7 +39,7 @@ from IPython.display import display
 
 pio.templates.default = "none"
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 1: Single Trace with Draggable Annotations ----
 graphid_1 = 'graph1'
 
@@ -368,7 +368,7 @@ tooltip(app6, template=template6)
 if __name__ == '__main__':
     app6.run(debug=True, port=8086)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 7: Comparison of Graphs with and without Tooltip Functionality ----
 app7 = Dash(__name__)
 
@@ -421,7 +421,7 @@ app7.layout = dbc.Container([
 ])
 
 template7 = "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
-tooltip(app7, template=template7, graph_ids=['app7-graph1'])
+tooltip(app7, template=template7, graph_ids=['app7-graph1'], debug=True)
 
 if __name__ == '__main__':
     app7.run(debug=True, port=8087, jupyter_height=1000)
@@ -485,7 +485,7 @@ tooltip(app8, template=template8)
 if __name__ == '__main__':
     app8.run(debug=True, port=8088, jupyter_height=1000)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 9: Pandas Time Series Plot (not editable) ----
 # plotly_resampler allows to display very large dataset with dynamic selective downsampling
 
@@ -504,7 +504,7 @@ fig9.update_layout(title_text="Pandas Time Series Plot (not editable)")
 tooltip(fig9._app)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 10: Pandas Time Series Plot (editable) ----
 # Generate random time series data
 date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
@@ -550,16 +550,8 @@ fig10.update_layout(title_text="Pandas Time Series Plot (editable)")
 
 # Add tooltip functionality
 template10 = "x: %{x},<br>y: %{y},<br>ID: %{pointNumber},<br>name: %{label}"#,<br>Label1: %{fullData.name}"
-tooltip(app10, graph_ids=["graph-id"], template=template10, debug=True)
+tooltip(app10, graph_ids=["graph-id"], template=template10)
 
 # Show the Dash app
 app10.run(debug=True, port=8090, jupyter_height=500)
 
-
-# %%
-app10.layout.children[0].figure.data[0]
-
-# %%
-app10.layout.children[0].figure['data'][0]
-
-# %%
