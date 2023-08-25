@@ -44,7 +44,7 @@ DEFAULT_ANNOTATION_CONFIG: Dict[str, Union[str, float, int]] =  {
     'alignment': 'left'
 }
 
-DEFAULT_TEMPLATE: str = "x: {x},<br>y: {y}"
+DEFAULT_TEMPLATE: str = "x: %{x},<br>y: %{y}"
 
 
 def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
@@ -198,20 +198,23 @@ def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Un
         x_val = point['x']
         y_val = point['y']
         
-        custom_data = point.get('customdata', [])
+        # Extract keys from the template
+        keys_in_template = re.findall(r"\%{(.*?)(?:\[(\d+)\])?}", template)  # This will capture both 'key' and 'index' if present
         
-        template_data = {'x': x_val, 'y': y_val}
+        template_data = {}
+        for key, idx in keys_in_template:
+            if idx:  # If there's an index, it means it's a list-like parameter
+                data_list = point.get(key, [])
+                if int(idx) < len(data_list):
+                    key_name = f"{key}[{idx}]"
+                    template_data[key_name] = data_list[int(idx)]
+            else:
+                value = point.get(key, "")
+                template_data[key] = value
         
-        for idx, data in enumerate(custom_data):
-            key = f"customdata[{idx}]"
-            template_data[key] = data
-
-        missing_keys = [key for key in re.findall(r"\{(.*?)\}", template) if key not in template_data]
-        if missing_keys:
-            raise ValueError(f"Missing keys in template_data: {', '.join(missing_keys)}. Available keys are: {', '.join(template_data.keys())}")
-
+        # Replace placeholders in the template with their corresponding values
         for placeholder, value in template_data.items():
-            template = template.replace("{" + placeholder + "}", str(value))
+            template = template.replace("%{" + placeholder + "}", str(value))
         
         fig.add_annotation(
             x=x_val, y=y_val,

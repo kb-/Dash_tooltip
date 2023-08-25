@@ -6,3 +6,4 @@ jupyterlab
 ipywidgets
 pandas
 plotly-resampler
+trace_updater
