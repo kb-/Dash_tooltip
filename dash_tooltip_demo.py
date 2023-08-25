@@ -549,11 +549,17 @@ fig10.register_update_graph_callback(app10, "graph-id", "trace-updater")
 fig10.update_layout(title_text="Pandas Time Series Plot (editable)")
 
 # Add tooltip functionality
-template10 = "x: %{x},<br>y: %{y},<br>ID: %{pointNumber},<br>name: %{fullData.name}"#,<br>Label1: %{fullData.name}"
-tooltip(app10, graph_ids=["graph-id"], template=template10)
+template10 = "x: %{x},<br>y: %{y},<br>ID: %{pointNumber},<br>name: %{label}"#,<br>Label1: %{fullData.name}"
+tooltip(app10, graph_ids=["graph-id"], template=template10, debug=True)
 
 # Show the Dash app
 app10.run(debug=True, port=8090, jupyter_height=500)
 
+
+# %%
+app10.layout.children[0].figure.data[0]
+
+# %%
+app10.layout.children[0].figure['data'][0]
 
 # %%

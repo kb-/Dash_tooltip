@@ -1,29 +1,13 @@
+
 import plotly.graph_objs as go
 import dash
 from dash import Output, Input, State, dcc
 from typing import List, Optional, Dict, Union
 import re
-
+import json
 from typing import Optional
 
-
 def add_annotation_store(layout: dash.html.Div, graph_id: Optional[str] = None) -> str:
-    """
-    Add a dcc.Store component to the layout to store annotation removal data.
-    
-    If you do not manually call this function, the `tooltip()` function will automatically 
-    call it and generate the store using a default ID or with the provided graph ID.
-    
-    If the graph_id is provided, it will be used as a suffix to the store ID. This can be useful
-    if you want to explicitly manage the store in other parts of your application.
-    
-    Parameters:
-    - layout: The Dash layout object.
-    - graph_id (optional): The ID of the graph. If provided, it will be used as a suffix for the store ID.
-    
-    Returns:
-    - str: The ID of the created or existing dcc.Store.
-    """
     store_id = "tooltip-annotations-to-remove"
     if graph_id:
         store_id += f"-{graph_id}"
@@ -33,8 +17,7 @@ def add_annotation_store(layout: dash.html.Div, graph_id: Optional[str] = None) 
     
     return store_id
 
-
-DEFAULT_ANNOTATION_CONFIG: Dict[str, Union[str, float, int]] =  {
+DEFAULT_ANNOTATION_CONFIG = {
     'text_color': 'black',
     'arrow_color': 'black',
     'arrow_size': 1.8,
@@ -44,19 +27,9 @@ DEFAULT_ANNOTATION_CONFIG: Dict[str, Union[str, float, int]] =  {
     'alignment': 'left'
 }
 
-DEFAULT_TEMPLATE: str = "x: %{x},<br>y: %{y}"
-
+DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
 
 def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
-    """
-    Find the first dcc.Graph component's ID in the given layout.
-    
-    Parameters:
-    - layout: The Dash layout object.
-    
-    Returns:
-    - The ID of the first dcc.Graph component found, or None if not found.
-    """
     if isinstance(layout, dcc.Graph):
         return layout.id
     
@@ -70,62 +43,25 @@ def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
             return find_first_graph_id(layout.children)
     return None
 
-
-def tooltip(app: dash.Dash, 
-            style: Dict[str, Union[str, float, int]] = DEFAULT_ANNOTATION_CONFIG, 
-            template: str = DEFAULT_TEMPLATE, 
-            graph_ids: Optional[List[str]] = None) -> None:
-    """
-    Add tooltip functionality to a Dash app.
-
-    Note:
-    To ensure annotations are editable, the dcc.Graph component(s) you want to apply the tooltip on 
-    should have the following configuration:
-        config={
-            'editable': True,
-            'edits': {
-                'shapePosition': True,
-                'annotationPosition': True
-            }
-        }
-
-    Parameters:
-    - app (dash.Dash): The Dash app instance.
-    - style (dict, optional): Configuration for the tooltip's appearance.
-    - template (str, optional): A string defining how the tooltip should be displayed. 
-                                Uses Python string formatting syntax.
-                                - Default: "x: {x},<br>y: {y}"
-                                - If the graph has custom data, you can extend the template to incorporate it like:
-                                  "x: {x},<br>y: {y},<br>{customdata[0]}". 
-                                  Use "{customdata[index]}" to access specific items in the customdata list, 
-                                  where index corresponds to the custom data's position.
-
-    - graph_ids (list, optional): A list of graph IDs to apply the tooltip to. 
-                                  If not provided, tooltips will be added to all graphs in the app.
-    """
-    
+def tooltip(app: dash.Dash, style: Dict[str, Union[str, float, int]] = DEFAULT_ANNOTATION_CONFIG, template: str = DEFAULT_TEMPLATE, graph_ids: Optional[List[str]] = None, debug: bool = False) -> None:
     if graph_ids is None:
-        # If no graph_ids are provided, find all graph IDs in the layout
         graph_ids = _find_all_graph_ids(app.layout)
         if not graph_ids:
             raise ValueError("No graphs found in the app layout. Please provide a graph ID.")
     
     for graph_id in graph_ids:
-        # Add the required dcc.Store for annotations if it isn't already present
         add_annotation_store(app.layout, graph_id)
 
-        # Register the main callback for displaying click data as annotations
         @app.callback(
             Output(component_id=graph_id, component_property='figure'),
             Input(component_id=graph_id, component_property='clickData'),
             State(component_id=graph_id, component_property='figure')
         )
         def display_click_data(clickData, figure):
-            return _display_click_data(clickData, figure, app, template, style)
+            return _display_click_data(clickData, figure, app, template, style, debug)
 
-        # Register the clientside callback for capturing annotation removal
         app.clientside_callback(
-            """
+            '''
             function(relayoutData) {
                 var annotationPattern = /annotations\[(\d+)\].text/;
                 var indicesToRemove = [];
@@ -137,12 +73,11 @@ def tooltip(app: dash.Dash,
                 }
                 return indicesToRemove;
             }
-            """,
+            ''',
             Output(f'tooltip-annotations-to-remove-{graph_id}', 'data'),
             Input(graph_id, 'relayoutData')
         )
 
-        # Register the callback for removing annotations
         @app.callback(
             Output(graph_id, 'figure', allow_duplicate=True),
             Input(f'tooltip-annotations-to-remove-{graph_id}', 'data'),
@@ -156,11 +91,7 @@ def tooltip(app: dash.Dash,
                 current_figure['layout']['annotations'] = updated_annotations
             return current_figure
 
-
 def _find_all_graph_ids(layout: dash.html.Div) -> List[str]:
-    """
-    Recursively find all dcc.Graph IDs in a Dash layout.
-    """
     graph_ids = []
 
     if isinstance(layout, dcc.Graph):
@@ -175,21 +106,35 @@ def _find_all_graph_ids(layout: dash.html.Div) -> List[str]:
     
     return graph_ids
 
+def extract_value_from_point(point, key):
+    parts = key.split('.')
+    
+    temp = point
+    for part in parts:
+        if re.match(r"\w+\[\d+\]", part):
+            name = part.split('[')[0]
+            index = int(part.split('[')[1].replace(']', ''))
+            if temp and isinstance(temp, dict) and name in temp:
+                temp = temp.get(name, [])[index]
+            else:
+                return None
+        else:
+            if temp and isinstance(temp, dict):
+                temp = temp.get(part)
+            else:
+                return None
+    
+    return temp
 
 def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Union[float, str]]]]], 
                         figure: go.Figure, 
                         app: dash.Dash, 
                         template: str, 
-                        config: Dict[str, Union[str, float, int]]) -> go.Figure:
-    """
-    Create and display a tooltip based on the clicked data point.
-    """
+                        config: Dict[str, Union[str, float, int]],
+                        debug: bool) -> go.Figure:
     fig = go.Figure(figure)
-    
-    # Merge the provided config with the default one
     merged_config = {**DEFAULT_ANNOTATION_CONFIG, **config}
     
-    # If the tooltip is not active, prevent the update
     if not getattr(app, 'tooltip_active', True):
         raise dash.exceptions.PreventUpdate
     
@@ -197,22 +142,20 @@ def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Un
         point = clickData['points'][0]
         x_val = point['x']
         y_val = point['y']
-        
-        # Extract keys from the template
-        keys_in_template = re.findall(r"\%{(.*?)(?:\[(\d+)\])?}", template)  # This will capture both 'key' and 'index' if present
-        
+
+        if debug:
+            with open('tooltip.log', 'a') as f:
+                f.write(json.dumps(point, indent=4))
+                f.write("\n" + "="*40 + "\n")
+            
+        placeholders = re.findall(r"\%{(.*?)\}", template)
+    
         template_data = {}
-        for key, idx in keys_in_template:
-            if idx:  # If there's an index, it means it's a list-like parameter
-                data_list = point.get(key, [])
-                if int(idx) < len(data_list):
-                    key_name = f"{key}[{idx}]"
-                    template_data[key_name] = data_list[int(idx)]
-            else:
-                value = point.get(key, "")
-                template_data[key] = value
+        for placeholder in placeholders:
+            value = extract_value_from_point(point, placeholder)
+            if value is not None:
+                template_data[placeholder] = value
         
-        # Replace placeholders in the template with their corresponding values
         for placeholder, value in template_data.items():
             template = template.replace("%{" + placeholder + "}", str(value))
         
