@@ -1,13 +1,13 @@
 
 # Dash Tooltip
 
-Easily add tooltips to your Plotly Dash applications with the `dash_tooltip` module. 
+Easily add tooltips to your Plotly Dash applications with the `dash_tooltip` module.
 
 ## Features
 
 - **Simple Integration**: Just a few lines of code to integrate with your Dash application.
 - **Customizable**: Customize tooltip appearance including text color, arrow color, arrow size, and more.
-- **Template-based**: Define your own tooltip content using a template string.
+- **Template-based**: Define your own tooltip content using a template string, similar to Plotly's hover template.
 - **Supports Custom Data**: If your graph has custom data, the tooltip can display it seamlessly.
 - **Annotation Removal**: Tooltips (annotations) can be removed by the user (click, delete text, press enter).
 
@@ -23,13 +23,38 @@ Here's a basic example of how to use the `dash_tooltip` module:
 
 ```python
 from dash_tooltip import tooltip
+import plotly.graph_objects as go
 
 # Your Dash app instance
 app = dash.Dash(__name__)
 
+# Sample data for the graph
+x_data = [1, 2, 3, 4, 5]
+y_data = [1, 4, 9, 16, 25]
+custom_labels = ["label_{}".format(i) for i in range(5)]
+
+# Create the figure with customdata
+figure = go.Figure(data=[go.Scatter(
+    x=x_data,
+    y=y_data,
+    mode='markers',
+    customdata=custom_labels
+)])
+
 # Your app layout with at least one graph
+# Ensure the graph's config is set to allow editing to make use of tooltips
 app.layout = html.Div([
-    dcc.Graph(id='my-graph', figure=...),
+    dcc.Graph(
+        id='my-graph',
+        figure=figure,
+        config={
+            'editable': True,
+            'edits': {
+                'shapePosition': True,
+                'annotationPosition': True
+            }
+        }
+    ),
 ])
 
 # Add tooltips to your app
@@ -74,4 +99,3 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 ## Contributing
 
 Contributions are welcome! Feel free to open a pull request or raise an issue.
-
