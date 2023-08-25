@@ -6,6 +6,7 @@ import re
 
 from typing import Optional
 
+
 def add_annotation_store(layout: dash.html.Div, graph_id: Optional[str] = None) -> str:
     """
     Add a dcc.Store component to the layout to store annotation removal data.
@@ -45,6 +46,7 @@ DEFAULT_ANNOTATION_CONFIG: Dict[str, Union[str, float, int]] =  {
 
 DEFAULT_TEMPLATE: str = "x: {x},<br>y: {y}"
 
+
 def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
     """
     Find the first dcc.Graph component's ID in the given layout.
@@ -67,6 +69,7 @@ def find_first_graph_id(layout: dash.html.Div) -> Optional[str]:
         else:
             return find_first_graph_id(layout.children)
     return None
+
 
 def tooltip(app: dash.Dash, 
             style: Dict[str, Union[str, float, int]] = DEFAULT_ANNOTATION_CONFIG, 
@@ -153,6 +156,7 @@ def tooltip(app: dash.Dash,
                 current_figure['layout']['annotations'] = updated_annotations
             return current_figure
 
+
 def _find_all_graph_ids(layout: dash.html.Div) -> List[str]:
     """
     Recursively find all dcc.Graph IDs in a Dash layout.
@@ -170,6 +174,7 @@ def _find_all_graph_ids(layout: dash.html.Div) -> List[str]:
             graph_ids.extend(_find_all_graph_ids(layout.children))
     
     return graph_ids
+
 
 def _display_click_data(clickData: Dict[str, Union[float, str, List[Dict[str, Union[float, str]]]]], 
                         figure: go.Figure, 

@@ -68,7 +68,6 @@ tooltip(app1)
 if __name__ == '__main__':
     app1.run(debug=True, port=8086)
 
-
 # %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.express as px
@@ -184,7 +183,6 @@ tooltip(app3)
 if __name__ == '__main__':
     app3.run(debug=True, port=8088)
 
-
 # %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
@@ -247,7 +245,6 @@ tooltip(app4, style=custom_config, template=template)
 
 if __name__ == '__main__':
     app4.run_server(debug=True, port=8089)
-
 
 # %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
@@ -314,22 +311,23 @@ app5.tooltip_active = False
 if __name__ == '__main__':
     app5.run_server(debug=True, port=8090)
 
-
 # %% jupyter={"source_hidden": true}
 import ipywidgets as widgets
 from IPython.display import display
 
+
 def toggle_tooltip(change):
     app5.tooltip_active = change['new']
+
 
 # Create a toggle button
 toggle = widgets.ToggleButton(
     value=app5.tooltip_active,
     description='Toggle Tooltip',
     disabled=False,
-    button_style='', # 'success', 'info', 'warning', 'danger' or ''
+    button_style='',  # 'success', 'info', 'warning', 'danger' or ''
     tooltip='Toggle Tooltip Active Status',
-    icon='check' # (FontAwesome names without the `fa-` prefix)
+    icon='check'  # (FontAwesome names without the `fa-` prefix)
 )
 
 # Display the button
@@ -337,7 +335,6 @@ display(toggle)
 
 # Link the button action to the function
 toggle.observe(toggle_tooltip, 'value')
-
 
 # %% jupyter={"source_hidden": true}
 # Two Traces with Multiple Custom Data
@@ -352,9 +349,9 @@ app6 = Dash(__name__)
 # Random data for two traces
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+custom_labels1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+custom_labels2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig6 = go.Figure()
@@ -410,9 +407,9 @@ app7 = Dash(__name__)
 # Random data for two graphs
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+custom_labels1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+custom_labels2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig7_1 = go.Figure()
@@ -461,14 +458,13 @@ tooltip(app7, template=template7)
 if __name__ == '__main__':
     app7.run_server(debug=True, port=8092)
 
-
 # %% jupyter={"source_hidden": true}
 import pandas as pd
 import numpy as np
 from plotly_resampler import FigureResampler
 
-#plotly_resampler allows to display very large dataset with dynamic selective downsampling
-#it also ads the Dash app "fig8._app" used here, but does not activate editable options (may not be possible)
+# plotly_resampler allows to display very large dataset with dynamic selective downsampling
+# it also ads the Dash app "fig8._app" used here, but does not activate editable options (may not be possible)
 
 # Generate random time series data
 date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
@@ -486,7 +482,6 @@ fig8.show_dash(mode='inline', port=8093)
 fig8.update_layout(title_text="Pandas Time Series Plot (not editable)")
 tooltip(fig8._app)
 
-
 # %% jupyter={"source_hidden": true}
 from dash import Dash, html, dcc, Input, Output, State
 import plotly.graph_objects as go
@@ -499,9 +494,9 @@ app9 = Dash(__name__)
 # Random data for two graphs
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels1 = [[f"A {i}", f"X {i*2}"] for i in range(50)]
+custom_labels1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels2 = [[f"B {i}", f"Y {i*3}"] for i in range(50)]
+custom_labels2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig9_1 = go.Figure()
@@ -514,7 +509,8 @@ fig9_2.update_layout(title_text="Graph with Tooltip Functionality")
 
 app9.layout = dbc.Container([
     dbc.Row([
-        dbc.Col([html.H1("Comparison of Graphs with and without Tooltip Functionality", style={"text-align": "center"})])
+        dbc.Col(
+            [html.H1("Comparison of Graphs with and without Tooltip Functionality", style={"text-align": "center"})])
     ]),
     dbc.Row([
         dbc.Col([
