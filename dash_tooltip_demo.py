@@ -536,6 +536,7 @@ app10.layout = html.Div(
             id="graph-id", 
             figure=fig10,
             config=
+            {
                 'editable': True,
                 'edits': {
                     'shapePosition': True,
@@ -543,7 +544,6 @@ app10.layout = html.Div(
                 }
             }
         ),
-        # Assuming you have the TraceUpdater module imported and available
         TraceUpdater(id="trace-updater", gdID="graph-id"),
     ]
 )
@@ -554,8 +554,10 @@ fig10.update_layout(title_text="Pandas Time Series Plot (editable)")
 
 # Add tooltip functionality
 template10 = template
-tooltip(app10, graph_ids=["graph-id"], template=template10)
+tooltip(app10, graph_ids=["graph-id"], template=template10, debug=True)
 
 # Show the Dash app
 app10.run(debug=True, port=8090, jupyter_height=500)
 
+
+# %% jupyter={"source_hidden": true}

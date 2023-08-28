@@ -1,52 +1,34 @@
 
 # Dash Tooltip
 
-Easily add tooltips to your Plotly Dash applications with the `dash_tooltip` module.
-
-## Features
-
-- **Simple Integration**: Just a few lines of code to integrate with your Dash application.
-- **Customizable**: Customize tooltip appearance including text color, arrow color, arrow size, and more.
-- **Template-based**: Define your own tooltip content using a template string, similar to Plotly's hover template.
-- **Supports Custom Data**: If your graph has custom data, the tooltip can display it seamlessly.
-- **Annotation Removal**: Tooltips (annotations) can be removed by the user (click, delete text, press enter).
+A module to add interactive tooltips to your Dash applications. Inspired by `mplcursors` and Matlab's `datatip`.
 
 ## Installation
 
-```bash
-pip install dash-tooltip
-```
+You can download the `dash_tooltip.py` module and place it in your working directory.
 
-## Usage
-
-Here's a basic example of how to use the `dash_tooltip` module:
+## Basic Usage
 
 ```python
+import numpy as np
+import plotly.express as px
+from dash import Dash, dcc, html
+from dash.dependencies import Input, Output
 from dash_tooltip import tooltip
-import plotly.graph_objects as go
 
-# Your Dash app instance
-app = dash.Dash(__name__)
+# Sample Data
+np.random.seed(20)
+y1 = np.random.normal(0, 10, 50)
+x1 = np.arange(0, 50)
+fig1 = px.scatter(x=x1, y=y1)
+fig1.update_layout(title_text="Editable Title", title_x=0.5)
 
-# Sample data for the graph
-x_data = [1, 2, 3, 4, 5]
-y_data = [1, 4, 9, 16, 25]
-custom_labels = ["label_{}".format(i) for i in range(5)]
+app1 = Dash(__name__)
 
-# Create the figure with customdata
-figure = go.Figure(data=[go.Scatter(
-    x=x_data,
-    y=y_data,
-    mode='markers',
-    customdata=custom_labels
-)])
-
-# Your app layout with at least one graph
-# Ensure the graph's config is set to allow editing to make use of tooltips
-app.layout = html.Div([
+app1.layout = html.Div([
     dcc.Graph(
-        id='my-graph',
-        figure=figure,
+        id='graph1',
+        figure=fig1,
         config={
             'editable': True,
             'edits': {
@@ -54,48 +36,79 @@ app.layout = html.Div([
                 'annotationPosition': True
             }
         }
-    ),
+    )
 ])
 
-# Add tooltips to your app
-tooltip(app)
-
-# Run your app
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# Add the tooltip functionality to the app
+tooltip(app1)
 ```
 
-### Advanced Usage
+## Advanced Usage
 
-Customize the tooltip's appearance and content:
+If you want to customize the tooltips, hover templates, and more:
 
 ```python
+import pandas as pd
+import numpy as np
+import plotly.express as px
+from dash import Dash, dcc, html
+from dash.dependencies import Input, Output
 from dash_tooltip import tooltip
 
-# Define custom appearance for the tooltip
-custom_style = {
+# Generate random time series data
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
+ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
+
+template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+fig10 = px.line(df, x=df.index, y=df.columns, title="Time Series Plot")
+
+for i, trace in enumerate(fig10.data):
+    trace.customdata = np.column_stack((np.repeat(df.columns[i], len(df)), np.repeat('#{}'.format(i+1), len(df))))
+    trace.hovertemplate = template
+
+app10 = Dash(__name__)
+
+app10.layout = html.Div([
+    dcc.Graph(
+        id="graph-id",
+        figure=fig10,
+        config={
+            'editable': True,
+            'edits': {
+                'shapePosition': True,
+                'annotationPosition': True
+            }
+        }
+    )
+])
+
+tooltip(app10, graph_ids=["graph-id"], template=template, debug=True)
+```
+
+## Custom Styling
+
+```python
+custom_config = {
     'text_color': 'red',
     'arrow_color': 'blue',
     'arrow_size': 2.5,
-    'arrow_width': 1,
-    'arrow_head': 3,
-    'x_anchor': 'left',
-    'alignment': 'left'
+    # ... any other customization
 }
-
-# Define custom template for the tooltip content
-custom_template = "x: {x},<br>y: {y}<br>{customdata[0]}"
-
-# Add tooltips with custom appearance and content
-tooltip(app, style=custom_style, template=custom_template)
+tooltip(app10, graph_ids=["graph-id"], template=template, debug=True, **custom_config)
 ```
 
-**Note**: The template string uses placeholders like `{x}`, `{y}`, `{customdata[0]}`, etc., based on the data available in the graph's `clickData`. To incorporate custom data in the tooltip, use the placeholder `{customdata[i]}` where `i` is the index of the desired item in the custom data list.
+For more examples, refer to the provided `dash_tooltip_demo.py` or its Jupyter counterpart `dash_tooltip_demo.ipynb`.
+
+## Debugging
+
+If you encounter any issues or unexpected behaviors, enable the debug mode by setting the `debug` argument of the `tooltip` function to `True`. The log outputs will be written to `dash_app.log` in the directory where your script or application is located.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Contributing
+## Acknowledgements
 
-Contributions are welcome! Feel free to open a pull request or raise an issue.
+- Inspired by `mplcursors` and Matlab's `datatip`.
