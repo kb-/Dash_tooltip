@@ -381,9 +381,10 @@ custom_labels2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig7_1 = go.Figure()
+fig7_1.update_layout({'title':'With Tooltip'})
 fig7_1.add_trace(go.Scatter(x=x, y=y1, mode='markers', name='Graph 1 Trace 1', customdata=custom_labels1))
-
 fig7_2 = go.Figure()
+fig7_2.update_layout({'title':'Without Tooltip'})
 fig7_2.add_trace(go.Scatter(x=x, y=y2, mode='markers', name='Graph 2 Trace 1', customdata=custom_labels2))
 
 app7.layout = dbc.Container([
@@ -511,17 +512,20 @@ date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
 ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 
-# Create a DataFrame to hold the time series
+# Create a DataFrame to hold the time series - hover and matching tooltip content
 df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
 
 # Plotting the time series
 import plotly.express as px
 
+template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+
 fig10 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
 
 # Modify each trace to include the desired hovertemplate
-for trace in fig10.data:
-    trace.hovertemplate = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}"
+for i,trace in enumerate(fig10.data):
+    trace.customdata = np.column_stack((np.repeat(df.columns[i], len(df)), np.repeat('#{}'.format(i+1), len(df))))
+    trace.hovertemplate = template
 
 # Construct app & its layout
 app10 = Dash(__name__)
@@ -531,7 +535,7 @@ app10.layout = html.Div(
         dcc.Graph(
             id="graph-id", 
             figure=fig10,
-            config={
+            config=
                 'editable': True,
                 'edits': {
                     'shapePosition': True,
@@ -549,7 +553,7 @@ fig10.register_update_graph_callback(app10, "graph-id", "trace-updater")
 fig10.update_layout(title_text="Pandas Time Series Plot (editable)")
 
 # Add tooltip functionality
-template10 = "x: %{x},<br>y: %{y},<br>ID: %{pointNumber},<br>name: %{label}"#,<br>Label1: %{fullData.name}"
+template10 = template
 tooltip(app10, graph_ids=["graph-id"], template=template10)
 
 # Show the Dash app
