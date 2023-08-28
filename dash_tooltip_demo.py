@@ -30,7 +30,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
 from plotly_resampler import FigureResampler
-from tooltip import tooltip, add_annotation_store
+from dash_tooltip import tooltip, add_annotation_store
 from dash import Dash, html, dcc, Input, Output, State
 import dash_bootstrap_components as dbc
 from trace_updater import TraceUpdater  # Assuming you've imported this module
