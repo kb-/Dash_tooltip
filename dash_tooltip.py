@@ -7,8 +7,6 @@ import re
 import json
 import logging
 
-import logging
-
 # Create a logger for your module
 logger = logging.getLogger('dash_tooltip')
 logger.setLevel(logging.DEBUG)
@@ -128,9 +126,21 @@ def tooltip(app: dash.Dash,
             """Remove annotations that have been deleted by the user."""
             if indices_to_remove:
                 annotations = current_figure['layout'].get('annotations', [])
+
+                # Log the original annotations
+                logger.debug(f"Original Annotations: {annotations}")
+                
                 updated_annotations = [anno for idx, anno in enumerate(annotations) if idx not in indices_to_remove]
+
+                # Log the indices being removed
+                logger.debug(f"Indices to Remove: {indices_to_remove}")
+                
+                # Log the updated annotations
+                logger.debug(f"Updated Annotations: {updated_annotations}")
+                
                 current_figure['layout']['annotations'] = updated_annotations
-            return current_figure
+                return current_figure #update figure with new annotations list
+            return dash.no_update #prevent undesired update when no change is done (also prevents breaking 
 
 
 def _find_all_graph_ids(layout: Div) -> List[str]:
