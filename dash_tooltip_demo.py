@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %%
+# %% jupyter={"source_hidden": true}
 
 # ---- Imports ----
 
@@ -39,7 +39,7 @@ from IPython.display import display
 
 pio.templates.default = "none"
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 1: Single Trace with Draggable Annotations ----
 graphid_1 = 'graph1'
 
@@ -241,7 +241,7 @@ tooltip(app4, style=custom_config, template=template)
 if __name__ == '__main__':
     app4.run(debug=True, port=8084)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 5: Multiple Traces with Toggable Tooltip function ----
 app5 = Dash(__name__)
 
@@ -301,7 +301,7 @@ app5.tooltip_active = False
 if __name__ == '__main__':
     app5.run(debug=True, port=8085)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 6: Two Traces with Multiple Custom Data ----
 def toggle_tooltip(change):
     app5.tooltip_active = change['new']
@@ -323,7 +323,7 @@ display(toggle)
 # Link the button action to the function
 toggle.observe(toggle_tooltip, 'value')
 
-# %%
+# %% jupyter={"source_hidden": true}
 # Two Traces with Multiple Custom Data
 
 app6 = Dash(__name__)
@@ -486,7 +486,7 @@ tooltip(app8, template=template8)
 if __name__ == '__main__':
     app8.run(debug=True, port=8088, jupyter_height=1000)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 9: Pandas Time Series Plot (not editable) ----
 # plotly_resampler allows to display very large dataset with dynamic selective downsampling
 
@@ -505,7 +505,7 @@ fig9.update_layout(title_text="Pandas Time Series Plot (not editable)")
 tooltip(fig9._app)
 
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 10: Pandas Time Series Plot (editable) ----
 # Generate random time series data
 date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
@@ -561,4 +561,4 @@ fig10.register_update_graph_callback(app10, "graph-id", "trace-updater")
 app10.run(debug=True, port=8090, jupyter_height=500)
 
 
-# %%
+# %% jupyter={"source_hidden": true}

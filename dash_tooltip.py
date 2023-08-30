@@ -203,15 +203,15 @@ def _display_click_data(clickData: Dict[str, Any],
         x_val = point['x']
         y_val = point['y']
 
-        if debug:
+        # if debug:
             # with open('tooltip.log', 'a') as f:
             #     f.write("Point data:\n")
             #     f.write(json.dumps(point, indent=4))
             #     f.write("\nTrace data:\n")
             #     f.write(json.dumps(figure['data'][point['curveNumber']], indent=4))
             #     f.write("\n" + "="*40 + "\n")
-            logger.debug("Point data:\n%s", json.dumps(point, indent=4))
-            logger.debug("Trace data:\n%s", json.dumps(figure['data'][point['curveNumber']], indent=4))
+            # logger.debug("Point data:\n%s", json.dumps(point, indent=4))
+            # logger.debug("Trace data:\n%s", json.dumps(figure['data'][point['curveNumber']], indent=4))
 
         placeholders = re.findall(r"\%{(.*?)\}", template)
     
