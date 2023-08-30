@@ -562,3 +562,71 @@ app10.run(debug=True, port=8090, jupyter_height=500)
 
 
 # %% jupyter={"source_hidden": true}
+#wrapper function
+import dash
+from dash import dcc, html
+import dash_bootstrap_components as dbc
+from dash_tooltip import tooltip  # assuming dash_tooltip.py is in the same directory
+
+def interactive_plot(fig, graphid, template):
+    """
+    Creates a Dash app with an interactive plot.
+    
+    Parameters:
+    - fig: plotly figure
+    - graphid: id for the dcc.Graph component
+    
+    Returns:
+    - Dash app instance and the figure
+    """
+    app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+    
+    app.layout = dbc.Container([
+        dbc.Row([
+            dbc.Col([
+                dcc.Graph(
+                    id=graphid,
+                    figure=fig,
+                    config={
+                        'editable': True,
+                        'edits': {
+                            'shapePosition': True,
+                            'annotationPosition': True
+                        }
+                    }
+                )
+            ])
+        ])
+    ])
+    
+    # Add tooltip functionality to the app
+    tooltip(app, template=template)
+    
+    return app, fig
+
+
+
+# %% jupyter={"source_hidden": true}
+# ---- Test 11: Wrapper function ----
+# Generate random time series data
+graphid_11 = 'graphid11'
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
+ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+
+# Create a DataFrame to hold the time series - hover and matching tooltip content
+df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
+# Plotting the time series
+import plotly.express as px
+template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+fig11 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
+# Modify each trace to include the desired hovertemplate
+for i,trace in enumerate(fig11.data):
+    trace.customdata = np.column_stack((np.repeat(df.columns[i], len(df)), np.repeat('#{}'.format(i+1), len(df))))
+    trace.hovertemplate = template
+
+app11, fig11 = interactive_plot(fig11, graphid_11, template)
+if __name__ == '__main__':
+    app11.run_server(debug=True, port=8091)
+
+# %% jupyter={"source_hidden": true}
