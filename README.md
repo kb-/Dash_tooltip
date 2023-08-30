@@ -1,7 +1,7 @@
 
 # Dash Tooltip
 
-A module to add interactive tooltips to your Dash applications. Inspired by `mplcursors` and Matlab's `datatip`.
+A module to add interactive editable tooltips to your Dash applications. Inspired by `mplcursors` and Matlab's `datatip`.
 
 ## Installation
 
@@ -25,6 +25,7 @@ fig1.update_layout(title_text="Editable Title", title_x=0.5)
 
 app1 = Dash(__name__)
 
+#makes graph items, including tooltips editable
 app1.layout = html.Div([
     dcc.Graph(
         id='graph1',
@@ -42,6 +43,12 @@ app1.layout = html.Div([
 # Add the tooltip functionality to the app
 tooltip(app1)
 ```
+Click on data points to add tooltips.
+If `dcc.Graph` is configured editatble, tolltips:
+- can be dragged around
+- text can be edited on click
+- can be deleted: click, delete text, enter. In some occasions a tooltip arrow may remain due to a Dash bug (clientside_callback not firing). In this cas, click near arrow end (mouse cursor changes to pointer), enter some text and repeat deletion and enter.
+
 
 ## Advanced Usage
 
