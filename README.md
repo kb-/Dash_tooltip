@@ -2,6 +2,7 @@
 # Dash Tooltip
 
 A module to add interactive editable tooltips to your Dash applications. Inspired by `mplcursors` and Matlab's `datatip`.
+
 ![newplot(6)](https://github.com/kb-/Dash_tooltip/assets/2260417/0d62008c-25f2-4128-aa31-6746b6b82248)
 
 ## Installation
