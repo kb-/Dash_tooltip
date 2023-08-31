@@ -7,3 +7,5 @@ ipywidgets
 pandas
 plotly-resampler
 trace_updater
+numpy
+ipython
