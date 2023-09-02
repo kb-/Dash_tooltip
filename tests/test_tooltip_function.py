@@ -8,9 +8,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+import json
 
 
 app = dash.Dash(__name__)
+
 
 @app.callback(
     Output('output-div', 'children'),
@@ -22,66 +24,80 @@ def display_click_data(clickData):
         return f'You clicked on point ({point["x"]}, {point["y"]})'
     return 'Click on a point to see its data.'
 
+
 app.layout = html.Div([
-    dcc.Graph(id='graph-input', figure={
-        'data': [{
-            'mode': 'markers',
-            'type': 'scatter',
-            'x': [1, 2, 3],
-            'y': [4, 5, 6]
-        }],
-        'layout': {}
-    }),
+    dcc.Graph(id='graph-input',
+              figure={
+                  'data': [{
+                      'mode': 'markers',
+                      'type': 'scatter',
+                      'x': [1, 2, 3],
+                      'y': [4, 5, 6]
+                  }],
+                  'layout': {}
+              },
+              config={
+                  'editable': True,
+                  'edits': {
+                      'annotationPosition': True
+                  }
+              }),
     html.Div(id='output-div')
 ])
 
+
 # Set up tooltip functionality for the app
-tooltip(app)
+tooltip_template = "Point: x=%{x}, y=%{y}"
+tooltip(app, template=tooltip_template, debug=True)
+
 
 def test_basic_usage(dash_duo):
 
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 600)
-    
+
+    # Tooltip template
+    x_val, y_val = 2, 5  # The coordinates of the data point we're testing
+    expected_annotation_text = tooltip_template.replace("%{x}", str(x_val)).replace("%{y}", str(y_val))
+
     # Start the Dash app
     dash_duo.start_server(app)
 
     # Select the data point corresponding to (2, 5)
     element = dash_duo.driver.find_element_by_css_selector('.scatterlayer .trace .points path:nth-of-type(2)')
     ActionChains(driver).move_to_element(element).click().perform()
-    # driver.execute_script("arguments[0].click();", point)
-    # Wait for the obstructing element to disappear
-    # WebDriverWait(dash_duo.driver, 3).until(
-        # EC.presence_of_element_located((By.CSS_SELECTOR, "rect.nsewdrag.drag"))
-    # )
-    # point.click()
-    # dash_duo.driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', {view: window, bubbles: true, cancelable: true}));", point)
 
-
-    # Give it some time to process
-    # time.sleep(2)
     WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.ID, 'output-div'), 'You clicked on point (2, 5)')
     )
 
     # Check if the clicked point's data is displayed
     output_div = dash_duo.find_element('#output-div')
-
     assert output_div.text == 'You clicked on point (2, 5)'
 
-    # Get the updated graph figure and check if the tooltip annotation has been added
-    updated_graph = dash_duo.find_element('#graph-input')
-    WebDriverWait(driver, 100).until(
-        lambda x: updated_graph.get_attribute('data-dash-figure') is not None
-    )
-    figure_data = updated_graph.get_attribute('data-dash-figure')
-    import json
+    # Use ActionChains to move the mouse slightly to click on the annotation
 
-    try:
-        figure_data_json = json.loads(figure_data)
-        assert "annotations" in figure_data_json, "Tooltip annotation not added after click."
-    except json.JSONDecodeError:
-        raise AssertionError("data-dash-figure is not a valid JSON string.")
-    
-    # assert "annotations" in figure_data, "Tooltip annotation not added after click."
+    annotation_element = dash_duo.driver.find_element_by_css_selector('g.annotation-text-g rect.bg')
+
+    # Use ActionChains to move the mouse slightly to click on the annotation
+    action = ActionChains(dash_duo.driver)
+    action.move_to_element(annotation_element).click().perform()
+
+    # Add a delay of 1 second
+    time.sleep(0.1)
+
+    # Simulate pressing the Enter key
+    action.send_keys('\ue007').perform()
+
+    # Use the simplified CSS selector to locate the annotation text element
+    annotation_text_element = dash_duo.driver.find_element_by_css_selector(
+        'g.annotation-text-g text.annotation-text'
+    )
+
+    # Get the text content of the annotation element
+    actual_annotation_text = annotation_text_element.text
+
+    # Check if the actual annotation text matches the expected text
+    assert actual_annotation_text == expected_annotation_text
+
 

@@ -149,7 +149,7 @@ def tooltip(app: dash.Dash,
                 
                 current_figure['layout']['annotations'] = updated_annotations
                 return current_figure #update figure with new annotations list
-            return dash.no_update #prevent undesired update when no change is done (also prevents breaking 
+            return dash.no_update #prevent undesired update when no change is done (also prevents breaking) 
 
 
 def _find_all_graph_ids(layout: Div) -> List[str]:
