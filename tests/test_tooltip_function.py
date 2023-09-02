@@ -1,3 +1,9 @@
+"""
+Test 1: Basic Usage Test:
+Call the tooltip function with minimal arguments and check if it returns without errors.
+This tests the basic functionality and setup of tooltips.
+"""
+
 import time
 import pytest
 import dash
@@ -10,9 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 import json
 
-
 app = dash.Dash(__name__)
-
 
 @app.callback(
     Output('output-div', 'children'),
@@ -23,7 +27,6 @@ def display_click_data(clickData):
         point = clickData['points'][0]
         return f'You clicked on point ({point["x"]}, {point["y"]})'
     return 'Click on a point to see its data.'
-
 
 app.layout = html.Div([
     dcc.Graph(id='graph-input',
@@ -45,14 +48,11 @@ app.layout = html.Div([
     html.Div(id='output-div')
 ])
 
-
 # Set up tooltip functionality for the app
 tooltip_template = "Point: x=%{x}, y=%{y}"
-tooltip(app, template=tooltip_template, debug=True)
-
+tooltip(app, template=tooltip_template)
 
 def test_basic_usage(dash_duo):
-
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 600)
 
@@ -64,22 +64,15 @@ def test_basic_usage(dash_duo):
     dash_duo.start_server(app)
 
     # Select the data point corresponding to (2, 5)
-    element = dash_duo.driver.find_element_by_css_selector('.scatterlayer .trace .points path:nth-of-type(2)')
+    element = dash_duo.driver.find_element(By.CSS_SELECTOR, '.scatterlayer .trace .points path:nth-of-type(2)')
     ActionChains(driver).move_to_element(element).click().perform()
 
     WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.ID, 'output-div'), 'You clicked on point (2, 5)')
     )
 
-    # Check if the clicked point's data is displayed
-    output_div = dash_duo.find_element('#output-div')
-    assert output_div.text == 'You clicked on point (2, 5)'
-
     # Use ActionChains to move the mouse slightly to click on the annotation
-
-    annotation_element = dash_duo.driver.find_element_by_css_selector('g.annotation-text-g rect.bg')
-
-    # Use ActionChains to move the mouse slightly to click on the annotation
+    annotation_element = dash_duo.driver.find_element(By.CSS_SELECTOR, 'g.annotation-text-g rect.bg')
     action = ActionChains(dash_duo.driver)
     action.move_to_element(annotation_element).click().perform()
 
@@ -90,14 +83,11 @@ def test_basic_usage(dash_duo):
     action.send_keys('\ue007').perform()
 
     # Use the simplified CSS selector to locate the annotation text element
-    annotation_text_element = dash_duo.driver.find_element_by_css_selector(
-        'g.annotation-text-g text.annotation-text'
-    )
+    annotation_text_element = dash_duo.driver.find_element(By.CSS_SELECTOR, 'g.annotation-text-g text.annotation-text')
 
     # Get the text content of the annotation element
     actual_annotation_text = annotation_text_element.text
 
     # Check if the actual annotation text matches the expected text
     assert actual_annotation_text == expected_annotation_text
-
 
