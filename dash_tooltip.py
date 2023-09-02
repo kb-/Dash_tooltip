@@ -66,11 +66,15 @@ DEFAULT_ANNOTATION_CONFIG = {
     'xanchor': 'left'            # horizontal alignment of the text (can be 'left', 'center', or 'right')
 }
 
+# Type Hint Definitions
+FontConfigType = Dict[str, Union[str, int]]
+AnnotationConfigType = Dict[str, Union[str, int, float, bool, FontConfigType]]
+
 DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
 
 
 def tooltip(app: dash.Dash, 
-            style: Dict[str, Union[str, float, int]] = DEFAULT_ANNOTATION_CONFIG, 
+            style: AnnotationConfigType = DEFAULT_ANNOTATION_CONFIG,
             template: str = DEFAULT_TEMPLATE, 
             graph_ids: Optional[List[str]] = None, 
             debug: bool = False) -> None:
