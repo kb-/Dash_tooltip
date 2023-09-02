@@ -1,3 +1,9 @@
+"""
+Test4a: Multiple Graphs Test:
+Call the tooltip function for an app with multiple graphs and verify that tooltips are functional for all graphs.
+This ensures that the function can handle multiple graphs correctly.
+"""
+
 import time
 import pytest
 import dash
