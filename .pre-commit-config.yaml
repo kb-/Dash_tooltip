@@ -7,3 +7,27 @@ repos:
         args: ['tests/', '--webdriver', 'Firefox']
         language: system
         pass_filenames: false
+
+    -   id: black
+        name: black
+        entry: ./env/Scripts/black.exe
+        language: system
+        types: [python]
+
+    -   id: isort
+        name: isort
+        entry: ./env/Scripts/isort.exe
+        language: system
+        types: [python]
+
+    -   id: flake8
+        name: flake8
+        entry: ./env/Scripts/flake8.exe
+        language: system
+        types: [python]
+
+    -   id: mypy
+        name: mypy
+        entry: ./env/Scripts/mypy.exe
+        language: system
+        types: [python]
