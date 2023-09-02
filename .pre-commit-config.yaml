@@ -1,0 +1,9 @@
+repos:
+-   repo: local
+    hooks:
+    -   id: pytest
+        name: Run Pytest
+        entry: pytest
+        args: ['tests/', '--webdriver', 'Firefox']
+        language: system
+        types: [python]
