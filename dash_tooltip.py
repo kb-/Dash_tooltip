@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Union, Any
 import re
 import json
 import logging
+from string import Template
 
 # Create a logger for your module
 logger = logging.getLogger('dash_tooltip')
@@ -51,13 +52,18 @@ def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
 
 
 DEFAULT_ANNOTATION_CONFIG = {
-    'text_color': 'black',
-    'arrow_color': 'black',
-    'arrow_size': 1.8,
-    'arrow_width': 1,
-    'arrow_head': 3,
-    'x_anchor': 'left',
-    'alignment': 'left'
+    'align': 'left',             # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    'arrowcolor': 'black',       # color of the annotation arrow
+    'arrowhead': 3,              # type of arrowhead, for Plotly (an integer from 0 to 8)
+    'arrowsize': 1.8,            # relative size of the arrowhead to the arrow stem, for Plotly
+    'arrowwidth': 1,             # width of the annotation arrow in pixels, for Plotly
+    'font': {
+        'color': 'black',      # color of the annotation text
+        'family': 'Arial',     # font family of the annotation text, for Plotly
+        'size': 12             # size of the annotation text in points, for Plotly
+    },
+    'showarrow': True,
+    'xanchor': 'left'            # horizontal alignment of the text (can be 'left', 'center', or 'right')
 }
 
 DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
@@ -98,20 +104,23 @@ def tooltip(app: dash.Dash,
         def display_click_data(clickData, figure):
             return _display_click_data(clickData, figure, app, template, style, debug)
 
+        dbg_str = 'console.log(relayoutData);'
+        
         app.clientside_callback(
-            '''
-            function(relayoutData) {
-                var annotationPattern = /annotations\[(\d+)\].text/;
-                var indicesToRemove = [];
-                for (var key in relayoutData) {
-                    var match = key.match(annotationPattern);
-                    if (match && relayoutData[key] === "") {
-                        indicesToRemove.push(parseInt(match[1]));
+            Template('''
+                function(relayoutData) {
+                    $dbg_str
+                    var annotationPattern = /annotations\[(\d+)\].text/;
+                    var indicesToRemove = [];
+                    for (var key in relayoutData) {
+                        var match = key.match(annotationPattern);
+                        if (match && relayoutData[key] === "") {
+                            indicesToRemove.push(parseInt(match[1]));
+                        }
                     }
+                    return indicesToRemove;
                 }
-                return indicesToRemove;
-            }
-            ''',
+            ''').substitute(dbg_str=dbg_str),
             Output(f'tooltip-annotations-to-remove-{graph_id}', 'data'),
             Input(graph_id, 'relayoutData')
         )
@@ -185,6 +194,51 @@ def extract_value_from_point(point: Dict[str, Any], key: str) -> Optional[Union[
         return None
 
 
+def truncate_json_arrays(json_str: str, limit: int) -> str:
+    """
+    Truncate arrays in a JSON string representation to a specified limit, both at top level and nested.
+    
+    Parameters:
+    - json_str (str): The JSON string representation to be processed.
+    - limit (int): The maximum number of elements to keep in any array.
+    
+    Returns:
+    - str: The processed JSON string with arrays truncated.
+    """
+    
+    def truncate_arrays(data: Any) -> Any:
+        """
+        Recursively truncate arrays in a data structure (dicts or lists).
+        """
+        if isinstance(data, list):
+            truncated_data = data[:limit]
+            if len(data) > limit:
+                truncated_data.append("[TRUNCATED]")
+            return [truncate_arrays(item) for item in truncated_data]
+        elif isinstance(data, dict):
+            return {key: truncate_arrays(value) for key, value in data.items()}
+        else:
+            return data
+
+    data = json.loads(json_str)
+    truncated_data = truncate_arrays(data)
+    
+    return json.dumps(truncated_data, indent=4)
+
+
+def deep_merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Recursively merges two dictionaries.
+    Nested keys from dict2 will overwrite those in dict1.
+    """
+    for key, value in dict2.items():
+        if isinstance(value, dict) and key in dict1 and isinstance(dict1[key], dict):
+            dict1[key] = deep_merge_dicts(dict1[key], value)
+        else:
+            dict1[key] = value
+    return dict1
+
+
 def _display_click_data(clickData: Dict[str, Any], 
                         figure: go.Figure, 
                         app: dash.Dash, 
@@ -193,7 +247,7 @@ def _display_click_data(clickData: Dict[str, Any],
                         debug: bool) -> go.Figure:
     """Displays the tooltip on the graph when a data point is clicked."""
     fig = go.Figure(figure)
-    merged_config = {**DEFAULT_ANNOTATION_CONFIG, **config}
+    merged_config = deep_merge_dicts(DEFAULT_ANNOTATION_CONFIG.copy(), config)
     
     if not getattr(app, 'tooltip_active', True):
         raise dash.exceptions.PreventUpdate
@@ -202,16 +256,23 @@ def _display_click_data(clickData: Dict[str, Any],
         point = clickData['points'][0]
         x_val = point['x']
         y_val = point['y']
+        
+        # Extract the clicked axis information from the curve data
+        if 'xaxis' in figure['data'][point['curveNumber']]:
+            xaxis = figure['data'][point['curveNumber']]['xaxis']
+        else:
+            xaxis = 'x'
 
-        # if debug:
-            # with open('tooltip.log', 'a') as f:
-            #     f.write("Point data:\n")
-            #     f.write(json.dumps(point, indent=4))
-            #     f.write("\nTrace data:\n")
-            #     f.write(json.dumps(figure['data'][point['curveNumber']], indent=4))
-            #     f.write("\n" + "="*40 + "\n")
-            # logger.debug("Point data:\n%s", json.dumps(point, indent=4))
-            # logger.debug("Trace data:\n%s", json.dumps(figure['data'][point['curveNumber']], indent=4))
+        if 'yaxis' in figure['data'][point['curveNumber']]:
+            yaxis = figure['data'][point['curveNumber']]['yaxis']
+        else:
+            yaxis = 'y'
+
+        if debug:
+            logger.debug(f"clickData: {truncate_json_arrays(json.dumps(clickData, indent=4),2)}")
+            logger.debug(f"figure: {truncate_json_arrays(json.dumps(figure, indent=4),2)}")
+            logger.debug("Point data:\n%s", truncate_json_arrays(json.dumps(point, indent=4),2))
+            logger.debug("Trace data:\n%s", truncate_json_arrays(json.dumps(figure['data'][point['curveNumber']], indent=4), 2))
 
         placeholders = re.findall(r"\%{(.*?)\}", template)
     
@@ -224,16 +285,17 @@ def _display_click_data(clickData: Dict[str, Any],
         for placeholder, value in template_data.items():
             template = template.replace("%{" + placeholder + "}", str(value))
         
-        fig.add_annotation(
-            x=x_val, y=y_val,
-            text=template,
-            showarrow=True,
-            arrowcolor=merged_config['arrow_color'],
-            arrowsize=merged_config['arrow_size'],
-            arrowwidth=merged_config['arrow_width'],
-            arrowhead=merged_config['arrow_head'],
-            xanchor=merged_config['x_anchor'],
-            align=merged_config['alignment'],
-            font=dict(color=merged_config['text_color'])
-        )
+        try:
+            fig.add_annotation(
+                x=x_val, y=y_val,
+                xref=xaxis,
+                yref=yaxis,
+                text=template,
+                **merged_config
+            )
+        except ValueError as e:
+            logger.error(
+                f"Failed to add annotation due to invalid properties in {merged_config}. Error: {e}"
+            )
+            raise e
     return fig

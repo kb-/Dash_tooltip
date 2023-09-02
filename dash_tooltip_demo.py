@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.0
+#       jupytext_version: 1.15.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -29,6 +29,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
+from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
 from dash_tooltip import tooltip, add_annotation_store
 from dash import Dash, html, dcc, Input, Output, State
@@ -74,7 +75,7 @@ app1.layout = dbc.Container([
 ])
 
 # Add the tooltip functionality to the app
-tooltip(app1)
+tooltip(app1,debug=True)
 
 if __name__ == '__main__':
     app1.run(debug=True, port=8081)
@@ -120,14 +121,14 @@ dcc_store_id = add_annotation_store(app2.layout, graphid_2)
 print("dcc_store_id:", dcc_store_id)
 
 # Add the tooltip functionality to the app
-custom_config = {
-    'text_color': 'red',
-    'arrow_color': 'blue',
-    'arrow_size': 2.5,
+custom_style = {
+    'font': {'size': 10},
+    'arrowcolor': 'blue',
+    'arrowsize': 2.5,
     # ... any other customization
 }
 
-tooltip(app2, style=custom_config, template="x: %{x},<br>y: %{y},<br>%{customdata[0]}")
+tooltip(app2, style=custom_style, template="x: %{x},<br>y: %{y},<br>%{customdata[0]}")
 
 if __name__ == '__main__':
     app2.run(debug=True, port=8082)
@@ -229,14 +230,14 @@ app4.layout = dbc.Container([
 ])
 
 # Add the tooltip functionality to the app
-custom_config = {
-    'text_color': 'red',
-    'arrow_color': 'blue',
-    'arrow_size': 2.5,
+custom_style = {
+    'font': {'size': 10},
+    'arrowcolor': 'blue',
+    'arrowsize': 2.5,
     # ... any other customization
 }
 template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
-tooltip(app4, style=custom_config, template=template)
+tooltip(app4, style=custom_style, template=template)
 
 if __name__ == '__main__':
     app4.run(debug=True, port=8084)
@@ -287,14 +288,14 @@ app5.layout = dbc.Container([
 ])
 
 # Add the tooltip functionality to the app
-custom_config = {
-    'text_color': 'red',
-    'arrow_color': 'blue',
-    'arrow_size': 2.5,
+custom_style = {
+    'font': {'size': 10},
+    'arrowcolor': 'blue',
+    'arrowsize': 2.5,
     # ... any other customization
 }
 template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
-tooltip(app5, style=custom_config, template=template)
+tooltip(app5, style=custom_style, template=template)
 
 app5.tooltip_active = False
 
@@ -594,13 +595,17 @@ def interactive_plot(fig, graphid, template):
                             'annotationPosition': True
                         }
                     }
-                )
+                ),
+                TraceUpdater(id="trace-updater", gdID=graphid),
             ])
         ])
     ])
     
     # Add tooltip functionality to the app
     tooltip(app, template=template)
+
+    # Register the callback with FigureResampler
+    fig10.register_update_graph_callback(app, graphid, "trace-updater")
     
     return app, fig
 
@@ -628,5 +633,65 @@ for i,trace in enumerate(fig11.data):
 app11, fig11 = interactive_plot(fig11, graphid_11, template)
 if __name__ == '__main__':
     app11.run_server(debug=True, port=8091)
+
+# %% jupyter={"source_hidden": true}
+# ---- Test 12: 2x2 Subplot with 2 traces on each subplot (Organized like Test 10) ----
+
+# Generate random time series data
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='m')
+
+ts_data = {}
+for i in range(4):
+    ts_data[f"ts{i+1}_1"] = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+    ts_data[f"ts{i+1}_2"] = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
+
+# Create 2x2 subplots
+fig12 = FigureResampler(make_subplots(rows=2, cols=2, shared_xaxes=True, subplot_titles=('Plot 1', 'Plot 2', 'Plot 3', 'Plot 4')))
+
+# Add data to subplots
+for i in range(1, 3):
+    for j in range(1, 3):
+        fig12.add_trace(go.Scatter(x=date_rng, y=ts_data[f"ts{(i-1)*2 + j}_1"], name=f"Trace 1, Plot {(i-1)*2 + j}"), row=i, col=j)
+        fig12.add_trace(go.Scatter(x=date_rng, y=ts_data[f"ts{(i-1)*2 + j}_2"], name=f"Trace 2, Plot {(i-1)*2 + j}"), row=i, col=j)
+
+# Modify each trace to include the desired hovertemplate
+template12 = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+for i, trace in enumerate(fig12.data):
+    trace.customdata = np.column_stack((np.repeat(trace.name, len(date_rng)), np.repeat('#{}'.format(i+1), len(date_rng))))
+    trace.hovertemplate = template12
+
+# Construct app & its layout
+app12 = Dash(__name__)
+
+app12.layout = html.Div(
+    [
+        dcc.Graph(
+            id="graph-id12", 
+            figure=fig12,
+            config=
+            {
+                'editable': True,
+                'edits': {
+                    'shapePosition': True,
+                    'annotationPosition': True
+                }
+            }
+        ),
+        TraceUpdater(id="trace-updater12", gdID="graph-id12"),
+    ]
+)
+
+# Add tooltip functionality
+tooltip(app12, graph_ids=["graph-id12"], style={'font': {'size': 10}}, template=template12, debug=True)
+
+# Update layout title
+fig12.update_layout(title_text="2x2 Subplots with 2 Traces Each")
+
+# Register the callback with FigureResampler
+fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
+
+# Code to run the Dash app (commented out for now, but can be used in a local environment)
+app12.run_server(debug=True, port=8092)
+
 
 # %% jupyter={"source_hidden": true}
