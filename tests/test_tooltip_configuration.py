@@ -64,9 +64,11 @@ custom_config = {
     'arrowcolor': 'blue',
     'font': {
         'color': 'red',
-        'size': 7
+        'size': 7,
+        'family': 'Helvetica'
     },
-    'arrowhead': 5
+    'arrowhead': 5,
+    'bordercolor': 'green'
 }
 
 # Tooltip template from dash_tooltip_demo.py
@@ -93,15 +95,25 @@ def test_tooltip_configuration(dash_duo):
     # Pause to inspect the DOM
     # wait.until(EC.presence_of_element_located((By.ID, 'some-id')))
 
-    # Extract text color and font size
+    # Text and Font Validation
     text_color = annotation_element.value_of_css_property('fill')
     font_size = annotation_element.value_of_css_property('font-size')
+    font_family = annotation_element.value_of_css_property('font-family')
+
+    # Annotation Box Validation
+    # Find the rectangle representing the annotation box
+    rect_element = driver.find_element(By.CSS_SELECTOR, 'g.annotation rect.bg')
+    border_color = rect_element.value_of_css_property('stroke')
 
     # Extract arrow color from graph configuration
     arrow_element = driver.find_element(By.CSS_SELECTOR, 'g.annotation-arrow-g path')
     arrow_color = arrow_element.value_of_css_property('stroke')
 
+    font_config = custom_config['font']
+
     # Assertions
     assert arrow_color == 'rgb(0, 0, 255)'  # RGB equivalent of 'blue'
     assert text_color == 'rgb(255, 0, 0)'  # RGB equivalent of 'red'
-    assert font_size == '7px'
+    assert font_size == str(font_config['size'])+'px'
+    assert font_family == font_config['family']
+    assert border_color == 'rgb(0, 128, 0)'  # RGB equivalent of 'green'
