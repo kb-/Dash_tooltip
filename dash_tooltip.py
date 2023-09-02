@@ -83,14 +83,20 @@ def tooltip(app: dash.Dash,
 
     Args:
     - app (dash.Dash): The Dash app instance.
-    - style (dict): Configuration for the tooltip appearance. Users can provide any valid Plotly annotation style options.
+    - style (dict): Configuration for the tooltip appearance. Users can provide any valid Plotly annotation
+                    style options.
                     Default values are set in DEFAULT_ANNOTATION_CONFIG.
-    - template (str): A string defining how the tooltip should be displayed using Plotly's template syntax. Users can modify this template to customize the tooltip content.
-    - graph_ids (list, optional): List of graph component IDs for the tooltip functionality. If None, function will try to find graph IDs automatically.
+    - template (str): A string defining how the tooltip should be displayed using Plotly's template syntax.
+                    Users can modify this template to customize the tooltip content.
+    - graph_ids (list, optional): List of graph component IDs for the tooltip functionality. If None,
+                    function will try to find graph IDs automatically.
     - debug (bool): If True, debug information will be written to a log file (tooltip.log).
 
     Example:
-    tooltip(app, style={'text_color': 'red'}, template="x: %{x},<br>y: %{y}<br>ID: %{pointNumber}", graph_ids=['graph-1'])
+    tooltip(app,
+            style={'text_color': 'red'},
+            template="x: %{x},<br>y: %{y}<br>ID: %{pointNumber}",
+            graph_ids=['graph-1'])
     """
     if graph_ids is None:
         graph_ids = _find_all_graph_ids(app.layout)
