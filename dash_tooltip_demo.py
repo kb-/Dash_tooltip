@@ -696,6 +696,7 @@ app10.layout = html.Div(
         dcc.Graph(
             id="graph-id",
             figure=fig10,
+            # titi='testing error',
             config={
                 "editable": True,
                 "edits": {"shapePosition": True, "annotationPosition": True},
@@ -789,7 +790,7 @@ for i, trace in enumerate(fig11.data):
 
 app11, fig11 = interactive_plot(fig11, graphid_11, template)
 if __name__ == "__main__":
-    app11.run_server(debug=True, port=8091)
+    app11.run(debug=True, port=8091)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 12: 2x2 Subplot with 2 traces on each subplot (Organized like Test 10) ----
@@ -880,6 +881,6 @@ fig12.update_layout(title_text="2x2 Subplots with 2 Traces Each")
 fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
 
 # Code to run the Dash app (commented out for now, but can be used in a local environment)
-app12.run_server(debug=True, port=8092)
+app12.run(debug=True, port=8092)
 
 # %% jupyter={"source_hidden": true}
