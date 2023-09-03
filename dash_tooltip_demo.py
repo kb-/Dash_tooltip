@@ -647,7 +647,7 @@ tooltip(app8, template=template8)
 if __name__ == "__main__":
     app8.run(debug=True, port=8088, jupyter_height=1000)
 
-# %% jupyter={"source_hidden": true}
+# %%
 # ---- Test 9: Pandas Time Series Plot (not editable) ----
 # plotly_resampler allows to display very large dataset with dynamic selective downsampling
 

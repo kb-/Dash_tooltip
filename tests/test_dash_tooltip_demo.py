@@ -1,34 +1,24 @@
 import re
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
-
-import dash
 from dash import Dash
-from plotly_resampler import FigureResampler
 
 
-def mock_show_dash(*args, **kwargs):
-    # If the first argument is an instance of FigureResampler
-    if hasattr(args[0], "_app"):
-        # Set a dummy Dash app
-        args[0]._app = Dash(__name__)
-    print("show_dash mock called!")
+# Mock the run method of the Dash app
+def mock_run_app(*args, **kwargs):
+    print("Dash app run method mock called!")
 
 
-# Backup of the original __init__ method of FigureResampler
-original_init = FigureResampler.__init__
+# Backup the original run method
+original_run = Dash.run
 
 
-def mock_init(self, *args, **kwargs):
-    # Call the original __init__ method
-    original_init(self, *args, **kwargs)
-
-    # Set a mock Dash app for _app attribute
-    self._app = Dash(__name__)
+# Override the run method
+def new_run(self, *args, **kwargs):
+    print("Overridden Dash app run method!")
+    # You can add any additional setup or configuration code here if necessary
 
 
-# Patch the __init__ method of FigureResampler
-FigureResampler.__init__ = mock_init
+Dash.run = new_run
 
 
 def execute_demos(file_content):
@@ -47,10 +37,7 @@ def execute_demos(file_content):
 
     for idx, block in enumerate(code_blocks, start=1):
         try:
-            with patch("dash.Dash.run", return_value=None), patch(
-                "plotly_resampler.FigureResampler.show_dash", return_value=MagicMock()
-            ):
-                exec(block, namespace)
+            exec(block, namespace)
             results[f"Demo {idx}"] = "Passed"
         except Exception as e:
             # Extract a snippet of code around the error
