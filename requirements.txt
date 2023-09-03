@@ -9,6 +9,7 @@ ipywidgets
 # This pinning is a temporary measure until both libraries address these issues in their implementations.
 # TODO: Periodically check for updates to plotly_resampler and Plotly and test compatibility with newer pandas versions.
 pandas < 2.1
+pandas-stubs
 plotly-resampler
 trace_updater
 numpy
