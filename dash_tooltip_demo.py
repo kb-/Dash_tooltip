@@ -21,9 +21,6 @@
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
 # %% jupyter={"source_hidden": true}
-
-from typing import List
-
 import dash
 import dash_bootstrap_components as dbc
 
@@ -421,11 +418,9 @@ app6 = Dash(__name__)
 # Random data for two traces
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels6_1: List[List[str]] = [
-    [f"A {i}", f"X {i * 2}"] for i in range(50)
-]  #: List[List[str]] for mypy confusion
+custom_labels6_1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels6_2: List[List[str]] = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
+custom_labels6_2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig6 = go.Figure()
@@ -488,9 +483,9 @@ app7 = Dash(__name__)
 # Random data for two graphs
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels7_1: List[List[str]] = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
+custom_labels7_1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels7_2: List[List[str]] = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
+custom_labels7_2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig7_1 = go.Figure()
@@ -574,9 +569,9 @@ app8 = Dash(__name__)
 # Random data for two graphs
 np.random.seed(0)
 y1 = np.random.normal(0, 10, 50)
-custom_labels8_1: List[List[str]] = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
+custom_labels8_1 = [[f"A {i}", f"X {i * 2}"] for i in range(50)]
 y2 = np.random.normal(5, 5, 50)
-custom_labels8_2: List[List[str]] = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
+custom_labels8_2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig8_1 = go.Figure()
