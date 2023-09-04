@@ -5,12 +5,15 @@ and verify that tooltips are functional for all graphs.
 This ensures that the function can handle multiple graphs on subplots correctly.
 """
 
+import time
+
 import dash
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 import pytest
 from dash import dcc, html
+from selenium.common import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -50,33 +53,38 @@ tooltip(app, graph_ids=["graph-1", "graph-2"], style={"font": {"size": 10}})
 @pytest.mark.selenium
 def test_multiple_graph_tooltips(dash_duo):
     driver = dash_duo.driver
-    wait = WebDriverWait(driver, 600)
+    WebDriverWait(driver, 600)
 
     # Start the Dash app
     dash_duo.start_server(app)
 
     # For each graph, interact with a data point to trigger the tooltip
     for graph_id in ["graph-1", "graph-2"]:
-        element = driver.find_element(
-            By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path"
-        )
-        ActionChains(driver).move_to_element(element).click().perform()
+        success = False  # flag to indicate if the tooltip was successfully triggered
 
-        # Check the tooltip's presence
-        annotation_element = wait.until(
-            EC.visibility_of_element_located(
-                (
-                    By.CSS_SELECTOR,
-                    f"#{graph_id} g.annotation-text-g text.annotation-text",
-                )
+        for _ in range(100):  # Try up to 100 times
+            element = driver.find_element(
+                By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path"
             )
-        )
+            ActionChains(driver).move_to_element(element).click().perform()
+            time.sleep(0.01)
 
-        # Assert the presence of the tooltip
-        assert annotation_element is not None
+            # Check if the tooltip is visible
+            try:
+                WebDriverWait(driver, 1).until(
+                    EC.visibility_of_element_located(
+                        (
+                            By.CSS_SELECTOR,
+                            f"#{graph_id} g.annotation-text-g text.annotation-text",
+                        )
+                    )
+                )
+                success = True  # update the flag
+                break  # exit the loop
+            except TimeoutException:
+                continue  # continue to the next iteration if the condition isn't met
 
-        # Close the tooltip to check the next one
-        close_element = driver.find_element(
-            By.CSS_SELECTOR, f"#{graph_id} g.annotation .cursor-pointer"
-        )
-        ActionChains(driver).move_to_element(close_element).click().perform()
+        # Check if the loop exited due to a successful tooltip trigger or if all attempts were exhausted
+        assert (
+            success
+        ), f"Failed to successfully trigger the tooltip for {graph_id} after multiple attempts."

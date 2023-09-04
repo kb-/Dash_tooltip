@@ -102,7 +102,7 @@ def test_multiple_graph_tooltips(dash_duo):
 
             for subplot in subplots:
                 # Interact with a data point in the current subplot
-                element = wait.until(
+                element = WebDriverWait(driver, 1).until(
                     EC.presence_of_element_located(
                         (
                             By.CSS_SELECTOR,

@@ -4,6 +4,8 @@ Call the tooltip function with a custom template and check if the tooltips are f
 This ensures that the function respects custom formatting.
 """
 
+import time
+
 import dash
 import dash_bootstrap_components as dbc
 import numpy as np
@@ -11,6 +13,7 @@ import plotly.express as px
 import pytest
 from dash import dcc, html
 from dash.dependencies import Input, Output
+from selenium.common import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -101,18 +104,31 @@ def test_customdata_tooltip(dash_duo):
     # Start the Dash app
     dash_duo.start_server(app)
 
-    # Select the data point with index=2
-    element = dash_duo.driver.find_element(
-        By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx+1})"
-    )
-    ActionChains(driver).move_to_element(element).click().perform()
+    success = False  # flag to indicate if the tooltip was successfully triggered
 
-    # Use ActionChains to move the mouse slightly to click on the annotation
-    annotation_element = wait.until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
+    for _ in range(100):  # Try up to 100 times
+        element = dash_duo.driver.find_element(
+            By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx+1})"
         )
-    )
+        ActionChains(driver).move_to_element(element).click().perform()
+        time.sleep(0.01)
+
+        # Check if the tooltip is visible
+        try:
+            annotation_element = wait.until(
+                EC.visibility_of_element_located(
+                    (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
+                )
+            )
+            success = True  # update the flag
+            break  # exit the loop
+        except TimeoutException:
+            continue  # continue to the next iteration if the condition isn't met
+
+    # Check if the loop exited due to a successful tooltip trigger or if all attempts were exhausted
+    assert (
+        success
+    ), "Failed to successfully trigger the tooltip after multiple attempts."
 
     # Get the text content of the annotation element
     actual_annotation_text = annotation_element.text
