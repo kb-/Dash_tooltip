@@ -1,13 +1,15 @@
 """
-Test4a: Multiple Graphs Test:
-Call the tooltip function for an app with multiple graphs and verify that tooltips are functional for all graphs.
-This ensures that the function can handle multiple graphs correctly.
+Test4a: Multiple Graphs with subplots Test:
+Call the tooltip function for an app with multiple graphs and subplots
+and verify that tooltips are functional for all graphs.
+This ensures that the function can handle multiple graphs on subplots correctly.
 """
 
 import dash
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
+import pytest
 from dash import dcc, html
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -45,6 +47,7 @@ app.layout = html.Div(
 tooltip(app, graph_ids=["graph-1", "graph-2"], style={"font": {"size": 10}})
 
 
+@pytest.mark.selenium
 def test_multiple_graph_tooltips(dash_duo):
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 600)

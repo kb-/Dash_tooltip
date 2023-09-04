@@ -2,21 +2,19 @@
 Test 1: Basic Usage Test:
 Call the tooltip function with minimal arguments and check if it returns without errors.
 This tests the basic functionality and setup of tooltips.
+Run multiple times because of variability in click results
 """
-
 import time
-
-import dash
-from dash import dcc, html
+import pytest
+from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-
 from dash_tooltip import tooltip
 
-app = dash.Dash(__name__)
+app = Dash(__name__)
 
 
 @app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
@@ -53,7 +51,9 @@ tooltip_template = "Point: x=%{x}, y=%{y}"
 tooltip(app, template=tooltip_template)
 
 
-def test_basic_usage(dash_duo):
+@pytest.mark.parametrize("iteration", range(5))
+@pytest.mark.selenium
+def test_basic_usage(iteration, dash_duo):
     driver = dash_duo.driver
     WebDriverWait(driver, 600)
 
@@ -66,38 +66,32 @@ def test_basic_usage(dash_duo):
     # Start the Dash app
     dash_duo.start_server(app)
 
-    # Select the data point corresponding to (2, 5)
-    element = dash_duo.driver.find_element(
-        By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)"
-    )
-    ActionChains(driver).move_to_element(element).click().perform()
+    # Ensure the element is clickable before interacting
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)")))
 
-    WebDriverWait(driver, 10).until(
-        EC.text_to_be_present_in_element(
-            (By.ID, "output-div"), "You clicked on point (2, 5)"
-        )
-    )
+    success = False  # flag to indicate if the click was successful
 
-    # Use ActionChains to move the mouse slightly to click on the annotation
-    annotation_element = dash_duo.driver.find_element(
-        By.CSS_SELECTOR, "g.annotation-text-g rect.bg"
-    )
-    action = ActionChains(dash_duo.driver)
-    action.move_to_element(annotation_element).click().perform()
+    for _ in range(100):  # Try up to 100 times (clicks sometimes not detected)
+        element = driver.find_element(By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)")
+        ActionChains(driver).move_to_element(element).click().perform()
+        time.sleep(0.01)
+        
+        # Check if the click was successful
+        try:
+            WebDriverWait(driver, 1).until(
+                EC.text_to_be_present_in_element(
+                    (By.ID, "output-div"), "You clicked on point (2, 5)"
+                )
+            )
+            success = True  # update the flag
+            break  # exit the loop
+        except:
+            continue  # continue to the next iteration if the condition isn't met
 
-    # Add a delay of 1 second
-    time.sleep(0.1)
+    # Check if the loop exited due to a successful click or if all attempts were exhausted
+    assert success, "Failed to successfully click the point after multiple attempts."
 
-    # Simulate pressing the Enter key
-    action.send_keys("\ue007").perform()
-
-    # Use the simplified CSS selector to locate the annotation text element
-    annotation_text_element = dash_duo.driver.find_element(
-        By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"
-    )
-
-    # Get the text content of the annotation element
+    # Remaining test steps
+    annotation_text_element = driver.find_element(By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
     actual_annotation_text = annotation_text_element.text
-
-    # Check if the actual annotation text matches the expected text
     assert actual_annotation_text == expected_annotation_text

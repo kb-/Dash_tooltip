@@ -1,25 +1,16 @@
 import re
 from pathlib import Path
 from dash import Dash
-
+from unittest.mock import patch
 
 # Mock the run method of the Dash app
 def mock_run_app(*args, **kwargs):
     print("Dash app run method mock called!")
 
-
-# Backup the original run method
-original_run = Dash.run
-
-
 # Override the run method
 def new_run(self, *args, **kwargs):
     print("Overridden Dash app run method!")
     # You can add any additional setup or configuration code here if necessary
-
-
-Dash.run = new_run
-
 
 def execute_demos(file_content):
     """
@@ -58,13 +49,13 @@ def execute_demos(file_content):
 
 
 def test_code_execution():
-    file_path = "dash_tooltip_demo.py"
-    code = Path(file_path).read_text()
-    result = execute_demos(code)
-    # Adjust the assertion to check if all demos passed
-    all_passed = all([res == "Passed" for res in result.values()])
-    assert all_passed, f"Error: {result}"
-
+    with patch.object(Dash, "run", new_run):  # Temporarily replace Dash.run with new_run
+        file_path = "dash_tooltip_demo.py"
+        code = Path(file_path).read_text()
+        result = execute_demos(code)
+        # Adjust the assertion to check if all demos passed
+        all_passed = all([res == "Passed" for res in result.values()])
+        assert all_passed, f"Error: {result}"
 
 if __name__ == "__main__":
     test_code_execution()

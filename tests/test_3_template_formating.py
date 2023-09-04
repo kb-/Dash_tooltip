@@ -8,6 +8,7 @@ import dash
 import dash_bootstrap_components as dbc
 import numpy as np
 import plotly.express as px
+import pytest
 from dash import dcc, html
 from dash.dependencies import Input, Output
 from selenium.webdriver.common.action_chains import ActionChains
@@ -77,6 +78,7 @@ tooltip_template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
 tooltip(app, template=tooltip_template, debug=True)
 
 
+@pytest.mark.selenium
 def test_customdata_tooltip(dash_duo):
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 10)
