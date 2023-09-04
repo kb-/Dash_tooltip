@@ -108,6 +108,8 @@ def tooltip(
             )
 
     for graph_id in graph_ids:
+        if graph_id not in app.layout:
+            raise ValueError(f"Invalid graph ID provided: {graph_id}")
         add_annotation_store(app.layout, graph_id)
 
         @app.callback(  # type: ignore
