@@ -4,6 +4,8 @@ Call the tooltip function for an app with multiple graphs and verify that toolti
 This ensures that the function can handle multiple graphs correctly.
 """
 
+import time
+
 import dash
 import numpy as np
 import plotly.graph_objects as go
@@ -94,6 +96,20 @@ def test_multiple_graph_tooltips(dash_duo):
     # Start the Dash app
     dash_duo.start_server(app)
 
+    # Helper function to perform the retry click
+    def perform_retry_click(element):
+        success = False
+        for _ in range(100):
+            ActionChains(driver).move_to_element(element).click().perform()
+            time.sleep(0.01)  # This ensures the UI has a moment to update
+
+            # Check if the annotation appeared to confirm the click was successful
+            if element.is_displayed():
+                success = True
+                break
+
+        return success
+
     # For each graph, interact with a data point to trigger the tooltip
     for graph_id in ["graph-1", "graph-2", "subplot-graph"]:
         if graph_id == "subplot-graph":
@@ -110,7 +126,9 @@ def test_multiple_graph_tooltips(dash_duo):
                         )
                     )
                 )
-                ActionChains(driver).move_to_element(element).click().perform()
+                assert perform_retry_click(
+                    element
+                ), f"Failed to click on {subplot} in {graph_id}"
 
                 # Wait for the tooltip's annotation to appear and ensure it's visible
                 annotation_element = wait.until(
@@ -124,7 +142,7 @@ def test_multiple_graph_tooltips(dash_duo):
             element = driver.find_element(
                 By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path"
             )
-            ActionChains(driver).move_to_element(element).click().perform()
+            assert perform_retry_click(element), f"Failed to click on {graph_id}"
 
             # Check the tooltip's presence
             annotation_element = wait.until(
