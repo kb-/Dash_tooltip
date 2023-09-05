@@ -36,8 +36,8 @@ app.layout = html.Div(
                     {
                         "mode": "markers",
                         "type": "scatter",
-                        "x": [1, 2, 3],
-                        "y": [4, 5, 6],
+                        "x": [1, 2, 3, 4],
+                        "y": [4, 5, 6, 2],
                     }
                 ],
                 "layout": {},
@@ -53,7 +53,7 @@ tooltip_template = "Point: x=%{x}, y=%{y}"
 tooltip(app, template=tooltip_template)
 
 
-@pytest.mark.parametrize("iteration", range(2))
+@pytest.mark.parametrize("iteration", range(3))
 @pytest.mark.selenium
 def test_annotation_removal(iteration, dash_duo):
     driver = dash_duo.driver
@@ -62,62 +62,63 @@ def test_annotation_removal(iteration, dash_duo):
     # Start the Dash app
     dash_duo.start_server(app)
 
-    # Ensure the element is clickable before interacting
-    WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)")
-        )
-    )
-
-    success = False  # flag to indicate if the click was successful
-
-    for _ in range(100):  # Try up to 100 times (clicks sometimes not detected)
-        element = driver.find_element(
-            By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)"
-        )
-        ActionChains(driver).move_to_element(element).click().perform()
-        time.sleep(0.01)
-
-        # Check if the click was successful
-        try:
-            WebDriverWait(driver, 1).until(
-                EC.text_to_be_present_in_element(
-                    (By.ID, "output-div"), "You clicked on point (2, 5)"
+    # Add tooltips to all points by clicking on them
+    for point_index in range(1, 4):
+        WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    f".scatterlayer .trace .points path:nth-of-type({point_index})",
                 )
             )
-            success = True  # update the flag
-            break  # exit the loop
-        except TimeoutException:
-            continue  # continue to the next iteration if the condition isn't met
+        )
 
-    # Check if the loop exited due to a successful click or if all attempts were exhausted
-    assert success, "Failed to successfully click the point after multiple attempts."
+        success = False
 
-    # Move to the tooltip (annotation) and click on it
+        for _ in range(100):
+            element = driver.find_element(
+                By.CSS_SELECTOR,
+                f".scatterlayer .trace .points path:nth-of-type({point_index})",
+            )
+            ActionChains(driver).move_to_element(element).click().perform()
+            time.sleep(0.01)
+
+            # Check if the click was successful by looking for the tooltip
+            try:
+                WebDriverWait(driver, 1).until(
+                    EC.presence_of_element_located(
+                        (
+                            By.CSS_SELECTOR,
+                            f"g.annotation-text-g:nth-of-type({point_index}) text.annotation-text",
+                        )
+                    )
+                )
+                success = True
+                break
+            except TimeoutException:
+                continue
+
+        assert (
+            success
+        ), f"Failed to add tooltip for point {point_index} after multiple attempts."
+
+    # Now, delete the second tooltip
     annotation_element = wait.until(
         EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
+            (By.CSS_SELECTOR, "g.annotation-text-g:nth-of-type(2) text.annotation-text")
         )
     )
     ActionChains(driver).move_to_element(annotation_element).click().perform()
-
-    # Simulate the delete key press
     ActionChains(driver).send_keys(Keys.DELETE).perform()
-
-    # Simulate the enter key press to confirm deletion
     ActionChains(driver).send_keys(Keys.ENTER).perform()
 
-    # Wait for element to disappear
     WebDriverWait(driver, 10).until(staleness_of(annotation_element))
-    WebDriverWait(driver, 10).until_not(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
-        )
-    )
 
-    # Check if the annotation is removed from the graph
+    # Check if the annotation (tooltip) is removed from the graph
     with pytest.raises(EC.NoSuchElementException):
-        driver.find_element(By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
+        driver.find_element(
+            By.CSS_SELECTOR, "g.annotation-text-g:nth-of-type(2) text.annotation-text"
+        )
 
 
 # Callback to retrieve annotations after a graph relayout
