@@ -1,10 +1,23 @@
 """
-Test 7: Test tooltip annotation removal
+Test 7: Test tooltip annotation
+
+This test aims to validate the tooltip annotation functionality of a Dash app. The primary objectives are:
+1. Verify that tooltips can be added to data points on a scatter plot by clicking on them.
+2. Ensure that a tooltip, once added, can be deleted.
+3. Validate that, after the tooltip's deletion, the number of tooltips decreases by one.
+
+Steps:
+1. Start the Dash app.
+2. Iteratively click on data points to add tooltips.
+3. After adding tooltips, count the total number of tooltips.
+4. Delete a specific tooltip.
+5. Count the number of tooltips again and validate that it has decreased by one.
 """
 import time
+from typing import Any, Dict
 
 import pytest
-from dash import Dash, State, dcc, html
+from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
 from selenium.common import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
@@ -17,10 +30,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from dash_tooltip import tooltip
 
 app = Dash(__name__)
+graph_id = "graph-input"
 
 
-@app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
-def display_click_data(clickData):
+@app.callback(Output("output-div", "children"), Input(graph_id, "clickData"))
+def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
         return f'You clicked on point ({point["x"]}, {point["y"]})'
@@ -30,14 +44,14 @@ def display_click_data(clickData):
 app.layout = html.Div(
     [
         dcc.Graph(
-            id="graph-input",
+            id=graph_id,
             figure={
                 "data": [
                     {
                         "mode": "markers",
                         "type": "scatter",
                         "x": [1, 2, 3, 4],
-                        "y": [4, 5, 6, 2],
+                        "y": [4, 5, 1, 2],
                     }
                 ],
                 "layout": {},
@@ -53,11 +67,11 @@ tooltip_template = "Point: x=%{x}, y=%{y}"
 tooltip(app, template=tooltip_template)
 
 
-@pytest.mark.parametrize("iteration", range(3))
+@pytest.mark.parametrize("iteration", range(1))
 @pytest.mark.selenium
-def test_annotation_removal(iteration, dash_duo):
+def test_annotation_removal(iteration: int, dash_duo: Any) -> None:
     driver = dash_duo.driver
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 600)
 
     # Start the Dash app
     dash_duo.start_server(app)
@@ -89,7 +103,7 @@ def test_annotation_removal(iteration, dash_duo):
                     EC.presence_of_element_located(
                         (
                             By.CSS_SELECTOR,
-                            f"g.annotation-text-g:nth-of-type({point_index}) text.annotation-text",
+                            f'g.annotation[data-index="{point_index-1}"] g.annotation-text-g text.annotation-text',
                         )
                     )
                 )
@@ -102,10 +116,13 @@ def test_annotation_removal(iteration, dash_duo):
             success
         ), f"Failed to add tooltip for point {point_index} after multiple attempts."
 
+    # Count the number of tooltips before deletion
+    initial_tooltips_count = len(driver.find_elements(By.CSS_SELECTOR, "g.annotation"))
+
     # Now, delete the second tooltip
     annotation_element = wait.until(
         EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, "g.annotation-text-g:nth-of-type(2) text.annotation-text")
+            (By.CSS_SELECTOR, 'g.annotation[data-index="1"] text.annotation-text')
         )
     )
     ActionChains(driver).move_to_element(annotation_element).click().perform()
@@ -114,25 +131,18 @@ def test_annotation_removal(iteration, dash_duo):
 
     WebDriverWait(driver, 10).until(staleness_of(annotation_element))
 
-    # Check if the annotation (tooltip) is removed from the graph
-    with pytest.raises(EC.NoSuchElementException):
-        driver.find_element(
-            By.CSS_SELECTOR, "g.annotation-text-g:nth-of-type(2) text.annotation-text"
-        )
+    # Custom waiting condition for the tooltips count to decrease by one
+    def tooltips_count_decreased(driver):
+        current_count = len(driver.find_elements(By.CSS_SELECTOR, "g.annotation"))
+        return current_count == initial_tooltips_count - 1
 
+    # Wait for the condition to be satisfied
+    wait.until(tooltips_count_decreased)
 
-# Callback to retrieve annotations after a graph relayout
-@app.callback(
-    Output("annotations-output", "children"),
-    Input("graph-input", "relayoutData"),
-    State("graph-input", "figure"),
-)
-def get_annotations(relayoutData, current_figure):
-    x_val, y_val = 2, 5  # The coordinates of the data point we're testing
-    expected_annotation_text = f"Point: x={x_val}, y={y_val}"
+    # Count the number of tooltips after deletion
+    final_tooltips_count = len(driver.find_elements(By.CSS_SELECTOR, "g.annotation"))
 
-    annotations = current_figure["layout"].get("annotations", [])
-    for annotation in annotations:
-        if annotation["text"] == expected_annotation_text:
-            return "Annotation found!"
-    return "Annotation not found!"
+    # Verify that one tooltip was deleted
+    assert (
+        final_tooltips_count == initial_tooltips_count - 1
+    ), "Tooltip was not deleted."

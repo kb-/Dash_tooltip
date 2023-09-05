@@ -3,8 +3,8 @@ Test4b: Multiple Graphs Test:
 Call the tooltip function for an app with multiple graphs and verify that tooltips are functional for all graphs.
 This ensures that the function can handle multiple graphs correctly.
 """
-
 import time
+from typing import Any
 
 import dash
 import numpy as np
@@ -14,6 +14,7 @@ from dash import dcc, html
 from plotly.subplots import make_subplots
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -88,7 +89,7 @@ tooltip(app, debug=True)
 
 
 @pytest.mark.selenium
-def test_multiple_graph_tooltips(dash_duo):
+def test_multiple_graph_tooltips(dash_duo: Any) -> None:
     driver = dash_duo.driver
     driver.maximize_window()
     wait = WebDriverWait(driver, 600)
@@ -97,7 +98,7 @@ def test_multiple_graph_tooltips(dash_duo):
     dash_duo.start_server(app)
 
     # Helper function to perform the retry click
-    def perform_retry_click(element):
+    def perform_retry_click(element: WebElement) -> bool:
         success = False
         for _ in range(100):
             ActionChains(driver).move_to_element(element).click().perform()

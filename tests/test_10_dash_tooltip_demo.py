@@ -1,22 +1,23 @@
 import re
 from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
 
 from dash import Dash
 
 
 # Mock the run method of the Dash app
-def mock_run_app(*args, **kwargs):
+def mock_run_app(*args: Any, **kwargs: Any) -> None:
     print("Dash app run method mock called!")
 
 
 # Override the run method
-def new_run(self, *args, **kwargs):
+def new_run(self: Dash, *args: Any, **kwargs: Any) -> None:
     print("Overridden Dash app run method!")
     # You can add any additional setup or configuration code here if necessary
 
 
-def execute_demos(file_content):
+def execute_demos(file_content: str) -> Dict[str, str]:
     """
     Execute each demo from the provided file_content.
     Returns a dictionary with the results.
@@ -52,7 +53,7 @@ def execute_demos(file_content):
     return results
 
 
-def test_code_execution():
+def test_code_execution() -> None:
     with patch.object(
         Dash, "run", new_run
     ):  # Temporarily replace Dash.run with new_run

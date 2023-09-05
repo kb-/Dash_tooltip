@@ -4,8 +4,8 @@ Call the tooltip function for an app with multiple graphs and subplots
 and verify that tooltips are functional for all graphs.
 This ensures that the function can handle multiple graphs on subplots correctly.
 """
-
 import time
+from typing import Any
 
 import dash
 import numpy as np
@@ -51,7 +51,7 @@ tooltip(app, graph_ids=["graph-1", "graph-2"], style={"font": {"size": 10}})
 
 
 @pytest.mark.selenium
-def test_multiple_graph_tooltips(dash_duo):
+def test_multiple_graph_tooltips(dash_duo: Any) -> None:
     driver = dash_duo.driver
     WebDriverWait(driver, 600)
 

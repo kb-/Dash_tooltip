@@ -1,10 +1,10 @@
 """
-Test 2: Template Formatting Test:
+Test 3: Template Formatting Test:
 Call the tooltip function with a custom template and check if the tooltips are formatted according to the template.
 This ensures that the function respects custom formatting.
 """
-
 import time
+from typing import Any, Dict
 
 import dash
 import dash_bootstrap_components as dbc
@@ -26,7 +26,7 @@ graphid_2 = "graph2"
 
 
 @app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
-def display_click_data(clickData):
+def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
         return f'You clicked on point {point["x"]}, {point["y"]}'
@@ -82,7 +82,7 @@ tooltip(app, template=tooltip_template, debug=True)
 
 
 @pytest.mark.selenium
-def test_customdata_tooltip(dash_duo):
+def test_customdata_tooltip(dash_duo: Any) -> None:
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 10)
 
@@ -105,6 +105,7 @@ def test_customdata_tooltip(dash_duo):
     dash_duo.start_server(app)
 
     success = False  # flag to indicate if the tooltip was successfully triggered
+    actual_annotation_text = None  # Initialize variable to store annotation text
 
     for _ in range(100):  # Try up to 100 times
         element = dash_duo.driver.find_element(
@@ -120,6 +121,9 @@ def test_customdata_tooltip(dash_duo):
                     (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
                 )
             )
+            actual_annotation_text = (
+                annotation_element.text
+            )  # Get the text content of the annotation element
             success = True  # update the flag
             break  # exit the loop
         except TimeoutException:
@@ -129,9 +133,6 @@ def test_customdata_tooltip(dash_duo):
     assert (
         success
     ), "Failed to successfully trigger the tooltip after multiple attempts."
-
-    # Get the text content of the annotation element
-    actual_annotation_text = annotation_element.text
 
     # Check if the actual annotation text matches the expected text based on the customdata
     assert actual_annotation_text == expected_annotation_text

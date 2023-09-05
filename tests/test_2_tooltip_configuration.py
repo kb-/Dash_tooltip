@@ -1,9 +1,10 @@
 """
-Test 3: Configuration Test:
+Test 2: Configuration Test:
 Call the tooltip function with a custom style configuration and check if the tooltips reflect the desired properties
 (e.g., arrow color, font size).
 This ensures that the function respects custom configurations.
 """
+from typing import Any, Dict, Union
 
 import dash
 import dash_bootstrap_components as dbc
@@ -22,9 +23,12 @@ from dash_tooltip import tooltip
 app = dash.Dash(__name__)
 graphid_2 = "graph2"
 
+FontConfigType = Dict[str, Union[str, int]]
+CustomConfigType = Dict[str, Union[str, int, FontConfigType]]
+
 
 @app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
-def display_click_data(clickData):
+def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
         return f'You clicked on point {point["x"]}, {point["y"]}'
@@ -75,7 +79,7 @@ app.layout = dbc.Container(
 )
 
 # Define a custom configuration
-custom_config = {
+custom_config: CustomConfigType = {
     "arrowcolor": "blue",
     "font": {"color": "red", "size": 7, "family": "Helvetica"},
     "arrowhead": 5,
@@ -90,7 +94,7 @@ tooltip(app, template=tooltip_template, style=custom_config, debug=True)
 
 
 @pytest.mark.selenium
-def test_tooltip_configuration(dash_duo):
+def test_tooltip_configuration(dash_duo: Any) -> None:
     driver = dash_duo.driver
     wait = WebDriverWait(driver, 600)
 
@@ -128,7 +132,8 @@ def test_tooltip_configuration(dash_duo):
     arrow_element = driver.find_element(By.CSS_SELECTOR, "g.annotation-arrow-g path")
     arrow_color = arrow_element.value_of_css_property("stroke")
 
-    font_config = custom_config["font"]
+    assert isinstance(custom_config["font"], dict)
+    font_config: FontConfigType = custom_config["font"]
 
     # Assertions
     assert arrow_color == "rgb(0, 0, 255)"  # RGB equivalent of 'blue'

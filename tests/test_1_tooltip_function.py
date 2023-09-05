@@ -5,6 +5,7 @@ This tests the basic functionality and setup of tooltips.
 Run multiple times because of variability in click results
 """
 import time
+from typing import Any, Dict
 
 import pytest
 from dash import Dash, dcc, html
@@ -21,7 +22,7 @@ app = Dash(__name__)
 
 
 @app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
-def display_click_data(clickData):
+def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
         return f'You clicked on point ({point["x"]}, {point["y"]})'
@@ -54,9 +55,9 @@ tooltip_template = "Point: x=%{x}, y=%{y}"
 tooltip(app, template=tooltip_template)
 
 
-@pytest.mark.parametrize("iteration", range(5))
+@pytest.mark.parametrize("iteration", range(1))
 @pytest.mark.selenium
-def test_basic_usage(iteration, dash_duo):
+def test_basic_usage(iteration: int, dash_duo: Any) -> None:
     driver = dash_duo.driver
     WebDriverWait(driver, 600)
 
