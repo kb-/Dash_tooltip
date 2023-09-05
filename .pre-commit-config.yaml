@@ -3,50 +3,50 @@ repos:
     hooks:
     -   id: black-fix
         name: black (auto format)
-        entry: ./env/Scripts/black.exe
+        entry: black
         language: system
         types: [python]
         
     -   id: isort-fix
         name: isort (auto sort)
-        entry: ./env/Scripts/isort.exe
+        entry: isort
         language: system
         types: [python]
         
     -   id: pytest-selenium
         name: pytest (selenium tests)
-        entry: ./env/Scripts/pytest.exe
-        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox']
+        entry: pytest
+        args: ['tests/', '-k', 'selenium']
         language: system
         pass_filenames: false
         
     -   id: pytest-non-selenium
         name: pytest (non-selenium tests)
-        entry: ./env/Scripts/pytest.exe
+        entry: pytest
         args: ['tests/', '-k', 'not selenium']
         language: system
         pass_filenames: false
 
     -   id: black
         name: black
-        entry: ./env/Scripts/black.exe
+        entry: black
         language: system
         types: [python]
 
     -   id: isort
         name: isort
-        entry: ./env/Scripts/isort.exe
+        entry: isort
         language: system
         types: [python]
 
     -   id: flake8
         name: flake8
-        entry: ./env/Scripts/flake8.exe
+        entry: flake8
         language: system
         types: [python]
 
     -   id: mypy
         name: mypy
-        entry: ./env/Scripts/mypy.exe
+        entry: mypy
         language: system
         types: [python]
