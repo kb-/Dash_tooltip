@@ -1,6 +1,7 @@
 """
 Test 3: Template Formatting Test:
-Call the tooltip function with a custom template and check if the tooltips are formatted according to the template.
+Call the tooltip function with a custom template and check if the tooltips are formatted
+according to the template.
 This ensures that the function respects custom formatting.
 """
 import time
@@ -129,10 +130,12 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
         except TimeoutException:
             continue  # continue to the next iteration if the condition isn't met
 
-    # Check if the loop exited due to a successful tooltip trigger or if all attempts were exhausted
+    # Check if the loop exited due to a successful tooltip trigger or if all attempts
+    # were exhausted
     assert (
         success
     ), "Failed to successfully trigger the tooltip after multiple attempts."
 
-    # Check if the actual annotation text matches the expected text based on the customdata
+    # Check if the actual annotation text matches the expected text based on the
+    # customdata
     assert actual_annotation_text == expected_annotation_text

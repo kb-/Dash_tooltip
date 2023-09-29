@@ -84,7 +84,9 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
             except TimeoutException:
                 continue  # continue to the next iteration if the condition isn't met
 
-        # Check if the loop exited due to a successful tooltip trigger or if all attempts were exhausted
-        assert (
-            success
-        ), f"Failed to successfully trigger the tooltip for {graph_id} after multiple attempts."
+        # Check if the loop exited due to a successful tooltip trigger or if all
+        # attempts were exhausted
+        assert success, (
+            f"Failed to successfully trigger the tooltip for {graph_id}"
+            f" after multiple attempts."
+        )

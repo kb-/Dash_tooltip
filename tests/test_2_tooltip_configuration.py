@@ -1,7 +1,7 @@
 """
 Test 2: Configuration Test:
-Call the tooltip function with a custom style configuration and check if the tooltips reflect the desired properties
-(e.g., arrow color, font size).
+Call the tooltip function with a custom style configuration and check if the tooltips
+reflect the desired properties (e.g., arrow color, font size).
 This ensures that the function respects custom configurations.
 """
 from typing import Any, Dict, Union

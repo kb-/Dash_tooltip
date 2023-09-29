@@ -10,20 +10,23 @@ handling the display of tooltips on the graph when a data point is clicked.
 The suite includes:
 
 1. **No Click Data Test:**
-    Ensures that if no valid click data is provided (i.e., an empty click event or an uninitialized state),
-    the function should not modify the figure. If there's no click, there shouldn't be a tooltip.
+    Ensures that if no valid click data is provided (i.e., an empty click event or an
+    uninitialized state), the function should not modify the figure.
+    If there's no click, there shouldn't be a tooltip.
 
 2. **With Click Data Test:**
-    Checks the function's behavior when valid click data is provided. The figure should be updated
-    with a new annotation corresponding to the clicked data point.
+    Checks the function's behavior when valid click data is provided.
+    The figure should be updated with a new annotation corresponding to the clicked
+    data point.
 
 3. **Custom Style Test:**
-    Evaluates the function's capability to adapt and display tooltips with custom styles. It ensures
-    that the tooltip's appearance aligns with the provided custom configurations.
+    Evaluates the function's capability to adapt and display tooltips with
+    custom styles. It ensures that the tooltip's appearance aligns with the
+    provided custom configurations.
 
-By ensuring that the `_display_click_data` function behaves as expected in these scenarios,
-we maintain the tooltip feature's integrity, ensuring that users get consistent and accurate tooltip displays
-during interactions.
+By ensuring that the `_display_click_data` function behaves as expected in these
+scenarios, we maintain the tooltip feature's integrity, ensuring that users get
+consistent and accurate tooltip displays during interactions.
 """
 from typing import Dict, List, Union
 

@@ -19,7 +19,8 @@ dash[testing]
 pre-commit
 black
 isort
-flake8
 mypy
 bandit
 execnet
+ruff
+selenium

@@ -118,7 +118,7 @@ app2.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Single Trace with Custom Data and Stylized Annotations",
+                            "Single Trace with Custom Data and Stylized" " Annotations",
                             style={"text-align": "center"},
                         )
                     ]
@@ -264,7 +264,8 @@ app4.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Multiple Traces with Custom Data and Stylized Annotations",
+                            "Multiple Traces with Custom Data and Stylized"
+                            " Annotations",
                             style={"text-align": "center"},
                         )
                     ]
@@ -510,7 +511,8 @@ app7.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Comparison of Graphs with and without Tooltip Functionality",
+                            "Comparison of Graphs with and"
+                            " without Tooltip Functionality",
                             style={"text-align": "center"},
                         )
                     ]
@@ -649,7 +651,8 @@ if __name__ == "__main__":
 
 # %%
 # ---- Test 9: Pandas Time Series Plot (not editable) ----
-# plotly_resampler allows to display very large dataset with dynamic selective downsampling
+# plotly_resampler allows to display very large dataset with dynamic
+# selective downsampling
 
 # Generate random time series data
 date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="h")
@@ -677,7 +680,10 @@ ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 df = pd.DataFrame({"Time Series 1": ts1, "Time Series 2": ts2})
 
 # Plotting the time series
-template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+template = (
+    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
+    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
+)
 
 fig10 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
 
@@ -779,7 +785,10 @@ ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 # Create a DataFrame to hold the time series - hover and matching tooltip content
 df = pd.DataFrame({"Time Series 1": ts1, "Time Series 2": ts2})
 # Plotting the time series
-template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+template = (
+    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
+    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
+)
 fig11 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
 # Modify each trace to include the desired hovertemplate
 for i, trace in enumerate(fig11.data):
@@ -838,7 +847,10 @@ for i in range(1, 3):
         )
 
 # Modify each trace to include the desired hovertemplate
-template12 = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+template12 = (
+    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
+    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
+)
 for i, trace in enumerate(fig12.data):
     trace.customdata = np.column_stack(
         (
@@ -880,7 +892,8 @@ fig12.update_layout(title_text="2x2 Subplots with 2 Traces Each")
 # Register the callback with FigureResampler
 fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
 
-# Code to run the Dash app (commented out for now, but can be used in a local environment)
+# Code to run the Dash app
+# (commented out for now, but can be used in a local environment)
 app12.run(debug=True, port=8092)
 
 # %% jupyter={"source_hidden": true}

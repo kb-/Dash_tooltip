@@ -98,7 +98,8 @@ def test_basic_usage(iteration: int, dash_duo: Any) -> None:
         except TimeoutException:
             continue  # continue to the next iteration if the condition isn't met
 
-    # Check if the loop exited due to a successful click or if all attempts were exhausted
+    # Check if the loop exited due to a successful click or if all attempts were
+    # exhausted
     assert success, "Failed to successfully click the point after multiple attempts."
 
     # Remaining test steps

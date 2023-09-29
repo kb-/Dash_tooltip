@@ -37,7 +37,8 @@ def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
 
     Args:
     - layout (dash.html.Div): The Dash app layout.
-    - graph_id (str, optional): The ID of the graph component to which the store is linked.
+    - graph_id (str, optional): The ID of the graph component to which the store is
+    linked.
 
     Returns:
     - str: The ID of the added dcc.Store component.
@@ -56,7 +57,8 @@ def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
 
 
 DEFAULT_ANNOTATION_CONFIG = {
-    "align": "left",  # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    "align": "left",
     "arrowcolor": "black",  # color of the annotation arrow
     "arrowhead": 3,  # type of arrowhead, for Plotly (an integer from 0 to 8)
     "arrowsize": 1.8,  # relative size of the arrowhead to the arrow stem, for Plotly
@@ -67,7 +69,8 @@ DEFAULT_ANNOTATION_CONFIG = {
         "size": 12,  # size of the annotation text in points, for Plotly
     },
     "showarrow": True,
-    "xanchor": "left",  # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    "xanchor": "left",
 }
 
 DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
@@ -85,14 +88,17 @@ def tooltip(
 
     Args:
     - app (dash.Dash): The Dash app instance.
-    - style (dict): Configuration for the tooltip appearance. Users can provide any valid Plotly annotation
-                    style options.
+    - style (dict): Configuration for the tooltip appearance. Users can provide any
+                    valid Plotly annotation style options.
                     Default values are set in DEFAULT_ANNOTATION_CONFIG.
-    - template (str): A string defining how the tooltip should be displayed using Plotly's template syntax.
-                    Users can modify this template to customize the tooltip content.
-    - graph_ids (list, optional): List of graph component IDs for the tooltip functionality. If None,
-                    function will try to find graph IDs automatically.
-    - debug (bool): If True, debug information will be written to a log file (tooltip.log).
+    - template (str): A string defining how the tooltip should be displayed using
+                    Plotly's template syntax. Users can modify this template to
+                    customize the tooltip content.
+    - graph_ids (list, optional): List of graph component IDs for the tooltip
+                    functionality. If None, function will try to find graph IDs
+                    automatically.
+    - debug (bool): If True, debug information will be written to a log file
+                    (tooltip.log).
 
     Example:
     tooltip(app,
@@ -175,9 +181,8 @@ def tooltip(
 
                 current_figure["layout"]["annotations"] = updated_annotations
                 return current_figure  # update figure with new annotations list
-            return (
-                dash.no_update
-            )  # prevent undesired update when no change is done (also prevents breaking)
+            return dash.no_update  # prevent undesired update when no change is done
+            # (also prevents breaking)
 
 
 def _find_all_graph_ids(layout: Div) -> List[str]:
@@ -224,7 +229,8 @@ def extract_value_from_point(point: Dict[str, Any], key: str) -> Any:
 
 def truncate_json_arrays(json_str: str, limit: int) -> str:
     """
-    Truncate arrays in a JSON string representation to a specified limit, both at top level and nested.
+    Truncate arrays in a JSON string representation to a specified limit, both at top
+    level and nested.
 
     Parameters:
     - json_str (str): The JSON string representation to be processed.
@@ -332,7 +338,8 @@ def _display_click_data(
             )
         except ValueError as e:
             logger.error(
-                f"Failed to add annotation due to invalid properties in {merged_config}. Error: {e}"
+                f"Failed to add annotation due to invalid"
+                f" properties in {merged_config}. Error: {e}"
             )
             raise e
     return fig

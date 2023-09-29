@@ -1,8 +1,10 @@
 """
 Test 7: Test tooltip annotation
 
-This test aims to validate the tooltip annotation functionality of a Dash app. The primary objectives are:
-1. Verify that tooltips can be added to data points on a scatter plot by clicking on them.
+This test aims to validate the tooltip annotation functionality of a Dash app.
+The primary objectives are:
+1. Verify that tooltips can be added to data points on a scatter plot by clicking
+   on them.
 2. Ensure that a tooltip, once added, can be deleted.
 3. Validate that, after the tooltip's deletion, the number of tooltips decreases by one.
 
@@ -103,7 +105,8 @@ def test_annotation_removal(iteration: int, dash_duo: Any) -> None:
                     EC.presence_of_element_located(
                         (
                             By.CSS_SELECTOR,
-                            f'g.annotation[data-index="{point_index-1}"] g.annotation-text-g text.annotation-text',
+                            f'g.annotation[data-index="{point_index-1}"] '
+                            f"g.annotation-text-g text.annotation-text",
                         )
                     )
                 )
