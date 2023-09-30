@@ -1,7 +1,7 @@
 import nox
 
 
-@nox.session(python=["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"])
+@nox.session(python=["3.7", "3.8", "3.9", "3.10", "3.11"])
 def tests_selenium(session):
     # Install dependencies:
     session.install("-r", "requirements.txt")
@@ -13,7 +13,7 @@ def tests_selenium(session):
     session.run("pytest", "tests/", "-k", "selenium", "--webdriver", "Firefox")
 
 
-@nox.session(python=["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"])
+@nox.session(python=["3.7", "3.8", "3.9", "3.10", "3.11"])
 def tests_non_selenium(session):
     # Install dependencies:
     session.install("-r", "requirements.txt")
