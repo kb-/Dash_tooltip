@@ -153,3 +153,5 @@ cython_debug/
 *.ipynb
 
 *.bat
+/env310/
+/env37/

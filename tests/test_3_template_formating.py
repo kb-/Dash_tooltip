@@ -85,7 +85,7 @@ tooltip(app, template=tooltip_template, debug=True)
 @pytest.mark.selenium
 def test_customdata_tooltip(dash_duo: Any) -> None:
     driver = dash_duo.driver
-    wait = WebDriverWait(driver, 10)
+    wait = WebDriverWait(driver, 30)
 
     # Customdata for the data point we're testing
     idx = 1  # Index of the data point

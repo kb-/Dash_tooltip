@@ -92,8 +92,9 @@ tooltip(app, debug=True)
 @pytest.mark.selenium
 def test_multiple_graph_tooltips(dash_duo: Any) -> None:
     driver = dash_duo.driver
-    driver.maximize_window()
-    wait = WebDriverWait(driver, 600)
+    driver.set_window_size(1920, 1080)
+    # driver.maximize_window() # issue in Debian
+    wait = WebDriverWait(driver, 30)
 
     # Start the Dash app
     dash_duo.start_server(app)
