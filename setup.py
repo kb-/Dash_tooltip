@@ -18,9 +18,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",  # Minimum python version required
+    python_requires=">=3.7",
     install_requires=[
-        # List your dependencies here, for instance:
-        # "dash>=1.0.0",
+        "dash>=2.13.0",
+        "plotly>=5.17.0",
     ],
 )
