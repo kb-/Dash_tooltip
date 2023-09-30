@@ -24,3 +24,6 @@ bandit
 execnet
 ruff
 selenium
+setuptools_scm
+tox
+nox
