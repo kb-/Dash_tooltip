@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from string import Template
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 import dash
 import plotly.graph_objs as go
@@ -159,7 +159,7 @@ def tooltip(
         )
         def remove_empty_annotations(
             indices_to_remove: List[int], current_figure: Dict[str, Any]
-        ) -> Union[Dict[str, Any], dash.no_update]:
+        ) -> Union[Dict[str, Any], Type[dash.no_update]]:
             """Remove annotations that have been deleted by the user."""
             if indices_to_remove:
                 annotations = current_figure["layout"].get("annotations", [])

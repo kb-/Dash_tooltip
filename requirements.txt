@@ -25,5 +25,5 @@ execnet
 ruff
 selenium
 setuptools_scm
-tox
+types-setuptools
 nox
