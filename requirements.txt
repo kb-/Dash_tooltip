@@ -27,3 +27,4 @@ selenium
 setuptools_scm
 types-setuptools
 nox
+wheel

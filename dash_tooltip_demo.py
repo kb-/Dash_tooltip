@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.1
+#       jupytext_version: 1.15.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -21,6 +21,8 @@
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
 # %% jupyter={"source_hidden": true}
+import warnings
+
 import dash
 import dash_bootstrap_components as dbc
 
@@ -649,10 +651,27 @@ tooltip(app8, template=template8)
 if __name__ == "__main__":
     app8.run(debug=True, port=8088, jupyter_height=1000)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 9: Pandas Time Series Plot (not editable) ----
 # plotly_resampler allows to display very large dataset with dynamic
 # selective downsampling
+
+# In the context of the provided code, we've encountered specific FutureWarning messages
+# related to the behavior of certain methods in the pandas library and the
+# plotly_resampler library.
+
+# Suppress the specific warning about the DatetimeProperties.to_pydatetime method
+# in pandas
+warnings.filterwarnings(
+    "ignore", category=FutureWarning, message=".*DatetimeProperties.to_pydatetime.*"
+)
+
+# Suppress the specific warning about the is_datetime64tz_dtype method
+# in plotly_resampler
+warnings.filterwarnings(
+    "ignore", category=FutureWarning, message=".*is_datetime64tz_dtype is deprecated.*"
+)
+
 
 # Generate random time series data
 date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="h")
@@ -702,7 +721,6 @@ app10.layout = html.Div(
         dcc.Graph(
             id="graph-id",
             figure=fig10,
-            # titi='testing error',
             config={
                 "editable": True,
                 "edits": {"shapePosition": True, "annotationPosition": True},

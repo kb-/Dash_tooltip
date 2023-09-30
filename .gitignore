@@ -114,11 +114,10 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
 venv/
 ENV/
-env.bak/
 venv.bak/
+env*/
 
 # Spyder project settings
 .spyderproject
@@ -153,5 +152,3 @@ cython_debug/
 *.ipynb
 
 *.bat
-/env310/
-/env37/
