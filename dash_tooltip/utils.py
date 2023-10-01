@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import dash
 import plotly.graph_objs as go
@@ -128,14 +128,32 @@ def deep_merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, 
 
 def _display_click_data(
     clickData: Dict[str, Any],
-    figure: go.Figure,
+    figure: Union[go.Figure, Dict[str, Any]],  # Allow both go.Figure and dictionary
     app: dash.Dash,
     template: str,
     config: Dict[Any, Any],
     debug: bool,
 ) -> go.Figure:
     """Displays the tooltip on the graph when a data point is clicked."""
-    fig = go.Figure(figure)
+
+    # Check if figure is a dictionary
+    if isinstance(figure, dict):
+        # Extract data and layout from the figure dictionary
+        raw_data = figure.get("data", [])
+        layout = figure.get("layout", {})
+
+        # Convert dictionary representations of traces into actual trace objects
+        data = []
+        for trace in raw_data:
+            trace_type = trace.pop("type")
+            trace_class = getattr(go, trace_type.capitalize())
+            data.append(trace_class(**trace))
+
+        # Construct the go.Figure using data and layout
+        fig = go.Figure(data=data, layout=layout)
+    else:
+        fig = figure
+
     merged_config = deep_merge_dicts(DEFAULT_ANNOTATION_CONFIG.copy(), config)
 
     if not getattr(app, "tooltip_active", True):

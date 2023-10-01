@@ -915,3 +915,54 @@ fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
 app12.run(debug=True, port=8092)
 
 # %% jupyter={"source_hidden": true}
+# ---- Test 13: Direct Data Injection into dcc.Graph with Draggable Annotations ----
+graphid_1 = "graph1"
+
+np.random.seed(20)
+y1 = np.random.normal(0, 10, 50)
+x1 = np.arange(0, 50)
+# custom_labels = [f"Label {i}" for i in range(50)]
+# fig13 = px.scatter(x=x1, y=y1)
+# fig13.update_layout(title_text="Editable Title", title_x=0.5)
+
+app13 = Dash(__name__)
+
+app13.layout = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dcc.Graph(
+                            id="example-graph",
+                            figure={
+                                "data": [
+                                    {"x": x1, "y": y1, "type": "line", "name": "sin(x)"}
+                                ],
+                                "layout": {
+                                    "title": "Direct Data Injection into "
+                                    "dcc.Graph with Draggable Annotations"
+                                },
+                            },
+                            config={
+                                "editable": True,
+                                "edits": {
+                                    "shapePosition": True,
+                                    "annotationPosition": True,
+                                },
+                            },
+                        )
+                    ]
+                )
+            ]
+        ),
+    ]
+)
+
+# Add the tooltip functionality to the app
+tooltip(app13, debug=True)
+
+if __name__ == "__main__":
+    app13.run(debug=True, port=8093)
+
+# %% jupyter={"source_hidden": true}

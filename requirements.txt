@@ -28,3 +28,5 @@ setuptools_scm
 types-setuptools
 nox
 wheel
+PyQt6
+PyQt6-WebEngine
