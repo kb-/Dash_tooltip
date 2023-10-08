@@ -1,3 +1,4 @@
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dash-tooltip)
 
 # Dash Tooltip
 
