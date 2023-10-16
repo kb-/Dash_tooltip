@@ -108,7 +108,7 @@ np.random.seed(42)
 y2 = np.random.normal(0, 10, 50)
 x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
-fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels])
+fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
 fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app2 = Dash(__name__)
@@ -161,7 +161,14 @@ custom_style = {
     # ... any other customization
 }
 
-tooltip(app2, style=custom_style, template="x: %{x},<br>y: %{y},<br>%{customdata[0]}")
+tooltip(
+    app2,
+    style=custom_style,
+    template="x: %{x},"
+    "<br>y: %{y:.2f},"
+    "<br>%{customdata[0]},"
+    "<br>2y=%{customdata[1]:.3f}",
+)
 
 if __name__ == "__main__":
     app2.run(debug=True, port=8082)

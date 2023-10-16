@@ -63,7 +63,8 @@ app.layout = html.Div(
     ]
 )
 # Add the tooltip functionality to the app
-tooltip(app)
+template = "x: %{x},<br>y: %{y:.2f}"
+tooltip(app, template=template)
 
 
 def run_dash():

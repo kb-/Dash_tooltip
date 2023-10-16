@@ -192,16 +192,32 @@ def _display_click_data(
                 ),
             )
 
-        placeholders = re.findall(r"\%{(.*?)\}", template)
+        placeholders = re.findall(r"%{(.*?)}", template)
 
         template_data = {}
         for placeholder in placeholders:
-            value = extract_value_from_point(point, placeholder)
+            parts = placeholder.split(":")
+            var_name = parts[0]
+            format_spec = parts[1] if len(parts) > 1 else None
+
+            value = extract_value_from_point(point, var_name)
             if value is not None:
-                template_data[placeholder] = value
+                if format_spec:
+                    try:
+                        # Applying the format specifier directly
+                        template_data[placeholder] = f"{value:{format_spec}}"
+                    except ValueError as e:
+                        # Fallback to string representation if formatting fails
+                        logger.error(
+                            f"Error formatting value {value}, with format {format_spec}"
+                            f" properties in {merged_config}. Error: {e}"
+                        )
+                        template_data[placeholder] = str(value)
+                else:
+                    template_data[placeholder] = str(value)
 
         for placeholder, value in template_data.items():
-            template = template.replace("%{" + placeholder + "}", str(value))
+            template = template.replace(f"%{{{placeholder}}}", value)
 
         try:
             fig.add_annotation(

@@ -38,7 +38,7 @@ np.random.seed(42)
 y2 = np.random.normal(0, 10, 50)
 x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
-fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels])
+fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
 fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app.layout = dbc.Container(
@@ -78,7 +78,9 @@ app.layout = dbc.Container(
 )
 
 # Tooltip template from dash_tooltip_demo.py
-tooltip_template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
+tooltip_template = (
+    "x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
+)
 tooltip(app, template=tooltip_template, debug=True)
 
 
@@ -94,12 +96,14 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
     # Extract x and y values directly from the data
     x_value = x2[idx]
     y_value = y2[idx]
+    expected_custom_label2 = y_value * 2
 
     expected_annotation_text = (
         tooltip_template.replace("<br>", "")
         .replace("%{x}", str(x_value))
-        .replace("%{y}", str(y_value))
+        .replace("%{y:.2f}", f"{y_value:.2f}")
         .replace("%{customdata[0]}", expected_custom_label)
+        .replace("%{customdata[1]:.3f}", f"{expected_custom_label2:.3f}")
     )
 
     # Start the Dash app
