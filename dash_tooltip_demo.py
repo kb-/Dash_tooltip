@@ -794,7 +794,7 @@ def interactive_plot(fig, graphid, template):
     tooltip(app, template=template)
 
     # Register the callback with FigureResampler
-    fig10.register_update_graph_callback(app, graphid, "trace-updater")
+    fig.register_update_graph_callback(app, graphid, "trace-updater")
 
     return app, fig
 
