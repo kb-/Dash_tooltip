@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import re
 from typing import Any, Dict, List, Optional, Union
 
@@ -126,15 +127,40 @@ def deep_merge_dicts(dict1: Dict[str, Any], dict2: Dict[str, Any]) -> Dict[str, 
     return dict1
 
 
+def get_axis_type(fig: go.Figure, axis: str) -> str:
+    """
+    Determines the type of the specified axis in a Plotly figure.
+
+    Parameters:
+    fig (Union[Figure, dict]): The Plotly figure object or dictionary.
+    axis (str): The axis identifier, e.g., 'x', 'y', 'x2', 'y2', etc.
+
+    Returns:
+    str: The type of the specified axis, e.g., 'linear' or 'log'.
+    """
+    # Check if the axis identifier has a number at the end
+    axis_number = axis[-1]
+    if axis_number.isnumeric():
+        axis_key = axis[:-1] + "axis" + axis_number
+    else:
+        axis_key = axis + "axis"
+
+    axis_type = fig.layout[axis_key].type
+    return axis_type
+
+
 def _display_click_data(
     clickData: Dict[str, Any],
     figure: Union[go.Figure, Dict[str, Any]],  # Allow both go.Figure and dictionary
     app: dash.Dash,
     template: str,
     config: Dict[Any, Any],
-    debug: bool,
+    apply_log_fix: bool = True,
+    debug: bool = False,
 ) -> go.Figure:
     """Displays the tooltip on the graph when a data point is clicked."""
+
+    xaxis, yaxis = "x", "y"  # Default values
 
     # Check if figure is a dictionary
     if isinstance(figure, dict):
@@ -164,16 +190,32 @@ def _display_click_data(
         x_val = point["x"]
         y_val = point["y"]
 
-        # Extract the clicked axis information from the curve data
-        if "xaxis" in figure["data"][point["curveNumber"]]:
-            xaxis = figure["data"][point["curveNumber"]]["xaxis"]
-        else:
-            xaxis = "x"
+        try:
+            # Extract the clicked axis information from the curve data
+            if "xaxis" in figure["data"][point["curveNumber"]]:
+                xaxis = figure["data"][point["curveNumber"]]["xaxis"]
+            else:
+                xaxis = "x"
 
-        if "yaxis" in figure["data"][point["curveNumber"]]:
-            yaxis = figure["data"][point["curveNumber"]]["yaxis"]
-        else:
-            yaxis = "y"
+            if "yaxis" in figure["data"][point["curveNumber"]]:
+                yaxis = figure["data"][point["curveNumber"]]["yaxis"]
+            else:
+                yaxis = "y"
+
+            # If the x-axis is logarithmic, adjust `x_val`
+            # This is a fix for longstanding Plotly bug
+            # https://github.com/plotly/plotly.py/issues/2580
+            if apply_log_fix and get_axis_type(fig, xaxis) == "log":
+                x_val = math.log10(x_val)
+
+            # If the y-axis is logarithmic, adjust `y_val`
+            if apply_log_fix and get_axis_type(fig, yaxis) == "log":
+                y_val = math.log10(y_val)
+
+        except KeyError as e:
+            logger.error(f"Error: {e}, key not found")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
         if debug:
             logger.debug(

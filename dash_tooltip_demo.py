@@ -973,3 +973,113 @@ if __name__ == "__main__":
     app13.run(debug=True, port=8093)
 
 # %% jupyter={"source_hidden": true}
+# ---- Test 14: log axis ----
+
+# Generate exponential data
+x_data = np.linspace(1, 100, 100)  # Generating 100 points from 1 to 100
+
+ts_data = {}
+for i in range(4):
+    ts_data[f"ts{i + 1}_1"] = np.exp(
+        0.05 * x_data
+    )  # Exponential growth with a base of exp(1)
+    ts_data[f"ts{i + 1}_2"] = np.exp(
+        0.03 * x_data
+    )  # Slower exponential growth with a base of exp(1)
+
+
+# Create 2x2 subplots
+fig14 = FigureResampler(
+    make_subplots(
+        rows=2,
+        cols=2,
+        shared_xaxes=True,
+        subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4"),
+    )
+)
+
+# Add data to subplots
+for i in range(1, 3):
+    for j in range(1, 3):
+        # noinspection PyTypeChecker
+        fig14.add_trace(
+            go.Scatter(
+                x=x_data,
+                y=ts_data[f"ts{(i - 1) * 2 + j}_1"],
+                name=f"Trace 1, Plot {(i - 1) * 2 + j}",
+            ),
+            row=i,
+            col=j,
+        )
+        # noinspection PyTypeChecker
+        fig14.add_trace(
+            go.Scatter(
+                x=x_data,
+                y=ts_data[f"ts{(i - 1) * 2 + j}_2"],
+                name=f"Trace 2, Plot {(i - 1) * 2 + j}",
+            ),
+            row=i,
+            col=j,
+        )
+
+# Set log axis
+fig14.update_layout(
+    yaxis1=dict(type="log"),
+    xaxis1=dict(type="log"),
+    yaxis2=dict(type="log"),
+    xaxis3=dict(type="log"),
+)
+
+# Modify each trace to include the desired hovertemplate
+template14 = (
+    "x: %{x}<br>y: %{y:0.2f}<br>ID: %{pointNumber}<br>"
+    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
+)
+for i, trace in enumerate(fig14.data):
+    trace.customdata = np.column_stack(
+        (
+            np.repeat(
+                trace.name, len(x_data)
+            ),  # Updated from len(date_rng) to len(x_data)
+            np.repeat(
+                "#{}".format(i + 1), len(x_data)
+            ),  # Updated from len(date_rng) to len(x_data)
+        )
+    )
+    trace.hovertemplate = template14
+
+# Construct app & its layout
+app14 = Dash(__name__)
+
+app14.layout = html.Div(
+    [
+        dcc.Graph(
+            id="graph-id14",
+            figure=fig14,
+            config={
+                "editable": True,
+                "edits": {"shapePosition": True, "annotationPosition": True},
+            },
+        ),
+        TraceUpdater(id="trace-updater14", gdID="graph-id14"),
+    ]
+)
+
+# Add tooltip functionality
+tooltip(
+    app14,
+    graph_ids=["graph-id14"],
+    style={"font": {"size": 10}},
+    template=template14,
+    debug=True,
+)
+
+# Update layout title
+fig14.update_layout(title_text="2x2 Subplots with 2 Traces Each", height=800)
+
+# Register the callback with FigureResampler
+fig14.register_update_graph_callback(app14, "graph-id14", "trace-updater14")
+
+# Code to run the Dash app
+# (commented out for now, but can be used in a local environment)
+app14.run(debug=True, port=8094, jupyter_height=800)

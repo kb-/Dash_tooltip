@@ -64,6 +64,7 @@ def test_display_click_data_no_click() -> None:
         SAMPLE_APP,
         DEFAULT_TEMPLATE,
         DEFAULT_ANNOTATION_CONFIG,
+        True,
         False,
     )
 
@@ -88,6 +89,7 @@ def test_display_click_data_with_click() -> None:
         SAMPLE_APP,
         DEFAULT_TEMPLATE,
         DEFAULT_ANNOTATION_CONFIG,
+        True,
         False,
     )
     assert len(fig_after.layout.annotations) == 1, "One annotation should be added."
@@ -113,7 +115,7 @@ def test_display_click_data_custom_style() -> None:
         ]
     }
     fig_after = _display_click_data(
-        click_data, fig_before, SAMPLE_APP, DEFAULT_TEMPLATE, custom_style, False
+        click_data, fig_before, SAMPLE_APP, DEFAULT_TEMPLATE, custom_style, True, False
     )
     annotation = fig_after.layout.annotations[0]
     assert annotation.arrowcolor == "red", "Arrow color mismatch."

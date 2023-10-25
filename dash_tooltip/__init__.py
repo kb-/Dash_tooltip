@@ -37,6 +37,7 @@ def tooltip(
     style: Dict[Any, Any] = DEFAULT_ANNOTATION_CONFIG,
     template: str = DEFAULT_TEMPLATE,
     graph_ids: Optional[List[str]] = None,
+    apply_log_fix: bool = True,
     debug: bool = False,
 ) -> None:
     """
@@ -53,6 +54,11 @@ def tooltip(
     - graph_ids (list, optional): List of graph component IDs for the tooltip
                     functionality. If None, function will try to find graph IDs
                     automatically.
+    - apply_log_fix (bool): If True, applies a logarithmic transformation fix for
+                    log axes due to a long-standing Plotly bug.
+                    More details can be found at:
+                    https://github.com/plotly/plotly.py/issues/2580
+                    Default is True.
     - debug (bool): If True, debug information will be written to a log file
                     (tooltip.log).
 
@@ -82,7 +88,9 @@ def tooltip(
         def display_click_data(
             clickData: Dict[str, Any], figure: go.Figure
         ) -> go.Figure:
-            return _display_click_data(clickData, figure, app, template, style, debug)
+            return _display_click_data(
+                clickData, figure, app, template, style, apply_log_fix, debug
+            )
 
         dbg_str = "console.log(relayoutData);"
 

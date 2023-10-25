@@ -119,6 +119,10 @@ tooltip(app10, graph_ids=["graph-id"], template=template, debug=True, **custom_c
 
 For more examples, refer to the provided `dash_tooltip_demo.py` or its Jupyter counterpart `dash_tooltip_demo.ipynb`.
 
+## Handling Log Axes
+
+Due to a long-standing bug in Plotly (see [Plotly Issue #2580](https://github.com/plotly/plotly.py/issues/2580)), annotations (`fig.add_annotation`) may not be placed correctly on log-scaled axes. The `dash_tooltip` module provides an option to automatically correct the tooltip placement on log-scaled axes via the `apply_log_fix` argument in the `tooltip` function. By default, `apply_log_fix` is set to `True` to enable the fix.
+
 ## Debugging
 
 If you encounter any issues or unexpected behaviors, enable the debug mode by setting the `debug` argument of the `tooltip` function to `True`. The log outputs will be written to `dash_app.log` in the directory where your script or application is located.
