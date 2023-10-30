@@ -1,4 +1,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dash-tooltip)
+[![CodeQL](https://github.com/kb-/Dash_tooltip/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/kb-/Dash_tooltip/actions/workflows/codeql.yml)
+[![Downloads](https://static.pepy.tech/badge/dash_tooltip)](https://pepy.tech/project/dash_tooltip)
+[![Pytest](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml/badge.svg?branch=main)](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml)
 
 # Dash Tooltip
 
@@ -108,13 +111,13 @@ Refer to [Plotly’s documentation on hover text and formatting](https://plotly.
 ## Custom Styling
 
 ```python
-custom_config = {
-    'text_color': 'red',
-    'arrow_color': 'blue',
-    'arrow_size': 2.5,
-    # ... any other customization
-}
-tooltip(app10, graph_ids=["graph-id"], template=template, debug=True, **custom_config)
+custom_style = {
+        "font": {"size": 12, "color":"red"},
+        "arrowcolor": "red",
+        'arrow_size': 5,
+        # ... any other customization
+    }
+tooltip(app10, style=custom_style, graph_ids=["graph-id"], template=template, debug=True)
 ```
 
 For more examples, refer to the provided `dash_tooltip_demo.py` or its Jupyter counterpart `dash_tooltip_demo.ipynb`.
