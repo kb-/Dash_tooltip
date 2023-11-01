@@ -120,7 +120,8 @@ custom_style = {
 tooltip(app10, style=custom_style, graph_ids=["graph-id"], template=template, debug=True)
 ```
 
-For more examples, refer to the provided `dash_tooltip_demo.py` or its Jupyter counterpart `dash_tooltip_demo.ipynb`.
+For more examples, refer to the provided `dash_tooltip_demo.py` and check out [Plotly’s Text and Annotations documentation](https://plotly.com/python/text-and-annotations/#styling-and-coloring-annotations), which provides a wealth of information on customizing the appearance of annotations.
+Refer to the [Plotly Annotation Reference](https://plotly.com/python/reference/layout/annotations/) for a comprehensive guide on available styling attributes and how to apply them.
 
 ## Handling Log Axes
 
