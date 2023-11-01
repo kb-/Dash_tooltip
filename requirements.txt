@@ -3,12 +3,7 @@ jupytext
 dash_bootstrap_components
 jupyterlab
 ipywidgets
-# Pinning pandas to <2.1 due to:
-# - plotly_resampler using the deprecated method is_datetime64tz_dtype.
-# - Plotly's basevalidators.py having a behavior change warning related to DatetimeProperties.to_pydatetime.
-# This pinning is a temporary measure until both libraries address these issues in their implementations.
-# TODO: Periodically check for updates to plotly_resampler and Plotly and test compatibility with newer pandas versions.
-pandas < 2.1
+pandas
 pandas-stubs
 plotly-resampler
 trace_updater

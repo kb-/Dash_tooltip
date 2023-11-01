@@ -1191,7 +1191,10 @@ tooltip(
 )
 
 # Update layout title
-fig15.update_layout(title_text="2x2 Subplots with 2 Traces Each", height=800)
+fig15.update_layout(
+    title_text="2x2 Subplots with 2 Traces Each (tooltip placement should work after Plotly issue fix)",
+    height=800,
+)
 
 # Register the callback with FigureResampler
 fig15.register_update_graph_callback(app15, "graph-id15", "trace-updater15")

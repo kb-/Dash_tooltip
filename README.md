@@ -114,7 +114,7 @@ Refer to [Plotly’s documentation on hover text and formatting](https://plotly.
 custom_style = {
         "font": {"size": 12, "color":"red"},
         "arrowcolor": "red",
-        'arrow_size': 5,
+        'arrowsize': 5,
         # ... any other customization
     }
 tooltip(app10, style=custom_style, graph_ids=["graph-id"], template=template, debug=True)
