@@ -3,6 +3,8 @@
 [![Downloads](https://static.pepy.tech/badge/dash_tooltip)](https://pepy.tech/project/dash_tooltip)
 [![Pytest](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml/badge.svg?branch=python3.12)](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml)
 
+Issue with tsdownsample prevents installing dependencies on 3.12 https://github.com/predict-idlab/tsdownsample/issues/61
+
 # Dash Tooltip
 
 A module to add interactive editable tooltips to your Dash applications. Inspired by `mplcursors` and Matlab's `datatip`.
