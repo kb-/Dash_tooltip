@@ -34,7 +34,8 @@ def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
         isinstance(child, dcc.Store) and child.id == store_id
         for child in layout.children
     ):
-        layout.children.append(dcc.Store(id=store_id))
+        if isinstance(layout.children, List):
+            layout.children.append(dcc.Store(id=store_id))
 
     return store_id
 
