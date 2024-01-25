@@ -72,6 +72,22 @@ def create_dash_app():
     """
     app = dash.Dash(__name__)
 
+    graph_config = {
+        "editable": True,
+        "edits": {
+            "shapePosition": True,
+            "annotationPosition": True,
+        },
+    }
+
+    graph_style = {
+        "width": "100%",
+        "height": "100%",
+        # "border": "2px solid red",
+    }
+
+    layout_margin = {"l": 25, "r": 25, "t": 25, "b": 25}
+
     # Creating a grid of x and y values
     x = np.linspace(0, 10, 100)
     y = np.linspace(0, 10, 100)
@@ -88,7 +104,8 @@ def create_dash_app():
             y=y,
             colorscale="Viridis"
             # You can change the colorscale as needed
-        )
+        ),
+        layout=go.Layout(margin=layout_margin),
     )
 
     # Define scatter data
@@ -109,28 +126,25 @@ def create_dash_app():
                             "name": "sin(x)",
                         }
                     ],
-                    "layout": {"title": "Dash by Plotly in PyQt"},
-                },
-                config={
-                    "editable": True,
-                    "edits": {
-                        "shapePosition": True,
-                        "annotationPosition": True,
+                    "layout": {
+                        "title": "Dash by Plotly in PyQt",
+                        "margin": layout_margin,
                     },
                 },
+                config=graph_config,
+                style=graph_style,
             ),
             dcc.Graph(
-                id="example-graph2",
-                figure=fig2,
-                config={
-                    "editable": True,
-                    "edits": {
-                        "shapePosition": True,
-                        "annotationPosition": True,
-                    },
-                },
+                id="example-graph2", figure=fig2, config=graph_config, style=graph_style
             ),
-        ]
+        ],
+        style={
+            "display": "flex",
+            "flex-direction": "column",  # Use "row" for side-by-side layout
+            "width": "95vw",
+            "height": "95vh",
+            "overflow": "hidden",
+        },  # Full viewport width and height
     )
 
     # Add the tooltip functionality to the app

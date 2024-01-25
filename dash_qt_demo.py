@@ -97,7 +97,6 @@ def create_dash_app():
                 config={
                     "editable": True,
                     "edits": {"shapePosition": True, "annotationPosition": True},
-                    "responsive": True,  # Make the graph responsive
                 },
                 style={
                     "width": "100%",
