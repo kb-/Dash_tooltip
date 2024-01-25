@@ -10,7 +10,7 @@ from dash import dcc, html
 from PyQt6.QtCore import QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
-
+import plotly.graph_objects as go
 from dash_tooltip import tooltip
 
 dash_port = 8050
@@ -72,20 +72,40 @@ def create_dash_app():
     """
     app = dash.Dash(__name__)
 
+    # Creating a grid of x and y values
+    x = np.linspace(0, 10, 100)
+    y = np.linspace(0, 10, 100)
+    X, Y = np.meshgrid(x, y)
+
+    # Calculate Z as a function of X and Y
+    Z = np.sin(X) * np.cos(Y)
+
+    # Create a heatmap
+    fig2 = go.Figure(
+        data=go.Heatmap(
+            z=Z,
+            x=x,
+            y=y,
+            colorscale="Viridis"
+            # You can change the colorscale as needed
+        )
+    )
+
+    # Define scatter data
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
 
     app.layout = html.Div(
         [
             dcc.Graph(
-                id="example-graph",
+                id="example-graph1",
                 figure={
                     "data": [
                         {
                             "x": x,
                             "y": y,
-                            "type": "scatter",
-                            "mode": "lines",
+                            "type": "scatter",  # Use scatter type
+                            "mode": "lines",  # Specify lines mode for scatter plot
                             "name": "sin(x)",
                         }
                     ],
@@ -98,11 +118,26 @@ def create_dash_app():
                         "annotationPosition": True,
                     },
                 },
-            )
+            ),
+            dcc.Graph(
+                id="example-graph2",
+                figure=fig2,
+                config={
+                    "editable": True,
+                    "edits": {
+                        "shapePosition": True,
+                        "annotationPosition": True,
+                    },
+                },
+            ),
         ]
     )
-    template = "x: %{x:.2f},<br>y: %{y:.3f}"
-    tooltip(app, template=template)
+
+    # Add the tooltip functionality to the app
+    template1 = "x: %{x:.2f},<br>y: %{y:.2f}"
+    tooltip(app, template=template1, graph_ids=["example-graph1"])
+    template2 = "x: %{x:.2f},<br>y: %{y:.2f},<br>z: %{z:.3f}"
+    tooltip(app, template=template2, graph_ids=["example-graph2"])
     return app
 
 
