@@ -9,7 +9,7 @@ import numpy as np
 from dash import dcc, html
 from PyQt6.QtCore import QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QVBoxLayout
 
 from dash_tooltip import tooltip
 
@@ -87,19 +87,29 @@ def create_dash_app():
                             "type": "scatter",
                             "mode": "lines",
                             "name": "sin(x)",
-                        }
+                        },
                     ],
-                    "layout": {"title": "Dash by Plotly in PyQt"},
+                    "layout": {
+                        "title": "Dash by Plotly in PyQt",
+                        "autosize": True,  # Enable autosizing of the graph
+                    },
                 },
                 config={
                     "editable": True,
-                    "edits": {
-                        "shapePosition": True,
-                        "annotationPosition": True,
-                    },
+                    "edits": {"shapePosition": True, "annotationPosition": True},
+                    "responsive": True,  # Make the graph responsive
                 },
+                style={
+                    "width": "100%",
+                    "height": "100%",
+                },  # Ensure full width and height
             )
-        ]
+        ],
+        style={
+            "width": "95vw",
+            "height": "95vh",
+            "overflow": "hidden",
+        },  # Full viewport width and height
     )
     template = "x: %{x:.2f},<br>y: %{y:.3f}"
     tooltip(app, template=template)
