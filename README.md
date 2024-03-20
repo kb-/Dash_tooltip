@@ -1,7 +1,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dash-tooltip)
 [![CodeQL](https://github.com/kb-/Dash_tooltip/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/kb-/Dash_tooltip/actions/workflows/codeql.yml)
 [![Downloads](https://static.pepy.tech/badge/dash_tooltip)](https://pepy.tech/project/dash_tooltip)
-[![Pytest](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml/badge.svg?branch=python3.12)](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml)
+[![Pytest](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml/badge.svg)](https://github.com/kb-/Dash_tooltip/actions/workflows/Pytest.yml)
 
 # Dash Tooltip
 
