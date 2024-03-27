@@ -28,6 +28,7 @@ By ensuring that the `_display_click_data` function behaves as expected in these
 scenarios, we maintain the tooltip feature's integrity, ensuring that users get
 consistent and accurate tooltip displays during interactions.
 """
+
 from typing import Dict, List, Union
 
 import dash

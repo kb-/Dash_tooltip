@@ -4,6 +4,7 @@ Call the tooltip function for an app with multiple graphs and verify that toolti
 functional for all graphs.
 This ensures that the function can handle multiple graphs correctly.
 """
+
 import time
 from typing import Any
 

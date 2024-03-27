@@ -1,7 +1,7 @@
 import http.client
-import threading
 import os
 import sys
+import threading
 import time
 
 import dash
@@ -9,7 +9,7 @@ import numpy as np
 from dash import dcc, html
 from PyQt6.QtCore import QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QVBoxLayout
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
 
 from dash_tooltip import tooltip
 
@@ -74,6 +74,7 @@ def create_dash_app():
 
     x = np.linspace(0, 10, 100)
     y = np.sin(x)
+    y1 = np.cos(x)
 
     app.layout = html.Div(
         [
@@ -87,6 +88,13 @@ def create_dash_app():
                             "type": "scatter",
                             "mode": "lines",
                             "name": "sin(x)",
+                        },
+                        {
+                            "x": x,
+                            "y": y1,
+                            "type": "scatter",
+                            "mode": "lines",
+                            "name": "cos(x)",
                         },
                     ],
                     "layout": {
@@ -110,7 +118,7 @@ def create_dash_app():
             "overflow": "hidden",
         },  # Full viewport width and height
     )
-    template = "x: %{x:.2f},<br>y: %{y:.3f}"
+    template = "%{label},<br>x: %{x:.2f},<br>y: %{y:.3f}"
     tooltip(app, template=template)
     return app
 

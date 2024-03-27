@@ -4,6 +4,7 @@ Call the tooltip function with minimal arguments and check if it returns without
 This tests the basic functionality and setup of tooltips.
 Run multiple times because of variability in click results
 """
+
 import time
 from typing import Any, Dict
 

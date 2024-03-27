@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -236,7 +236,7 @@ tooltip(app3)
 if __name__ == "__main__":
     app3.run(debug=True, port=8083)
 
-# %% jupyter={"source_hidden": true}
+# %%
 # ---- Test 4: Multiple Traces with Tooltips ----
 app4 = Dash(__name__)
 
@@ -310,7 +310,7 @@ custom_style = {
     "arrowsize": 2.5,
     # ... any other customization
 }
-template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
+template = "%{label},<br>x: %{x},<br>y: %{y},<br>%{customdata[0]}"
 tooltip(app4, style=custom_style, template=template)
 
 if __name__ == "__main__":
@@ -679,6 +679,17 @@ warnings.filterwarnings(
     "ignore", category=FutureWarning, message=".*is_datetime64tz_dtype is deprecated.*"
 )
 
+# Suppress the specific warning about H
+# in plotly_resampler
+warnings.filterwarnings(
+    "ignore", category=FutureWarning, message=".*'H' is deprecated.*"
+)
+
+# Suppress the specific warning about m
+# in plotly_resampler
+warnings.filterwarnings(
+    "ignore", category=FutureWarning, message=".*'m' is deprecated.*"
+)
 
 # Generate random time series data
 date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="h")
@@ -944,7 +955,13 @@ app13.layout = dbc.Container(
                             id="example-graph",
                             figure={
                                 "data": [
-                                    {"x": x1, "y": y1, "type": "line", "name": "sin(x)"}
+                                    {
+                                        "x": x1,
+                                        "y": y1,
+                                        "type": "line",
+                                        "mode": "lines",
+                                        "name": "sin(x)",
+                                    }
                                 ],
                                 "layout": {
                                     "title": "Direct Data Injection into "

@@ -15,6 +15,7 @@ Steps:
 4. Delete a specific tooltip.
 5. Count the number of tooltips again and validate that it has decreased by one.
 """
+
 import time
 from typing import Any, Dict
 

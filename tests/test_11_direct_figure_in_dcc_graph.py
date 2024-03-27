@@ -23,7 +23,7 @@ app13 = Dash(__name__)
 
 np.random.seed(20)
 y1 = np.random.normal(0, 10, 50)
-x1 = np.arange(0, 50)
+x1 = np.arange(0, 30)
 
 app13.layout = dbc.Container(
     [

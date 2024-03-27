@@ -4,6 +4,7 @@ Call the tooltip function with a custom style configuration and check if the too
 reflect the desired properties (e.g., arrow color, font size).
 This ensures that the function respects custom configurations.
 """
+
 from typing import Any, Dict, Union
 
 import dash

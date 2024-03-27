@@ -4,6 +4,7 @@ Call the tooltip function with a custom template and check if the tooltips are f
 according to the template.
 This ensures that the function respects custom formatting.
 """
+
 import time
 from typing import Any, Dict
 
@@ -39,6 +40,7 @@ y2 = np.random.normal(0, 10, 50)
 x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
 fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
+fig2.update_traces(name="LABEL")
 fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app.layout = dbc.Container(
@@ -78,9 +80,7 @@ app.layout = dbc.Container(
 )
 
 # Tooltip template from dash_tooltip_demo.py
-tooltip_template = (
-    "x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
-)
+tooltip_template = "%{label},<br>x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
 tooltip(app, template=tooltip_template, debug=True)
 
 
@@ -97,9 +97,11 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
     x_value = x2[idx]
     y_value = y2[idx]
     expected_custom_label2 = y_value * 2
+    expected_label = "LABEL"
 
     expected_annotation_text = (
         tooltip_template.replace("<br>", "")
+        .replace("%{label}", expected_label)
         .replace("%{x}", str(x_value))
         .replace("%{y:.2f}", f"{y_value:.2f}")
         .replace("%{customdata[0]}", expected_custom_label)
@@ -143,3 +145,6 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
     # Check if the actual annotation text matches the expected text based on the
     # customdata
     assert actual_annotation_text == expected_annotation_text
+
+    # Check if the actual annotation text contains the expected label
+    assert expected_label in actual_annotation_text
