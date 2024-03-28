@@ -80,7 +80,7 @@ app.layout = dbc.Container(
 )
 
 # Tooltip template from dash_tooltip_demo.py
-tooltip_template = "%{label},<br>x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
+tooltip_template = "%{name},<br>x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
 tooltip(app, template=tooltip_template, debug=True)
 
 
@@ -101,7 +101,7 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
 
     expected_annotation_text = (
         tooltip_template.replace("<br>", "")
-        .replace("%{label}", expected_label)
+        .replace("%{name}", expected_label)
         .replace("%{x}", str(x_value))
         .replace("%{y:.2f}", f"{y_value:.2f}")
         .replace("%{customdata[0]}", expected_custom_label)
