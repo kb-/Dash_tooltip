@@ -88,6 +88,7 @@ def create_dash_app():
                             "type": "scatter",
                             "mode": "lines",
                             "name": "sin(x)",
+                            "meta": ["some meta info"],
                         },
                         {
                             "x": x,
@@ -118,7 +119,7 @@ def create_dash_app():
             "overflow": "hidden",
         },  # Full viewport width and height
     )
-    template = "%{label},<br>x: %{x:.2f},<br>y: %{y:.3f}"
+    template = "%{name}<br>%{meta[0]}<br>x: %{x:.2f}<br>y: %{y:.3f}"
     tooltip(app, template=template)
     return app
 

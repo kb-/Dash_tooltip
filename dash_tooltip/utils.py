@@ -203,8 +203,11 @@ def _display_click_data(
             else:
                 yaxis = "y"
 
-            # Extract name from the curve data
-            point["name"] = figure["data"][point["curveNumber"]]["name"]
+            if "meta" in figure["data"][point["curveNumber"]]:
+                point["meta"] = figure["data"][point["curveNumber"]]["meta"]
+
+            if "name" in figure["data"][point["curveNumber"]]:
+                point["name"] = figure["data"][point["curveNumber"]]["name"]
 
             # If the x-axis is logarithmic, adjust `x_val`
             # This is a fix for longstanding Plotly bug
