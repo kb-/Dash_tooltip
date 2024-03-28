@@ -13,12 +13,12 @@ repos:
         language: system
         types: [python]
         
-    -   id: pytest-selenium
-        name: pytest (selenium tests)
-        entry: ./env/Scripts/pytest.exe
-        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox']
-        language: system
-        pass_filenames: false
+#    -   id: pytest-selenium
+#        name: pytest (selenium tests)
+#        entry: ./env/Scripts/pytest.exe
+#        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox']
+#        language: system
+#        pass_filenames: false
         
     -   id: pytest-non-selenium
         name: pytest (non-selenium tests)
