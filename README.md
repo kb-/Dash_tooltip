@@ -69,16 +69,27 @@ from dash.dependencies import Input, Output
 from dash_tooltip import tooltip
 
 # Generate random time series data
-date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
-ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
-ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
-df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='H')
+ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng, name='Time Series 1')
+ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng, name='Time Series 2')
+df = pd.DataFrame({ts1.name: ts1, ts2.name: ts2})
 
-template = "%{name}<br>x: %{x}<br>y: %{y:.2f}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+# Define the hover and tooltip template
+# name is only compatible with tooltip
+template = "name:%{name}<br>META0: %{meta[0]}<br>META1: %{meta[1]}<br>x: %{x}<br>y: %{y:.2f}<br>pointNumber: %{pointNumber}<br>customdata0: %{customdata[0]}<br>customdata1: %{customdata[1]}"
+
+# Create a line plot
 fig10 = px.line(df, x=df.index, y=df.columns, title="Time Series Plot")
 
+# Apply metadata and custom data to each trace
 for i, trace in enumerate(fig10.data):
-    trace.customdata = [[f"Series {i+1}", f'Point {j+1}'] for j in range(len(df))]
+    # Applying different metadata to each trace
+    trace.meta = [f"META{i}0", f"META{i}1"]
+    
+    # Setting customdata for each point in the trace, for use in the hover template
+    trace.customdata = np.array([[f"Series {i+1}", f'Point {j+1}'] for j in range(len(df))])
+    
+    # Setting the hover template
     trace.hovertemplate = template
 
 app10 = Dash(__name__)
@@ -98,13 +109,14 @@ app10.layout = html.Div([
 ])
 
 tooltip(app10, graph_ids=["graph-id"], template=template, debug=True)
+app10.run(port=8082)
 ```
 
 ## Tooltip Templates with Formatting
 
 Tooltips can be formatted using templates similar to Plotly's hovertemplates. The tooltip template allows custom formatting and the inclusion of text and values.
 
-For example, you can use a template like `"{name}<br>x: %{x:.2f}<br>y: %{y:.2f}"` to display the track name, plus x and y values with two decimal places.
+For example, you can use a template like `"%{name}<br>%{meta[0]}<br>x: %{x:.2f}<br>y: %{y:.2f}"` to display the track `name`, `meta[0]` from a list of text data, plus `x` and `y` values with two decimal places. Note that `name` key is not available in the Plotly hover template, but is displayed by default.
 
 Refer to [Plotly’s documentation on hover text and formatting](https://plotly.com/python/hover-text-and-formatting/) for more details on how to construct and customize your tooltip templates.
 
