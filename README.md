@@ -74,7 +74,7 @@ ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 df = pd.DataFrame({'Time Series 1': ts1, 'Time Series 2': ts2})
 
-template = "%{label}<br>x: %{x}<br>y: %{y:.2f}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
+template = "%{name}<br>x: %{x}<br>y: %{y:.2f}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 fig10 = px.line(df, x=df.index, y=df.columns, title="Time Series Plot")
 
 for i, trace in enumerate(fig10.data):
@@ -104,7 +104,7 @@ tooltip(app10, graph_ids=["graph-id"], template=template, debug=True)
 
 Tooltips can be formatted using templates similar to Plotly's hovertemplates. The tooltip template allows custom formatting and the inclusion of text and values.
 
-For example, you can use a template like `"{label}<br>x: %{x:.2f}<br>y: %{y:.2f}"` to display the track label, plus x and y values with two decimal places.
+For example, you can use a template like `"{name}<br>x: %{x:.2f}<br>y: %{y:.2f}"` to display the track name, plus x and y values with two decimal places.
 
 Refer to [Plotly’s documentation on hover text and formatting](https://plotly.com/python/hover-text-and-formatting/) for more details on how to construct and customize your tooltip templates.
 
