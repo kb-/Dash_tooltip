@@ -20,6 +20,8 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
+import json
+
 # %% jupyter={"source_hidden": true}
 import warnings
 
@@ -109,6 +111,7 @@ y2 = np.random.normal(0, 10, 50)
 x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
 fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
+fig2.update_traces(name="LABEL", meta=["META0", "META1"])
 fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app2 = Dash(__name__)
@@ -161,17 +164,125 @@ custom_style = {
     # ... any other customization
 }
 
+# Tooltip template from dash_tooltip_demo.py
+tooltip_template = (
+    "%{name},<br>%{meta[1]},<br>x: %{x},<br>y: %{y:.2f},<br>%{"
+    "customdata[0]},<br>2y=%{customdata[1]:.3f}"
+)
+
 tooltip(
     app2,
     style=custom_style,
-    template="x: %{x},"
-    "<br>y: %{y:.2f},"
-    "<br>%{customdata[0]},"
-    "<br>2y=%{customdata[1]:.3f}",
+    template=tooltip_template,
 )
 
 if __name__ == "__main__":
     app2.run(debug=True, port=8082)
+
+# %%
+
+DEFAULT_ANNOTATION_CONFIG = {
+    # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    "align": "left",
+    "arrowcolor": "black",  # color of the annotation arrow
+    "arrowhead": 3,  # type of arrowhead, for Plotly (an integer from 0 to 8)
+    "arrowsize": 1.8,  # relative size of the arrowhead to the arrow stem, for Plotly
+    "arrowwidth": 1,  # width of the annotation arrow in pixels, for Plotly
+    "font": {
+        "color": "black",  # color of the annotation text
+        "family": "Arial",  # font family of the annotation text, for Plotly
+        "size": 12,  # size of the annotation text in points, for Plotly
+    },
+    "showarrow": True,
+    # horizontal alignment of the text (can be 'left', 'center', or 'right')
+    "xanchor": "left",
+}
+
+# %%
+annotation_config_json = json.dumps(DEFAULT_ANNOTATION_CONFIG)
+
+# %%
+# Prepare your JavaScript string with Python f-string interpolation
+# click_handler_js = f"""
+# document.getElementById('{{plot_id}}').on('plotly_click', function(data){{
+#     var pts = data.points[0];
+#     console.log("clicked point", pts)
+#     var text = 'Value: (' + pts.x + ', ' + pts.y + ')';
+#     text += '<br>Custom Data: ' + pts.customdata[0];
+#     text += '<br>Name: ' + pts.data.name;
+#     text += '<br>Meta: ' + pts.data.meta[1];
+#     text += '<br>Point Number: ' + pts.pointNumber;
+#     text += '<br>Curve Number: ' + pts.curveNumber;
+#     var newAnnotation = {{
+#         x: pts.x,
+#         y: pts.y,
+#         xref: 'x',
+#         yref: 'y',
+#         text: text,
+#         showarrow: true,
+#         arrowhead: 7,
+#         ax: 0,
+#         ay: -40,
+#         ...{annotation_config_json}
+#     }};
+#     var layoutUpdates = {{
+#         annotations: [newAnnotation],
+#         dragmode: 'drag'
+#     }};
+#     Plotly.relayout('{{plot_id}}', layoutUpdates);
+# }});
+# """
+
+click_handler_js = f"""
+document.getElementById('{{plot_id}}').on('plotly_click', function(data){{
+    var pts = data.points[0];
+    var graphDiv = document.getElementById('{{plot_id}}');
+    var existingAnnotations = (graphDiv.layout.annotations || []).slice(); // Clone the array to avoid direct mutation
+    var text = 'Value: (' + pts.x + ', ' + pts.y + ')' +
+               '<br>Custom Data: ' + (pts.customdata ? pts.customdata[0] : 'N/A') +
+               '<br>Name: ' + (pts.data ? pts.data.name : 'N/A') +
+               '<br>Meta: ' + (pts.data && pts.data.meta ? pts.data.meta[1] : 'N/A') +
+               '<br>Point Number: ' + pts.pointNumber +
+               '<br>Curve Number: ' + pts.curveNumber;
+    var newAnnotation = {{
+        x: pts.x,
+        y: pts.y,
+        xref: 'x',
+        yref: 'y',
+        text: text,
+        showarrow: true,
+        arrowhead: 7,
+        ax: 0,
+        ay: -40,
+        ...{annotation_config_json}
+    }};
+    existingAnnotations.push(newAnnotation);  // Add new annotation to the array
+    Plotly.relayout(graphDiv, {{ annotations: existingAnnotations }});  // Update the plot with the new annotations array
+}});
+"""
+
+
+html_string = fig2.to_html(
+    auto_play=True,
+    include_plotlyjs="cdn",
+    include_mathjax="cdn",
+    post_script=click_handler_js,
+    full_html=True,
+    animation_opts=None,
+    default_width="100%",
+    default_height="100%",
+    validate=True,
+    div_id=None,
+    config={
+        "editable": True,
+        # 'dragmode': 'drag'  # Setting dragmode during plot initialization
+    },
+)
+
+# Saving the HTML to a file (optional)
+with open("plotly_graph.html", "w") as f:
+    f.write(html_string)
+
 
 # %% jupyter={"source_hidden": true}
 
@@ -236,7 +347,7 @@ tooltip(app3)
 if __name__ == "__main__":
     app3.run(debug=True, port=8083)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 4: Multiple Traces with Tooltips ----
 app4 = Dash(__name__)
 
