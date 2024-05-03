@@ -163,6 +163,10 @@ def _display_click_data(
 
     xaxis, yaxis = "x", "y"  # Default values
 
+    if figure is None:
+        # Initialize the figure
+        figure = go.Figure()
+
     # Check if figure is a dictionary
     if isinstance(figure, dict):
         # Extract data and layout from the figure dictionary

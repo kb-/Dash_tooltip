@@ -31,6 +31,8 @@ logger.debug("dash_tooltip log active")
 
 DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
 
+registered_callbacks = set()
+
 
 def tooltip(
     app: dash.Dash,
@@ -76,6 +78,11 @@ def tooltip(
             )
 
     for graph_id in graph_ids:
+        callback_identifier = (graph_id, "figure")
+        if callback_identifier in registered_callbacks:
+            continue  # Skip reattaching if already registered
+
+        registered_callbacks.add(callback_identifier)
         if graph_id not in app.layout:
             raise ValueError(f"Invalid graph ID provided: {graph_id}")
         add_annotation_store(app.layout, graph_id)
