@@ -20,8 +20,6 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-import json
-
 # %% jupyter={"source_hidden": true}
 import warnings
 
@@ -29,14 +27,12 @@ import dash
 import dash_bootstrap_components as dbc
 
 # ---- Imports ----
-import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import Dash, dcc, html
-from IPython.display import display
+from dash import Dash, Input, Output, dcc, html
 from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
 from trace_updater import TraceUpdater  # Assuming you've imported this module
@@ -111,7 +107,6 @@ y2 = np.random.normal(0, 10, 50)
 x2 = np.arange(0, 50)
 custom_labels = [f"Label {i}" for i in range(50)]
 fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
-fig2.update_traces(name="LABEL", meta=["META0", "META1"])
 fig2.update_layout(title_text="Editable Title", title_x=0.5)
 
 app2 = Dash(__name__)
@@ -164,125 +159,17 @@ custom_style = {
     # ... any other customization
 }
 
-# Tooltip template from dash_tooltip_demo.py
-tooltip_template = (
-    "%{name},<br>%{meta[1]},<br>x: %{x},<br>y: %{y:.2f},<br>%{"
-    "customdata[0]},<br>2y=%{customdata[1]:.3f}"
-)
-
 tooltip(
     app2,
     style=custom_style,
-    template=tooltip_template,
+    template="x: %{x},"
+    "<br>y: %{y:.2f},"
+    "<br>%{customdata[0]},"
+    "<br>2y=%{customdata[1]:.3f}",
 )
 
 if __name__ == "__main__":
     app2.run(debug=True, port=8082)
-
-# %%
-
-DEFAULT_ANNOTATION_CONFIG = {
-    # horizontal alignment of the text (can be 'left', 'center', or 'right')
-    "align": "left",
-    "arrowcolor": "black",  # color of the annotation arrow
-    "arrowhead": 3,  # type of arrowhead, for Plotly (an integer from 0 to 8)
-    "arrowsize": 1.8,  # relative size of the arrowhead to the arrow stem, for Plotly
-    "arrowwidth": 1,  # width of the annotation arrow in pixels, for Plotly
-    "font": {
-        "color": "black",  # color of the annotation text
-        "family": "Arial",  # font family of the annotation text, for Plotly
-        "size": 12,  # size of the annotation text in points, for Plotly
-    },
-    "showarrow": True,
-    # horizontal alignment of the text (can be 'left', 'center', or 'right')
-    "xanchor": "left",
-}
-
-# %%
-annotation_config_json = json.dumps(DEFAULT_ANNOTATION_CONFIG)
-
-# %%
-# Prepare your JavaScript string with Python f-string interpolation
-# click_handler_js = f"""
-# document.getElementById('{{plot_id}}').on('plotly_click', function(data){{
-#     var pts = data.points[0];
-#     console.log("clicked point", pts)
-#     var text = 'Value: (' + pts.x + ', ' + pts.y + ')';
-#     text += '<br>Custom Data: ' + pts.customdata[0];
-#     text += '<br>Name: ' + pts.data.name;
-#     text += '<br>Meta: ' + pts.data.meta[1];
-#     text += '<br>Point Number: ' + pts.pointNumber;
-#     text += '<br>Curve Number: ' + pts.curveNumber;
-#     var newAnnotation = {{
-#         x: pts.x,
-#         y: pts.y,
-#         xref: 'x',
-#         yref: 'y',
-#         text: text,
-#         showarrow: true,
-#         arrowhead: 7,
-#         ax: 0,
-#         ay: -40,
-#         ...{annotation_config_json}
-#     }};
-#     var layoutUpdates = {{
-#         annotations: [newAnnotation],
-#         dragmode: 'drag'
-#     }};
-#     Plotly.relayout('{{plot_id}}', layoutUpdates);
-# }});
-# """
-
-click_handler_js = f"""
-document.getElementById('{{plot_id}}').on('plotly_click', function(data){{
-    var pts = data.points[0];
-    var graphDiv = document.getElementById('{{plot_id}}');
-    var existingAnnotations = (graphDiv.layout.annotations || []).slice(); // Clone the array to avoid direct mutation
-    var text = 'Value: (' + pts.x + ', ' + pts.y + ')' +
-               '<br>Custom Data: ' + (pts.customdata ? pts.customdata[0] : 'N/A') +
-               '<br>Name: ' + (pts.data ? pts.data.name : 'N/A') +
-               '<br>Meta: ' + (pts.data && pts.data.meta ? pts.data.meta[1] : 'N/A') +
-               '<br>Point Number: ' + pts.pointNumber +
-               '<br>Curve Number: ' + pts.curveNumber;
-    var newAnnotation = {{
-        x: pts.x,
-        y: pts.y,
-        xref: 'x',
-        yref: 'y',
-        text: text,
-        showarrow: true,
-        arrowhead: 7,
-        ax: 0,
-        ay: -40,
-        ...{annotation_config_json}
-    }};
-    existingAnnotations.push(newAnnotation);  // Add new annotation to the array
-    Plotly.relayout(graphDiv, {{ annotations: existingAnnotations }});  // Update the plot with the new annotations array
-}});
-"""
-
-
-html_string = fig2.to_html(
-    auto_play=True,
-    include_plotlyjs="cdn",
-    include_mathjax="cdn",
-    post_script=click_handler_js,
-    full_html=True,
-    animation_opts=None,
-    default_width="100%",
-    default_height="100%",
-    validate=True,
-    div_id=None,
-    config={
-        "editable": True,
-        # 'dragmode': 'drag'  # Setting dragmode during plot initialization
-    },
-)
-
-# Saving the HTML to a file (optional)
-with open("plotly_graph.html", "w") as f:
-    f.write(html_string)
-
 
 # %% jupyter={"source_hidden": true}
 
@@ -429,6 +316,7 @@ if __name__ == "__main__":
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 5: Multiple Traces with Toggable Tooltip function ----
+# ---- Test 5: Multiple Traces with Toggable Tooltip function ----
 app5 = Dash(__name__)
 
 # Random data for three traces
@@ -476,7 +364,7 @@ app5.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="multi-trace-graph",
+                            id="multi-trace-graph5",
                             figure=fig5,
                             config={
                                 "editable": True,
@@ -490,6 +378,19 @@ app5.layout = dbc.Container(
                 )
             ]
         ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Switch(
+                        id="tooltip-switch",
+                        label="Enable Tooltip",
+                        value=False,
+                        className="mt-3",
+                    ),
+                )
+            ]
+        ),
+        html.Div(id="dummy-output-for-callback", style={"display": "none"}),
     ]
 )
 
@@ -501,38 +402,27 @@ custom_style = {
     # ... any other customization
 }
 template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
-tooltip(app5, style=custom_style, template=template)
+mytooltip = tooltip(app5, style=custom_style, template=template)
 
-app5.tooltip_active = False
+mytooltip.tooltip_active = False
+
+
+# Create a callback to toggle the tooltip
+@app5.callback(
+    Output("dummy-output-for-callback", "children"),  # We don't need a real output
+    Input("tooltip-switch", "value"),
+)
+def toggle_tooltip(value: bool):
+    mytooltip.tooltip_active = value
+    return ""
+
 
 if __name__ == "__main__":
-    app5.run(debug=True, port=8085)
+    app5.run(debug=False, port=8085)
 
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 6: Two Traces with Multiple Custom Data ----
-def toggle_tooltip(change):
-    app5.tooltip_active = change["new"]
-
-
-# Create a toggle button
-toggle = widgets.ToggleButton(
-    value=app5.tooltip_active,
-    description="Toggle Tooltip",
-    disabled=False,
-    button_style="",  # 'success', 'info', 'warning', 'danger' or ''
-    tooltip="Toggle Tooltip Active Status",
-    icon="check",  # (FontAwesome names without the `fa-` prefix)
-)
-
-# Display the button
-display(toggle)
-
-# Link the button action to the function
-toggle.observe(toggle_tooltip, "value")
-
-# %% jupyter={"source_hidden": true}
-# Two Traces with Multiple Custom Data
 
 app6 = Dash(__name__)
 
@@ -572,7 +462,7 @@ app6.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="double-customdata-graph",
+                            id="double-customdata-graph6",
                             figure=fig6,
                             config={
                                 "editable": True,
@@ -869,7 +759,7 @@ tooltip(app10, graph_ids=["graph-id"], template=template10, debug=True)
 fig10.register_update_graph_callback(app10, "graph-id", "trace-updater")
 
 # Show the Dash app
-app10.run(debug=True, port=8090, jupyter_height=500)
+app10.run(debug=False, port=8090, jupyter_height=500)
 
 
 # %% jupyter={"source_hidden": true}
@@ -946,7 +836,7 @@ for i, trace in enumerate(fig11.data):
 
 app11, fig11 = interactive_plot(fig11, graphid_11, template)
 if __name__ == "__main__":
-    app11.run(debug=True, port=8091)
+    app11.run(debug=False, port=8091)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 12: 2x2 Subplot with 2 traces on each subplot (Organized like Test 10) ----
@@ -1041,7 +931,7 @@ fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app12.run(debug=True, port=8092)
+app12.run(debug=False, port=8092)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 13: Direct Data Injection into dcc.Graph with Draggable Annotations ----
@@ -1063,13 +953,13 @@ app13.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="example-graph",
+                            id="example-graph13",
                             figure={
                                 "data": [
                                     {
                                         "x": x1,
                                         "y": y1,
-                                        "type": "line",
+                                        "type": "scatter",
                                         "mode": "lines",
                                         "name": "sin(x)",
                                     }
@@ -1098,7 +988,7 @@ app13.layout = dbc.Container(
 tooltip(app13, debug=True)
 
 if __name__ == "__main__":
-    app13.run(debug=True, port=8093)
+    app13.run(debug=False, port=8093)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 14: log axis ----
@@ -1210,7 +1100,7 @@ fig14.register_update_graph_callback(app14, "graph-id14", "trace-updater14")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app14.run(debug=True, port=8094, jupyter_height=800)
+app14.run(debug=False, port=8094, jupyter_height=800)
 
 
 # %% jupyter={"source_hidden": true}
@@ -1329,7 +1219,7 @@ fig15.register_update_graph_callback(app15, "graph-id15", "trace-updater15")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app15.run(debug=True, port=8095, jupyter_height=800)
+app15.run(debug=False, port=8095, jupyter_height=800)
 
 
 # %% jupyter={"source_hidden": true}

@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Union
 import plotly.graph_objs as go
 from dash import Input, Output, State, dash
 
-from .config import DEFAULT_ANNOTATION_CONFIG
+from .config import DEFAULT_ANNOTATION_CONFIG, DEFAULT_TEMPLATE
+from .custom_figure import CustomFigure
 from .utils import _display_click_data, _find_all_graph_ids, add_annotation_store
 
 # Logger setup
@@ -29,7 +30,136 @@ logger.propagate = False
 # Now, you can log messages
 logger.debug("dash_tooltip log active")
 
-DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
+registered_callbacks = set()
+
+
+class TooltipManager:
+    def __init__(
+        self,
+        app: dash.Dash,
+        style: Dict[Any, Any],
+        template: str,
+        graph_ids: List[str],
+        apply_log_fix: bool,
+        debug: bool,
+    ):
+        self.figures = {graph_id: CustomFigure() for graph_id in graph_ids}
+        self.templates = {graph_id: template for graph_id in graph_ids}
+        self.style = style
+        self.apply_log_fix = apply_log_fix
+        self.debug = debug
+        self.app = app
+        self.graph_ids = graph_ids
+        self.tooltip_active = True  # Default to active
+        self.initialize_callbacks()
+
+    def update_template(self, graph_id: str, template: str):
+        if graph_id in self.figures:
+            self.templates[graph_id] = template
+            self.figures[graph_id].update_template(template)
+
+    def initialize_callbacks(self):
+        for graph_id in self.graph_ids:
+            callback_identifier = (graph_id, "figure")
+            if callback_identifier in registered_callbacks:
+                # Skip reattaching if already registered
+                continue
+            registered_callbacks.add(callback_identifier)
+
+            # Check for valid graph ID and add annotation store
+            if graph_id not in self.app.layout:
+                raise ValueError(f"Invalid graph ID provided: {graph_id}")
+            add_annotation_store(self.app.layout, graph_id)
+
+            @self.app.callback(
+                Output(component_id=graph_id, component_property="figure"),
+                Input(component_id=graph_id, component_property="clickData"),
+                State(component_id=graph_id, component_property="figure"),
+            )
+            def display_click_data(
+                clickData: Dict[str, Any],
+                figure: Union[CustomFigure, Dict[str, Any]],
+            ) -> CustomFigure:
+                """Display data on click event."""
+                if not self.tooltip_active:
+                    raise dash.PreventUpdate
+
+                if figure is None:
+                    figure = CustomFigure()
+
+                template = self.templates[graph_id]
+                if isinstance(figure, CustomFigure):
+                    return _display_click_data(clickData, figure, template, self.style)
+                # Check if figure is a dictionary
+                elif isinstance(figure, dict):
+                    # Extract data and layout from the figure dictionary
+                    raw_data = figure.get("data", [])
+                    layout = figure.get("layout", {})
+
+                    # Convert dictionary representations of traces into actual trace objects
+                    data = []
+                    for trace in raw_data:
+                        trace_type = trace.pop("type")
+                        trace_class = getattr(go, trace_type.capitalize())
+                        data.append(trace_class(**trace))
+
+                    # Construct the CustomFigure(go.Figure) using data and layout
+                    custom_figure = CustomFigure(data=data, layout=layout)
+                    return _display_click_data(
+                        clickData, custom_figure, template, self.style
+                    )
+                else:
+                    custom_figure = CustomFigure(figure)
+                    return _display_click_data(
+                        clickData, custom_figure, template, self.style
+                    )
+
+            @self.app.callback(
+                Output(graph_id, "figure", allow_duplicate=True),
+                Input(f"tooltip-annotations-to-remove-{graph_id}", "data"),
+                State(graph_id, "figure"),
+                prevent_initial_call=True,
+            )
+            def remove_empty_annotations(
+                indices_to_remove: List[int], current_figure: Dict[str, Any]
+            ) -> Union[Dict[str, Any], dash._callback.NoUpdate]:
+                """Remove annotations that have been deleted by the user."""
+                if indices_to_remove:
+                    annotations = current_figure["layout"].get("annotations", [])
+                    logger.debug(f"Original Annotations: {annotations}")
+                    updated_annotations = [
+                        anno
+                        for idx, anno in enumerate(annotations)
+                        if idx not in indices_to_remove
+                    ]
+                    logger.debug(f"Indices to Remove: {indices_to_remove}")
+                    logger.debug(f"Updated Annotations: {updated_annotations}")
+                    current_figure["layout"]["annotations"] = updated_annotations
+                    return current_figure
+                return dash.no_update
+
+            # Client-side callback to identify annotations to remove
+            dbg_str = "console.log(relayoutData);" if self.debug else ""
+            self.app.clientside_callback(
+                Template(
+                    """
+                    function(relayoutData) {
+                        $dbg_str
+                        var annotationPattern = /annotations\\[(\\d+)\\].text/;
+                        var indicesToRemove = [];
+                        for (var key in relayoutData) {
+                            var match = key.match(annotationPattern);
+                            if (match && relayoutData[key] === "") {
+                                indicesToRemove.push(parseInt(match[1]));
+                            }
+                        }
+                        return indicesToRemove;
+                    }
+                    """
+                ).substitute(dbg_str=dbg_str),
+                Output(f"tooltip-annotations-to-remove-{graph_id}", "data"),
+                Input(graph_id, "relayoutData"),
+            )
 
 
 def tooltip(
@@ -39,34 +169,23 @@ def tooltip(
     graph_ids: Optional[List[str]] = None,
     apply_log_fix: bool = True,
     debug: bool = False,
-) -> None:
+) -> TooltipManager:
     """
     Add tooltip functionality to Dash graph components.
 
     Args:
-    - app (dash.Dash): The Dash app instance.
-    - style (dict): Configuration for the tooltip appearance. Users can provide any
-                    valid Plotly annotation style options.
-                    Default values are set in DEFAULT_ANNOTATION_CONFIG.
-    - template (str): A string defining how the tooltip should be displayed using
-                    Plotly's template syntax. Users can modify this template to
-                    customize the tooltip content.
-    - graph_ids (list, optional): List of graph component IDs for the tooltip
-                    functionality. If None, function will try to find graph IDs
-                    automatically.
-    - apply_log_fix (bool): If True, applies a logarithmic transformation fix for
-                    log axes due to a long-standing Plotly bug.
-                    More details can be found at:
-                    https://github.com/plotly/plotly.py/issues/2580
-                    Default is True.
-    - debug (bool): If True, debug information will be written to a log file
-                    (tooltip.log).
+        app (dash.Dash): The Dash app instance.
+        style (dict): Configuration for the tooltip appearance.
+                      Users can provide any valid Plotly annotation style options.
+        template (str): The default annotation template.
+                        Default is a basic string template.
+        graph_ids (list, optional): List of graph IDs to apply tooltips to.
+                                    If not provided, will try to auto-detect from the layout.
+        apply_log_fix (bool): If True, applies a fix for logging issues.
+        debug (bool): If True, enables debugging mode.
 
-    Example:
-    tooltip(app,
-            style={'text_color': 'red'},
-            template="x: %{x},<br>y: %{y}<br>ID: %{pointNumber}",
-            graph_ids=['graph-1'])
+    Returns:
+        TooltipManager: An instance of TooltipManager class.
     """
     if graph_ids is None:
         graph_ids = _find_all_graph_ids(app.layout)
@@ -74,79 +193,7 @@ def tooltip(
             raise ValueError(
                 "No graphs found in the app layout. Please provide a graph ID."
             )
-
-    for graph_id in graph_ids:
-        if graph_id not in app.layout:
-            raise ValueError(f"Invalid graph ID provided: {graph_id}")
-        add_annotation_store(app.layout, graph_id)
-
-        @app.callback(  # type: ignore
-            Output(component_id=graph_id, component_property="figure"),
-            Input(component_id=graph_id, component_property="clickData"),
-            State(component_id=graph_id, component_property="figure"),
-        )
-        def display_click_data(
-            clickData: Dict[str, Any], figure: go.Figure
-        ) -> go.Figure:
-            return _display_click_data(
-                clickData, figure, app, template, style, apply_log_fix, debug
-            )
-
-        dbg_str = "console.log(relayoutData);"
-
-        app.clientside_callback(
-            Template(
-                r"""
-                function(relayoutData) {
-                    $dbg_str
-                    var annotationPattern = /annotations\[(\d+)\].text/;
-                    var indicesToRemove = [];
-                    for (var key in relayoutData) {
-                        var match = key.match(annotationPattern);
-                        if (match && relayoutData[key] === "") {
-                            indicesToRemove.push(parseInt(match[1]));
-                        }
-                    }
-                    return indicesToRemove;
-                }
-            """
-            ).substitute(dbg_str=dbg_str),
-            Output(f"tooltip-annotations-to-remove-{graph_id}", "data"),
-            Input(graph_id, "relayoutData"),
-        )
-
-        @app.callback(  # type: ignore
-            Output(graph_id, "figure", allow_duplicate=True),
-            Input(f"tooltip-annotations-to-remove-{graph_id}", "data"),
-            State(graph_id, "figure"),
-            prevent_initial_call=True,
-        )
-        def remove_empty_annotations(
-            indices_to_remove: List[int], current_figure: Dict[str, Any]
-        ) -> Union[Dict[str, Any], dash._callback.NoUpdate]:
-            """Remove annotations that have been deleted by the user."""
-            if indices_to_remove:
-                annotations = current_figure["layout"].get("annotations", [])
-
-                # Log the original annotations
-                logger.debug(f"Original Annotations: {annotations}")
-
-                updated_annotations = [
-                    anno
-                    for idx, anno in enumerate(annotations)
-                    if idx not in indices_to_remove
-                ]
-
-                # Log the indices being removed
-                logger.debug(f"Indices to Remove: {indices_to_remove}")
-
-                # Log the updated annotations
-                logger.debug(f"Updated Annotations: {updated_annotations}")
-
-                current_figure["layout"]["annotations"] = updated_annotations
-                return current_figure  # update figure with new annotations list
-            return dash.no_update  # prevent undesired update when no change is done
-            # (also prevents breaking)
+    return TooltipManager(app, style, template, graph_ids, apply_log_fix, debug)
 
 
 __all__ = [

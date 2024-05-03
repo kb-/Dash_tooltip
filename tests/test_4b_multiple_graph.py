@@ -80,8 +80,8 @@ editable_config = {
 
 app.layout = html.Div(
     [
-        dcc.Graph(id="graph-1", figure=fig1, config=editable_config),
-        dcc.Graph(id="graph-2", figure=fig2, config=editable_config),
+        dcc.Graph(id="graph-1b", figure=fig1, config=editable_config),
+        dcc.Graph(id="graph-2b", figure=fig2, config=editable_config),
         dcc.Graph(id="subplot-graph", figure=fig, config=editable_config),
     ]
 )
@@ -115,7 +115,7 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
         return success
 
     # For each graph, interact with a data point to trigger the tooltip
-    for graph_id in ["graph-1", "graph-2", "subplot-graph"]:
+    for graph_id in ["graph-1b", "graph-2b", "subplot-graph"]:
         if graph_id == "subplot-graph":
             # Handle subplots differently. Interact with each subplot.
             subplots = ["xy", "x2y2", "x3y3", "x4y4"]
