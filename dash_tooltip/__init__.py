@@ -5,7 +5,8 @@ from typing import Any, Dict, List, Optional, Union
 import plotly.graph_objs as go
 from dash import Input, Output, State, dash
 
-from .config import DEFAULT_ANNOTATION_CONFIG
+from .config import DEFAULT_ANNOTATION_CONFIG, DEFAULT_TEMPLATE
+from .custom_figure import CustomFigure
 from .utils import _display_click_data, _find_all_graph_ids, add_annotation_store
 
 # Logger setup
@@ -28,8 +29,6 @@ logger.propagate = False
 
 # Now, you can log messages
 logger.debug("dash_tooltip log active")
-
-DEFAULT_TEMPLATE = "x: %{x},<br>y: %{y}"
 
 registered_callbacks = set()
 
@@ -80,6 +79,7 @@ def tooltip(
     for graph_id in graph_ids:
         callback_identifier = (graph_id, "figure")
         if callback_identifier in registered_callbacks:
+            # update figure here
             continue  # Skip reattaching if already registered
 
         registered_callbacks.add(callback_identifier)
@@ -93,11 +93,20 @@ def tooltip(
             State(component_id=graph_id, component_property="figure"),
         )
         def display_click_data(
-            clickData: Dict[str, Any], figure: go.Figure
-        ) -> go.Figure:
-            return _display_click_data(
-                clickData, figure, app, template, style, apply_log_fix, debug
-            )
+            clickData: Dict[str, Any], figure: Union[CustomFigure, Dict[str, Any]]
+        ) -> CustomFigure:
+            if figure is None:
+                # Initialize the figure
+                figure = CustomFigure()
+            if isinstance(figure, CustomFigure):
+                return _display_click_data(
+                    clickData, figure, app, style, template, apply_log_fix, debug
+                )
+            else:
+                figure = CustomFigure(figure)
+                return _display_click_data(
+                    clickData, figure, app, style, template, apply_log_fix, debug
+                )
 
         dbg_str = "console.log(relayoutData);"
 

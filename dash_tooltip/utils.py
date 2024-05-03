@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from dash import dcc
 from dash.html import Div
 
-from dash_tooltip import DEFAULT_ANNOTATION_CONFIG
+from dash_tooltip import DEFAULT_ANNOTATION_CONFIG, CustomFigure
 
 logger = logging.getLogger("dash_tooltip")
 
@@ -152,20 +152,16 @@ def get_axis_type(fig: go.Figure, axis: str) -> str:
 
 def _display_click_data(
     clickData: Dict[str, Any],
-    figure: Union[go.Figure, Dict[str, Any]],  # Allow both go.Figure and dictionary
+    figure: Union[CustomFigure, Dict[str, Any]],  # Allow both go.Figure and dictionary
     app: dash.Dash,
-    template: str,
     config: Dict[Any, Any],
+    template: str,
     apply_log_fix: bool = True,
     debug: bool = False,
-) -> go.Figure:
+) -> CustomFigure:
     """Displays the tooltip on the graph when a data point is clicked."""
 
     xaxis, yaxis = "x", "y"  # Default values
-
-    if figure is None:
-        # Initialize the figure
-        figure = go.Figure()
 
     # Check if figure is a dictionary
     if isinstance(figure, dict):
@@ -181,9 +177,11 @@ def _display_click_data(
             data.append(trace_class(**trace))
 
         # Construct the go.Figure using data and layout
-        fig = go.Figure(data=data, layout=layout)
+        fig = CustomFigure(data=data, layout=layout)
+        fig.update_template(template)
     else:
         fig = figure
+        fig.update_template(template)
 
     merged_config = deep_merge_dicts(DEFAULT_ANNOTATION_CONFIG.copy(), config)
 
@@ -245,7 +243,7 @@ def _display_click_data(
                 ),
             )
 
-        placeholders = re.findall(r"%{(.*?)}", template)
+        placeholders = re.findall(r"%{(.*?)}", fig.layout._tooltip_template)
 
         template_data = {}
         for placeholder in placeholders:
@@ -269,12 +267,18 @@ def _display_click_data(
                 else:
                     template_data[placeholder] = str(value)
 
+        tooltip_template = fig.layout._tooltip_template
         for placeholder, value in template_data.items():
-            template = template.replace(f"%{{{placeholder}}}", value)
+            tooltip_template = tooltip_template.replace(f"%{{{placeholder}}}", value)
 
         try:
             fig.add_annotation(
-                x=x_val, y=y_val, xref=xaxis, yref=yaxis, text=template, **merged_config
+                x=x_val,
+                y=y_val,
+                xref=xaxis,
+                yref=yaxis,
+                text=tooltip_template,
+                **merged_config,
             )
         except ValueError as e:
             logger.error(
