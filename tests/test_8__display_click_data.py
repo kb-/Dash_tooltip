@@ -35,6 +35,7 @@ import dash
 import plotly.graph_objs as go
 
 from dash_tooltip import (  # Adjust the import based on where the function is defined.
+    CustomFigure,
     _display_click_data,
 )
 
@@ -54,7 +55,7 @@ DEFAULT_ANNOTATION_CONFIG = {
 
 
 def test_display_click_data_no_click() -> None:
-    fig_before = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    fig_before = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
 
     # Use an empty dictionary as the dummy clickData
     dummy_click_data: Dict[str, List[Dict[str, Union[int, float]]]] = {}
@@ -62,7 +63,6 @@ def test_display_click_data_no_click() -> None:
     fig_after = _display_click_data(
         dummy_click_data,
         fig_before,
-        SAMPLE_APP,
         DEFAULT_TEMPLATE,
         DEFAULT_ANNOTATION_CONFIG,
         True,
@@ -73,7 +73,7 @@ def test_display_click_data_no_click() -> None:
 
 
 def test_display_click_data_with_click() -> None:
-    fig_before = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    fig_before = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
     click_data = {
         "points": [
             {
@@ -87,7 +87,6 @@ def test_display_click_data_with_click() -> None:
     fig_after = _display_click_data(
         click_data,
         fig_before,
-        SAMPLE_APP,
         DEFAULT_TEMPLATE,
         DEFAULT_ANNOTATION_CONFIG,
         True,
@@ -104,7 +103,7 @@ def test_display_click_data_custom_style() -> None:
         "arrowhead": 4,
         "bordercolor": "blue",
     }
-    fig_before = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    fig_before = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
     click_data = {
         "points": [
             {
@@ -116,7 +115,7 @@ def test_display_click_data_custom_style() -> None:
         ]
     }
     fig_after = _display_click_data(
-        click_data, fig_before, SAMPLE_APP, DEFAULT_TEMPLATE, custom_style, True, False
+        click_data, fig_before, DEFAULT_TEMPLATE, custom_style, True, False
     )
     annotation = fig_after.layout.annotations[0]
     assert annotation.arrowcolor == "red", "Arrow color mismatch."

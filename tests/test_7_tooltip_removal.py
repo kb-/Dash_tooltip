@@ -33,7 +33,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from dash_tooltip import tooltip
 
 app = Dash(__name__)
-graph_id = "graph-input"
+graph_id = "graph-input7"
 
 
 @app.callback(Output("output-div", "children"), Input(graph_id, "clickData"))

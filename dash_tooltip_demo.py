@@ -27,14 +27,13 @@ import dash
 import dash_bootstrap_components as dbc
 
 # ---- Imports ----
-import ipywidgets as widgets
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import Dash, dcc, html
-from IPython.display import display
+from dash import Dash, Input, Output, dcc, html
+from dash.exceptions import PreventUpdate
 from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
 from trace_updater import TraceUpdater  # Assuming you've imported this module
@@ -236,7 +235,7 @@ tooltip(app3)
 if __name__ == "__main__":
     app3.run(debug=True, port=8083)
 
-# %%
+# %% jupyter={"source_hidden": true}
 # ---- Test 4: Multiple Traces with Tooltips ----
 app4 = Dash(__name__)
 
@@ -318,6 +317,7 @@ if __name__ == "__main__":
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 5: Multiple Traces with Toggable Tooltip function ----
+# ---- Test 5: Multiple Traces with Toggable Tooltip function ----
 app5 = Dash(__name__)
 
 # Random data for three traces
@@ -365,7 +365,7 @@ app5.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="multi-trace-graph",
+                            id="multi-trace-graph5",
                             figure=fig5,
                             config={
                                 "editable": True,
@@ -379,6 +379,19 @@ app5.layout = dbc.Container(
                 )
             ]
         ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    dbc.Switch(
+                        id="tooltip-switch",
+                        label="Enable Tooltip",
+                        value=False,
+                        className="mt-3",
+                    ),
+                )
+            ]
+        ),
+        html.Div(id="dummy-output-for-callback", style={"display": "none"}),
     ]
 )
 
@@ -390,38 +403,27 @@ custom_style = {
     # ... any other customization
 }
 template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
-tooltip(app5, style=custom_style, template=template)
+tooltip_instance5 = tooltip(app5, style=custom_style, template=template)
 
-app5.tooltip_active = False
+tooltip_instance5.tooltip_active = False
+
+
+# Create a callback to toggle the tooltip
+@app5.callback(
+    Output("dummy-output-for-callback", "children"),  # We don't need a real output
+    Input("tooltip-switch", "value"),
+)
+def toggle_tooltip(value: bool):
+    tooltip_instance5.tooltip_active = value
+    return ""
+
 
 if __name__ == "__main__":
-    app5.run(debug=True, port=8085)
+    app5.run(debug=False, port=8085)
 
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 6: Two Traces with Multiple Custom Data ----
-def toggle_tooltip(change):
-    app5.tooltip_active = change["new"]
-
-
-# Create a toggle button
-toggle = widgets.ToggleButton(
-    value=app5.tooltip_active,
-    description="Toggle Tooltip",
-    disabled=False,
-    button_style="",  # 'success', 'info', 'warning', 'danger' or ''
-    tooltip="Toggle Tooltip Active Status",
-    icon="check",  # (FontAwesome names without the `fa-` prefix)
-)
-
-# Display the button
-display(toggle)
-
-# Link the button action to the function
-toggle.observe(toggle_tooltip, "value")
-
-# %% jupyter={"source_hidden": true}
-# Two Traces with Multiple Custom Data
 
 app6 = Dash(__name__)
 
@@ -461,7 +463,7 @@ app6.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="double-customdata-graph",
+                            id="double-customdata-graph6",
                             figure=fig6,
                             config={
                                 "editable": True,
@@ -758,7 +760,7 @@ tooltip(app10, graph_ids=["graph-id"], template=template10, debug=True)
 fig10.register_update_graph_callback(app10, "graph-id", "trace-updater")
 
 # Show the Dash app
-app10.run(debug=True, port=8090, jupyter_height=500)
+app10.run(debug=False, port=8090, jupyter_height=500)
 
 
 # %% jupyter={"source_hidden": true}
@@ -835,7 +837,7 @@ for i, trace in enumerate(fig11.data):
 
 app11, fig11 = interactive_plot(fig11, graphid_11, template)
 if __name__ == "__main__":
-    app11.run(debug=True, port=8091)
+    app11.run(debug=False, port=8091)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 12: 2x2 Subplot with 2 traces on each subplot (Organized like Test 10) ----
@@ -930,7 +932,7 @@ fig12.register_update_graph_callback(app12, "graph-id12", "trace-updater12")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app12.run(debug=True, port=8092)
+app12.run(debug=False, port=8092)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 13: Direct Data Injection into dcc.Graph with Draggable Annotations ----
@@ -952,13 +954,13 @@ app13.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id="example-graph",
+                            id="example-graph13",
                             figure={
                                 "data": [
                                     {
                                         "x": x1,
                                         "y": y1,
-                                        "type": "line",
+                                        "type": "scatter",
                                         "mode": "lines",
                                         "name": "sin(x)",
                                     }
@@ -987,7 +989,7 @@ app13.layout = dbc.Container(
 tooltip(app13, debug=True)
 
 if __name__ == "__main__":
-    app13.run(debug=True, port=8093)
+    app13.run(debug=False, port=8093)
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 14: log axis ----
@@ -1099,7 +1101,7 @@ fig14.register_update_graph_callback(app14, "graph-id14", "trace-updater14")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app14.run(debug=True, port=8094, jupyter_height=800)
+app14.run(debug=False, port=8094, jupyter_height=800)
 
 
 # %% jupyter={"source_hidden": true}
@@ -1218,7 +1220,113 @@ fig15.register_update_graph_callback(app15, "graph-id15", "trace-updater15")
 
 # Code to run the Dash app
 # (commented out for now, but can be used in a local environment)
-app15.run(debug=True, port=8095, jupyter_height=800)
+app15.run(debug=False, port=8095, jupyter_height=800)
 
+
+# %%
+# ---- Test 16: update tooltip template----
+GRAPH_ID = "scatter-plot16a"
+
+# Sample DataFrame with DatetimeIndex
+date_range = pd.date_range(start="2025-01-01", periods=5)
+df = pd.DataFrame(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [2, 4, 6, 8, 10],
+        "z": [3, 6, 9, 12, 15],
+        "a": [4, 8, 12, 16, 20],
+        "b": [5, 10, 15, 20, 25],
+    },
+    index=date_range,
+)
+
+# Initialize the Dash app
+app16 = dash.Dash(__name__)
+
+# Define the layout
+app16.layout = html.Div(
+    [
+        html.Label("Select X and Y columns:"),
+        dcc.Dropdown(
+            id="x-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            placeholder="Select X axis data",
+        ),
+        dcc.Dropdown(
+            id="y-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            placeholder="Select Y axis data",
+        ),
+        dcc.Graph(
+            id=GRAPH_ID,
+            style={"width": "600px", "height": "600px"},
+            config={
+                "editable": True,
+                "edits": {"shapePosition": True, "annotationPosition": True},
+            },
+        ),
+    ]
+)
+
+tooltip_instance16 = tooltip(app16, debug=True, graph_ids=[GRAPH_ID])
+
+
+# Define callback to update the scatter plot
+@app16.callback(
+    Output(GRAPH_ID, "figure", allow_duplicate=True),
+    [Input("x-column", "value"), Input("y-column", "value")],
+    prevent_initial_call=True,
+)
+def update_scatter_plot(x_column, y_column):
+    if not x_column or not y_column:
+        raise PreventUpdate  # Prevent update if either dropdown is not selected
+
+    non_selected_columns = [
+        col for col in df.columns if col not in [x_column, y_column]
+    ]
+    customdata = df[non_selected_columns].apply(
+        lambda row: "<br>".join(
+            f"{col}: {val}" for col, val in zip(non_selected_columns, row)
+        ),
+        axis=1,
+    )
+    # gives (depending on selected entries):
+    # 2022-01-01     x: 1<br>z: 3<br>b: 5
+    # 2022-01-02     x: 2<br>z: 6<br>b: 10
+    # ...
+
+    template = (
+        "<b>Date</b>: %{customdata}<br>"
+        + f"<b>{x_column}: %{{x}}<br>"
+        + f"{y_column}: %{{y}}</b><br>"
+    )
+    # gives (depending on selected entries):
+    # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
+
+    tooltip_instance16.update_template(graph_id=GRAPH_ID, template=template)
+
+    trace = go.Scatter(
+        x=df[x_column],
+        y=df[y_column],
+        mode="markers",
+        marker=dict(color="blue"),
+        customdata=df.index.strftime("%Y-%m-%d %H:%M:%S") + "<br>" + customdata,
+        # Include date and time with other data
+        hovertemplate=template,
+    )
+    layout = go.Layout(
+        title="Scatter Plot",
+        xaxis=dict(title=x_column),
+        yaxis=dict(title=y_column),
+        hovermode="closest",
+        height=800,
+        width=800,
+    )
+    return {"data": [trace], "layout": layout}
+
+
+# Run the app
+if __name__ == "__main__":
+    app16.run_server(debug=False, port=8196)
 
 # %% jupyter={"source_hidden": true}

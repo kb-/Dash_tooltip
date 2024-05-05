@@ -24,7 +24,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from dash_tooltip import tooltip
 
 app = dash.Dash(__name__)
-graphid_2 = "graph2"
+graphid_3 = "graph3"
 
 
 @app.callback(Output("output-div", "children"), Input("graph-input", "clickData"))
@@ -36,12 +36,12 @@ def display_click_data(clickData: Dict[str, Any]) -> str:
 
 
 np.random.seed(42)
-y2 = np.random.normal(0, 10, 50)
-x2 = np.arange(0, 50)
-custom_labels = [f"Label {i}" for i in range(50)]
-fig2 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
-fig2.update_traces(name="LABEL", meta=["META0", "META1"])
-fig2.update_layout(title_text="Editable Title", title_x=0.5)
+y2 = np.random.normal(0, 10, 25)
+x2 = np.arange(0, 25)
+custom_labels = [f"Label {i}" for i in range(25)]
+fig3 = px.scatter(x=x2, y=y2, custom_data=[custom_labels, y2 * 2])
+fig3.update_traces(name="LABEL", meta=["META0", "META1"])
+fig3.update_layout(title_text="Editable Title", title_x=0.5)
 
 app.layout = dbc.Container(
     [
@@ -62,8 +62,8 @@ app.layout = dbc.Container(
                 dbc.Col(
                     [
                         dcc.Graph(
-                            id=graphid_2,
-                            figure=fig2,
+                            id=graphid_3,
+                            figure=fig3,
                             config={
                                 "editable": True,
                                 "edits": {
