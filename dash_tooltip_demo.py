@@ -32,7 +32,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import Dash, Input, Output, dcc, html
+from dash import Dash, Input, Output, callback_context, dcc, html
 from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
 from trace_updater import TraceUpdater  # Assuming you've imported this module
@@ -1221,5 +1221,113 @@ fig15.register_update_graph_callback(app15, "graph-id15", "trace-updater15")
 # (commented out for now, but can be used in a local environment)
 app15.run(debug=False, port=8095, jupyter_height=800)
 
+
+# %% jupyter={"source_hidden": true}
+# ---- Test 16: update tooltip template----
+GRAPH_ID = "scatter-plot16"
+
+# Sample DataFrame with DatetimeIndex
+date_range = pd.date_range(start="2025-01-01", periods=5)
+df = pd.DataFrame(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [2, 4, 6, 8, 10],
+        "z": [3, 6, 9, 12, 15],
+        "a": [4, 8, 12, 16, 20],
+        "b": [5, 10, 15, 20, 25],
+    },
+    index=date_range,
+)
+
+# Initialize the Dash app
+app16 = dash.Dash(__name__)
+
+# Define the layout
+app16.layout = html.Div(
+    [
+        html.Label("Select X and Y columns:"),
+        dcc.Dropdown(
+            id="x-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            value=df.columns[0],
+        ),
+        dcc.Dropdown(
+            id="y-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            value=df.columns[1],
+        ),
+        dcc.Graph(
+            id=GRAPH_ID,
+            style={"width": "600px", "height": "600px"},
+            config={
+                "editable": True,
+                "edits": {"shapePosition": True, "annotationPosition": True},
+            },
+        ),
+    ]
+)
+
+mytooltip = tooltip(app16, debug=True, graph_ids=[GRAPH_ID])
+once = False
+
+
+# Define callback to update the scatter plot
+@app16.callback(
+    Output(GRAPH_ID, "figure", allow_duplicate=True),
+    [Input("x-column", "value"), Input("y-column", "value")],
+    prevent_initial_call=True,
+)
+def update_scatter_plot(x_column, y_column):
+    global once
+    triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
+
+    if triggered_id in ["x-column", "y-column"]:
+        non_selected_columns = [
+            col for col in df.columns if col not in [x_column, y_column]
+        ]
+        customdata = df[non_selected_columns].apply(
+            lambda row: "<br>".join(
+                f"{col}: {val}" for col, val in zip(non_selected_columns, row)
+            ),
+            axis=1,
+        )
+        # gives (depending on selected entries):
+        # 2022-01-01     x: 1<br>z: 3<br>b: 5
+        # 2022-01-02     x: 2<br>z: 6<br>b: 10
+        # ...
+
+        template = (
+            "<b>Date</b>: %{customdata}<br>"
+            + f"<b>{x_column}: %{{x}}<br>"
+            + f"{y_column}: %{{y}}</b><br>"
+        )
+        # gives (depending on selected entries):
+        # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
+
+        mytooltip.update_template(graph_id=GRAPH_ID, template=template)
+
+        trace = go.Scatter(
+            x=df[x_column],
+            y=df[y_column],
+            mode="markers",
+            marker=dict(color="blue"),
+            customdata=df.index.strftime("%Y-%m-%d %H:%M:%S") + "<br>" + customdata,
+            # Include date and time with other data
+            hovertemplate=template,
+        )
+        layout = go.Layout(
+            title="Scatter Plot",
+            xaxis=dict(title=x_column),
+            yaxis=dict(title=y_column),
+            hovermode="closest",
+            height=800,
+            width=800,
+        )
+        return {"data": [trace], "layout": layout}
+
+
+# Run the app
+if __name__ == "__main__":
+    app16.run_server(debug=False, port=8196)
 
 # %% jupyter={"source_hidden": true}

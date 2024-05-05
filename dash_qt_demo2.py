@@ -1,16 +1,17 @@
 import http.client
-import threading
 import os
 import sys
+import threading
 import time
 
 import dash
 import numpy as np
+import plotly.graph_objects as go
 from dash import dcc, html
 from PyQt6.QtCore import QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow
-import plotly.graph_objects as go
+
 from dash_tooltip import tooltip
 
 dash_port = 8050
@@ -89,8 +90,8 @@ def create_dash_app():
     layout_margin = {"l": 25, "r": 25, "t": 25, "b": 25}
 
     # Creating a grid of x and y values
-    x = np.linspace(0, 10, 100)
-    y = np.linspace(0, 10, 100)
+    x = np.linspace(0, 10, 400)
+    y = np.linspace(0, 10, 400)
     X, Y = np.meshgrid(x, y)
 
     # Calculate Z as a function of X and Y
@@ -102,7 +103,7 @@ def create_dash_app():
             z=Z,
             x=x,
             y=y,
-            colorscale="Viridis"
+            colorscale="Viridis",
             # You can change the colorscale as needed
         ),
         layout=go.Layout(margin=layout_margin),
@@ -151,7 +152,10 @@ def create_dash_app():
     template1 = "x: %{x:.2f},<br>y: %{y:.2f}"
     tooltip(app, template=template1, graph_ids=["example-graph1"])
     template2 = "x: %{x:.2f},<br>y: %{y:.2f},<br>z: %{z:.3f}"
-    tooltip(app, template=template2, graph_ids=["example-graph2"])
+    tooltip_style = {
+        "bgcolor": "rgba(255, 255, 255, 0.2)",
+    }
+    tooltip(app, style=tooltip_style, template=template2, graph_ids=["example-graph2"])
     return app
 
 
