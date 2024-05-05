@@ -25,44 +25,44 @@ repos:
 
     -   id: black-fix
         name: black (auto format)
-        entry: ./env311/Scripts/black.exe
+        entry: ./env/Scripts/black.exe
         language: system
         types: [python]
         
     -   id: isort-fix
         name: isort (auto sort)
-        entry: ./env311/Scripts/isort.exe
+        entry: ./env/Scripts/isort.exe
         language: system
         types: [python]
         
     -   id: black
         name: black
-        entry: ./env311/Scripts/black.exe
+        entry: ./env/Scripts/black.exe
         language: system
         types: [python]
 
     -   id: isort
         name: isort
-        entry: ./env311/Scripts/isort.exe
+        entry: ./env/Scripts/isort.exe
         language: system
         types: [python]
 
     -   id: mypy
         name: mypy
-        entry: ./env311/Scripts/mypy.exe
+        entry: ./env/Scripts/mypy.exe
         language: system
         types: [python]
 
     -   id: pytest-selenium
         name: pytest (selenium tests)
-        entry: ./env311/Scripts/pytest.exe
-        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox']
+        entry: ./env/Scripts/pytest.exe
+        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox', '--testmon']
         language: system
         pass_filenames: false
 
     -   id: pytest-non-selenium
         name: pytest (non-selenium tests)
-        entry: ./env311/Scripts/pytest.exe
-        args: ['tests/', '-k', 'not selenium']
+        entry: ./env/Scripts/pytest.exe
+        args: ['tests/', '-k', 'not selenium', '--testmon']
         language: system
         pass_filenames: false

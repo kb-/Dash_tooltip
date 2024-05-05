@@ -10,6 +10,7 @@ trace_updater
 numpy
 ipython
 pytest
+pytest-testmon
 dash[testing]
 pre-commit
 black

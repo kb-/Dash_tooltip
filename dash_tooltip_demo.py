@@ -32,7 +32,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import Dash, Input, Output, callback_context, dcc, html
+from dash import Dash, Input, Output, dcc, html
+from dash.exceptions import PreventUpdate
 from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
 from trace_updater import TraceUpdater  # Assuming you've imported this module
@@ -402,9 +403,9 @@ custom_style = {
     # ... any other customization
 }
 template = "x: %{x},<br>y: %{y},<br>%{customdata[0]}"
-mytooltip = tooltip(app5, style=custom_style, template=template)
+tooltip_instance5 = tooltip(app5, style=custom_style, template=template)
 
-mytooltip.tooltip_active = False
+tooltip_instance5.tooltip_active = False
 
 
 # Create a callback to toggle the tooltip
@@ -413,7 +414,7 @@ mytooltip.tooltip_active = False
     Input("tooltip-switch", "value"),
 )
 def toggle_tooltip(value: bool):
-    mytooltip.tooltip_active = value
+    tooltip_instance5.tooltip_active = value
     return ""
 
 
@@ -1222,9 +1223,9 @@ fig15.register_update_graph_callback(app15, "graph-id15", "trace-updater15")
 app15.run(debug=False, port=8095, jupyter_height=800)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 # ---- Test 16: update tooltip template----
-GRAPH_ID = "scatter-plot16"
+GRAPH_ID = "scatter-plot16a"
 
 # Sample DataFrame with DatetimeIndex
 date_range = pd.date_range(start="2025-01-01", periods=5)
@@ -1249,12 +1250,12 @@ app16.layout = html.Div(
         dcc.Dropdown(
             id="x-column",
             options=[{"label": col, "value": col} for col in df.columns],
-            value=df.columns[0],
+            placeholder="Select X axis data",
         ),
         dcc.Dropdown(
             id="y-column",
             options=[{"label": col, "value": col} for col in df.columns],
-            value=df.columns[1],
+            placeholder="Select Y axis data",
         ),
         dcc.Graph(
             id=GRAPH_ID,
@@ -1267,8 +1268,7 @@ app16.layout = html.Div(
     ]
 )
 
-mytooltip = tooltip(app16, debug=True, graph_ids=[GRAPH_ID])
-once = False
+tooltip_instance16 = tooltip(app16, debug=True, graph_ids=[GRAPH_ID])
 
 
 # Define callback to update the scatter plot
@@ -1278,52 +1278,51 @@ once = False
     prevent_initial_call=True,
 )
 def update_scatter_plot(x_column, y_column):
-    global once
-    triggered_id = callback_context.triggered[0]["prop_id"].split(".")[0]
+    if not x_column or not y_column:
+        raise PreventUpdate  # Prevent update if either dropdown is not selected
 
-    if triggered_id in ["x-column", "y-column"]:
-        non_selected_columns = [
-            col for col in df.columns if col not in [x_column, y_column]
-        ]
-        customdata = df[non_selected_columns].apply(
-            lambda row: "<br>".join(
-                f"{col}: {val}" for col, val in zip(non_selected_columns, row)
-            ),
-            axis=1,
-        )
-        # gives (depending on selected entries):
-        # 2022-01-01     x: 1<br>z: 3<br>b: 5
-        # 2022-01-02     x: 2<br>z: 6<br>b: 10
-        # ...
+    non_selected_columns = [
+        col for col in df.columns if col not in [x_column, y_column]
+    ]
+    customdata = df[non_selected_columns].apply(
+        lambda row: "<br>".join(
+            f"{col}: {val}" for col, val in zip(non_selected_columns, row)
+        ),
+        axis=1,
+    )
+    # gives (depending on selected entries):
+    # 2022-01-01     x: 1<br>z: 3<br>b: 5
+    # 2022-01-02     x: 2<br>z: 6<br>b: 10
+    # ...
 
-        template = (
-            "<b>Date</b>: %{customdata}<br>"
-            + f"<b>{x_column}: %{{x}}<br>"
-            + f"{y_column}: %{{y}}</b><br>"
-        )
-        # gives (depending on selected entries):
-        # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
+    template = (
+        "<b>Date</b>: %{customdata}<br>"
+        + f"<b>{x_column}: %{{x}}<br>"
+        + f"{y_column}: %{{y}}</b><br>"
+    )
+    # gives (depending on selected entries):
+    # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
 
-        mytooltip.update_template(graph_id=GRAPH_ID, template=template)
+    tooltip_instance16.update_template(graph_id=GRAPH_ID, template=template)
 
-        trace = go.Scatter(
-            x=df[x_column],
-            y=df[y_column],
-            mode="markers",
-            marker=dict(color="blue"),
-            customdata=df.index.strftime("%Y-%m-%d %H:%M:%S") + "<br>" + customdata,
-            # Include date and time with other data
-            hovertemplate=template,
-        )
-        layout = go.Layout(
-            title="Scatter Plot",
-            xaxis=dict(title=x_column),
-            yaxis=dict(title=y_column),
-            hovermode="closest",
-            height=800,
-            width=800,
-        )
-        return {"data": [trace], "layout": layout}
+    trace = go.Scatter(
+        x=df[x_column],
+        y=df[y_column],
+        mode="markers",
+        marker=dict(color="blue"),
+        customdata=df.index.strftime("%Y-%m-%d %H:%M:%S") + "<br>" + customdata,
+        # Include date and time with other data
+        hovertemplate=template,
+    )
+    layout = go.Layout(
+        title="Scatter Plot",
+        xaxis=dict(title=x_column),
+        yaxis=dict(title=y_column),
+        hovermode="closest",
+        height=800,
+        width=800,
+    )
+    return {"data": [trace], "layout": layout}
 
 
 # Run the app

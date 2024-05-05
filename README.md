@@ -135,6 +135,117 @@ tooltip(app10, style=custom_style, graph_ids=["graph-id"], template=template, de
 For more examples, refer to the provided `dash_tooltip_demo.py` and check out [Plotly’s Text and Annotations documentation](https://plotly.com/python/text-and-annotations/#styling-and-coloring-annotations), which provides a wealth of information on customizing the appearance of annotations.
 Refer to the [Plotly Annotation Reference](https://plotly.com/python/reference/layout/annotations/) for a comprehensive guide on available styling attributes and how to apply them.
 
+## Template updating
+
+Tooltip content can be updated to match with selected data in a dynamic Dash app:
+```python
+GRAPH_ID = "scatter-plot16a"
+
+# Sample DataFrame with DatetimeIndex
+date_range = pd.date_range(start="2025-01-01", periods=5)
+df = pd.DataFrame(
+    {
+        "x": [1, 2, 3, 4, 5],
+        "y": [2, 4, 6, 8, 10],
+        "z": [3, 6, 9, 12, 15],
+        "a": [4, 8, 12, 16, 20],
+        "b": [5, 10, 15, 20, 25],
+    },
+    index=date_range,
+)
+
+# Initialize the Dash app
+app16 = dash.Dash(__name__)
+
+# Define the layout
+app16.layout = html.Div(
+    [
+        html.Label("Select X and Y columns:"),
+        dcc.Dropdown(
+            id="x-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            placeholder="Select X axis data",
+        ),
+        dcc.Dropdown(
+            id="y-column",
+            options=[{"label": col, "value": col} for col in df.columns],
+            placeholder="Select Y axis data",
+        ),
+        dcc.Graph(
+            id=GRAPH_ID,
+            style={"width": "600px", "height": "600px"},
+            config={
+                "editable": True,
+                "edits": {"shapePosition": True, "annotationPosition": True},
+            },
+        ),
+    ]
+)
+
+# Create a tooltip instance
+tooltip_instance16 = tooltip(app16, graph_ids=[GRAPH_ID])
+
+# Define callback to update the scatter plot
+@app16.callback(
+    Output(GRAPH_ID, "figure", allow_duplicate=True),
+    [Input("x-column", "value"), Input("y-column", "value")],
+    prevent_initial_call=True,
+)
+def update_scatter_plot(x_column, y_column):
+    if not x_column or not y_column:
+        raise PreventUpdate  # Prevent update if either dropdown is not selected
+
+    non_selected_columns = [
+        col for col in df.columns if col not in [x_column, y_column]
+    ]
+    customdata = df[non_selected_columns].apply(
+        lambda row: "<br>".join(
+            f"{col}: {val}" for col, val in zip(non_selected_columns, row)
+        ),
+        axis=1,
+    )
+    # gives (depending on selected entries):
+    # 2022-01-01     x: 1<br>z: 3<br>b: 5
+    # 2022-01-02     x: 2<br>z: 6<br>b: 10
+    # ...
+
+    # New template, to match selected data entries
+    template = (
+        "<b>Date</b>: %{customdata}<br>"
+        + f"<b>{x_column}: %{{x}}<br>"
+        + f"{y_column}: %{{y}}</b><br>"
+    )
+    # gives (depending on selected entries):
+    # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
+
+    # Update template for new tooltips
+    tooltip_instance16.update_template(graph_id=GRAPH_ID, template=template)
+
+    trace = go.Scatter(
+        x=df[x_column],
+        y=df[y_column],
+        mode="markers",
+        marker=dict(color="blue"),
+        customdata=df.index.strftime("%Y-%m-%d %H:%M:%S") + "<br>" + customdata,
+        # Include date and time with other data
+        hovertemplate=template,
+    )
+    layout = go.Layout(
+        title="Scatter Plot",
+        xaxis=dict(title=x_column),
+        yaxis=dict(title=y_column),
+        hovermode="closest",
+        height=800,
+        width=800,
+    )
+    return {"data": [trace], "layout": layout}
+
+
+# Run the app
+if __name__ == "__main__":
+    app16.run_server(debug=False, port=8196)
+```
+
 ## Handling Log Axes
 
 Due to a long-standing bug in Plotly (see [Plotly Issue #2580](https://github.com/plotly/plotly.py/issues/2580)), annotations (`fig.add_annotation`) may not be placed correctly on log-scaled axes. The `dash_tooltip` module provides an option to automatically correct the tooltip placement on log-scaled axes via the `apply_log_fix` argument in the `tooltip` function. By default, `apply_log_fix` is set to `True` to enable the fix.
