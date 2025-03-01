@@ -11,7 +11,7 @@ A module to add interactive editable tooltips to your Dash applications. Inspire
 
 ## Installation
 
-You can download the `dash_tooltip.py` module and place it in your working directory.
+`pip install dash-tooltip`
 
 ## Basic Usage
 
