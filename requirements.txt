@@ -26,5 +26,3 @@ nox
 wheel
 PyQt6; python_version >= "3.8"
 PyQt6-WebEngine; python_version >= "3.8"
-git+https://github.com/predict-idlab/tsdownsample.git#egg=tsdownsample; python_version >= "3.12"
-
