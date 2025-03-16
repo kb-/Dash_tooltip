@@ -1,0 +1,79 @@
+[project]
+name = "Dash_tooltip"
+version = "0.4.1"
+description = "A tooltip functionality for Dash."
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "dash>=2.13.0",
+    "plotly>=5.17.0"
+]
+authors = [
+    { name = "kb-" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/kb-/Dash_tooltip"
+
+[dependency-groups]
+dev = [
+    "dash_bootstrap_components",
+    "numpy",
+    "pandas",
+    "plotly-resampler",
+    "trace_updater",
+    "pytest",
+    "pytest-testmon",
+    "pre-commit",
+    "black",
+    "isort",
+    "mypy",
+    "bandit",
+    "ruff",
+    "nox",
+    "selenium",
+    "ipython",
+    "jupytext",
+    "jupyterlab",
+    "ipywidgets",
+    "PyQt6; python_version >= '3.8'",
+    "PyQt6-WebEngine; python_version >= '3.8'",
+    "dash[testing]"
+]
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "setuptools_scm",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["dash_tooltip"]
+
+[tool.setuptools_scm]
+write_to = "dash_tooltip/_version.py"
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+markers = [
+  "selenium: marks tests as requiring Selenium (deselect with '-k \"not selenium\"')",
+  "selenium_dbg: Selenium debug"
+]

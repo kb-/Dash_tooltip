@@ -130,9 +130,9 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
                         )
                     )
                 )
-                assert perform_retry_click(
-                    element
-                ), f"Failed to click on {subplot} in {graph_id}"
+                assert perform_retry_click(element), (
+                    f"Failed to click on {subplot} in {graph_id}"
+                )
 
                 # Wait for the tooltip's annotation to appear and ensure it's visible
                 annotation_element = wait.until(

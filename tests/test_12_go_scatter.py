@@ -91,11 +91,11 @@ def test_customdata_tooltip(dash_duo):
         except TimeoutException:
             continue  # Continue to the next iteration if the condition isn't met
 
-    assert (
-        success
-    ), "Failed to successfully trigger the tooltip after multiple attempts."
+    assert success, (
+        "Failed to successfully trigger the tooltip after multiple attempts."
+    )
     # Define the expected part of the tooltip text based on your tooltip_template and the data point
     expected_content_part = f"Data Points,x: {x_data[idx - 1]},y: {y_data[idx - 1]:.2f}"
-    assert (
-        expected_content_part in actual_annotation_text
-    ), "Tooltip content does not match the expected."
+    assert expected_content_part in actual_annotation_text, (
+        "Tooltip content does not match the expected."
+    )

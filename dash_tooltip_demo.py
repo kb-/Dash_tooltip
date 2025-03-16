@@ -119,7 +119,7 @@ app2.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Single Trace with Custom Data and Stylized" " Annotations",
+                            "Single Trace with Custom Data and Stylized Annotations",
                             style={"text-align": "center"},
                         )
                     ]
@@ -163,10 +163,7 @@ custom_style = {
 tooltip(
     app2,
     style=custom_style,
-    template="x: %{x},"
-    "<br>y: %{y:.2f},"
-    "<br>%{customdata[0]},"
-    "<br>2y=%{customdata[1]:.3f}",
+    template="x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}",
 )
 
 if __name__ == "__main__":
@@ -272,8 +269,7 @@ app4.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Multiple Traces with Custom Data and Stylized"
-                            " Annotations",
+                            "Multiple Traces with Custom Data and Stylized Annotations",
                             style={"text-align": "center"},
                         )
                     ]

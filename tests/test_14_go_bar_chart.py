@@ -87,13 +87,13 @@ def test_bar_chart_tooltip(dash_duo):
         except TimeoutException:
             continue  # Continue to the next iteration if the condition isn't met
 
-    assert (
-        success
-    ), "Failed to successfully trigger the tooltip after multiple attempts."
+    assert success, (
+        "Failed to successfully trigger the tooltip after multiple attempts."
+    )
     # Define the expected content based on the tooltip template and data point
     expected_content_part = (
         f"Sales by Category,x: {categories[idx - 1]},y: {values[idx - 1]}"
     )
-    assert (
-        expected_content_part in actual_annotation_text
-    ), "Tooltip content does not match the expected."
+    assert expected_content_part in actual_annotation_text, (
+        "Tooltip content does not match the expected."
+    )

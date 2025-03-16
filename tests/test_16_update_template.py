@@ -108,9 +108,9 @@ def test_customdata_tooltip(dash_duo):
 
     # Assert that there are exactly two tooltips and their contents are correct
     assert len(tooltip_texts) == 2, "There should be exactly two tooltips displayed."
-    assert (
-        "Data Points,x: 1,y: 2.00" in tooltip_texts[0]
-    ), f"First tooltip content does not match: {tooltip_texts[0]}"
-    assert (
-        "UPDATED,x: 2,y: 3.00" in tooltip_texts[1]
-    ), f"Second tooltip content does not match: {tooltip_texts[1]}"
+    assert "Data Points,x: 1,y: 2.00" in tooltip_texts[0], (
+        f"First tooltip content does not match: {tooltip_texts[0]}"
+    )
+    assert "UPDATED,x: 2,y: 3.00" in tooltip_texts[1], (
+        f"Second tooltip content does not match: {tooltip_texts[1]}"
+    )

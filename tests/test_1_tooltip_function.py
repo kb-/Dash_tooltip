@@ -26,7 +26,7 @@ app = Dash(__name__)
 def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
-        return f'You clicked on point ({point["x"]}, {point["y"]})'
+        return f"You clicked on point ({point['x']}, {point['y']})"
     return "Click on a point to see its data."
 
 

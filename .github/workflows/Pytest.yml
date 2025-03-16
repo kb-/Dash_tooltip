@@ -3,11 +3,10 @@ name: Pytest
 on:
   push: {}
   pull_request: {}
-  workflow_dispatch: # Add this line to enable manual triggering
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -15,24 +14,27 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install pre-commit
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Install uv and dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install uv pre-commit
+          uv sync
 
-    - name: Run pre-commit hooks for Ruff
-      run: |
-        ruff check . --exit-zero --show-files
-        ruff check . --exit-zero --statistics
+      - name: Run Ruff Checks
+        run: |
+          # Activate the virtual environment so that ruff is on PATH
+          source .venv/bin/activate
+          ruff check . --exit-zero --show-files
+          ruff check . --exit-zero --statistics
 
-    - name: Test with pytest
-      run: |
-        pytest tests/ -k "not selenium"
+      - name: Run Pytest (excluding selenium tests)
+        run: |
+          source .venv/bin/activate
+          pytest tests/ -k "not selenium"

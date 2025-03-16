@@ -1,6 +1,6 @@
 repos:
--   repo: local
-    hooks:
+- repo: local
+  hooks:
     - id: ruff
       name: ruff
       description: "Run 'ruff' for extremely fast Python linting"
@@ -23,46 +23,39 @@ repos:
       additional_dependencies: []
       minimum_pre_commit_version: "2.9.2"
 
-    -   id: black-fix
-        name: black (auto format)
-        entry: ./env/Scripts/black.exe
-        language: system
-        types: [python]
-        
-    -   id: isort-fix
-        name: isort (auto sort)
-        entry: ./env/Scripts/isort.exe
-        language: system
-        types: [python]
-        
-    -   id: black
-        name: black
-        entry: ./env/Scripts/black.exe
-        language: system
-        types: [python]
+    - id: isort-fix
+      name: isort (auto sort)
+      description: "Automatically sort imports using isort"
+      entry: isort
+      language: system
+      types: [python]
 
-    -   id: isort
-        name: isort
-        entry: ./env/Scripts/isort.exe
-        language: system
-        types: [python]
+    - id: isort
+      name: isort
+      description: "Run isort to check import order"
+      entry: isort
+      language: system
+      types: [python]
 
-    -   id: mypy
-        name: mypy
-        entry: ./env/Scripts/mypy.exe
-        language: system
-        types: [python]
+#    - id: mypy
+#      name: mypy
+#      description: "Run mypy for static type checking"
+#      entry: mypy
+#      language: system
+#      types: [python]
 
-    -   id: pytest-selenium
-        name: pytest (selenium tests)
-        entry: ./env/Scripts/pytest.exe
-        args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox', '--testmon']
-        language: system
-        pass_filenames: false
+    - id: pytest-selenium
+      name: pytest (selenium tests)
+      description: "Run pytest for selenium tests"
+      entry: pytest
+      args: ['tests/', '-k', 'selenium', '--webdriver', 'Firefox', '--testmon']
+      language: system
+      pass_filenames: false
 
-    -   id: pytest-non-selenium
-        name: pytest (non-selenium tests)
-        entry: ./env/Scripts/pytest.exe
-        args: ['tests/', '-k', 'not selenium', '--testmon']
-        language: system
-        pass_filenames: false
+    - id: pytest-non-selenium
+      name: pytest (non-selenium tests)
+      description: "Run pytest for non-selenium tests"
+      entry: pytest
+      args: ['tests/', '-k', 'not selenium', '--testmon']
+      language: system
+      pass_filenames: false

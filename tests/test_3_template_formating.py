@@ -31,7 +31,7 @@ graphid_3 = "graph3"
 def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
-        return f'You clicked on point {point["x"]}, {point["y"]}'
+        return f"You clicked on point {point['x']}, {point['y']}"
     return "Click on a point to see its data."
 
 
@@ -121,7 +121,7 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
 
     for _ in range(100):  # Try up to 100 times
         element = dash_duo.driver.find_element(
-            By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx+1})"
+            By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx + 1})"
         )
         ActionChains(driver).move_to_element(element).click().perform()
         time.sleep(0.01)
@@ -143,9 +143,9 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
 
     # Check if the loop exited due to a successful tooltip trigger or if all attempts
     # were exhausted
-    assert (
-        success
-    ), "Failed to successfully trigger the tooltip after multiple attempts."
+    assert success, (
+        "Failed to successfully trigger the tooltip after multiple attempts."
+    )
 
     # Check if the actual annotation text matches the expected text based on the
     # customdata
