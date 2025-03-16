@@ -32,7 +32,7 @@ CustomConfigType = Dict[str, Union[str, int, FontConfigType]]
 def display_click_data(clickData: Dict[str, Any]) -> str:
     if clickData:
         point = clickData["points"][0]
-        return f'You clicked on point {point["x"]}, {point["y"]}'
+        return f"You clicked on point {point['x']}, {point['y']}"
     return "Click on a point to see its data."
 
 
@@ -105,7 +105,7 @@ def test_tooltip_configuration(dash_duo: Any) -> None:
     # Interact with a data point to trigger the tooltip
     idx = 1
     element = driver.find_element(
-        By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx+1})"
+        By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx + 1})"
     )
     ActionChains(driver).move_to_element(element).click().perform()
 
