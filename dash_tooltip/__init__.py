@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import plotly.graph_objs as go
 from dash import Input, Output, State, dash
+from dash.exceptions import PreventUpdate
 
 from .config import DEFAULT_ANNOTATION_CONFIG, DEFAULT_TEMPLATE
 from .custom_figure import CustomFigure
@@ -82,7 +83,7 @@ class TooltipManager:
             ) -> CustomFigure:
                 """Display data on click event."""
                 if not self.tooltip_active:
-                    raise dash.PreventUpdate
+                    raise PreventUpdate
 
                 if figure is None:
                     figure = CustomFigure()

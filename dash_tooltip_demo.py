@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.19.3
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -839,7 +839,7 @@ if __name__ == "__main__":
 # ---- Test 12: 2x2 Subplot with 2 traces on each subplot (Organized like Test 10) ----
 
 # Generate random time series data
-date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="m")
+date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="ME")
 
 ts_data = {}
 for i in range(4):
@@ -1323,6 +1323,6 @@ def update_scatter_plot(x_column, y_column):
 
 # Run the app
 if __name__ == "__main__":
-    app16.run_server(debug=False, port=8196)
+    app16.run(debug=False, port=8196)
 
 # %% jupyter={"source_hidden": true}

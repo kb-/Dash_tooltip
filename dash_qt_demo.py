@@ -129,7 +129,7 @@ def run_dash():
     Run the Dash app server.
     """
     app = create_dash_app()
-    app.run_server()
+    app.run()
 
 
 # Check server availability

@@ -69,7 +69,7 @@ from dash.dependencies import Input, Output
 from dash_tooltip import tooltip
 
 # Generate random time series data
-date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='H')
+date_rng = pd.date_range(start='2020-01-01', end='2020-12-31', freq='h')
 ts1 = pd.Series(np.random.randn(len(date_rng)), index=date_rng, name='Time Series 1')
 ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng, name='Time Series 2')
 df = pd.DataFrame({ts1.name: ts1, ts2.name: ts2})
@@ -243,7 +243,7 @@ def update_scatter_plot(x_column, y_column):
 
 # Run the app
 if __name__ == "__main__":
-    app16.run_server(debug=False, port=8196)
+app16.run(debug=False, port=8196)
 ```
 
 ## Handling Log Axes

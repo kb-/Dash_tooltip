@@ -23,7 +23,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from dash_tooltip import tooltip
 
 # Sample data
-date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="m")
+date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="ME")
 ts_data = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 
 # Create a Dash app with multiple graphs
