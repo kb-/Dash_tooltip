@@ -33,6 +33,7 @@ dev = [
     "numpy",
     "pandas",
     "plotly-resampler",
+    "pytz",
     "trace_updater",
     "pytest",
     "pytest-testmon",
