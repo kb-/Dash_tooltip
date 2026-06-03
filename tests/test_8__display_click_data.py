@@ -120,3 +120,173 @@ def test_display_click_data_custom_style() -> None:
     annotation = fig_after.layout.annotations[0]
     assert annotation.arrowcolor == "red", "Arrow color mismatch."
     # Add additional assertions for other styles.
+
+
+def test_display_click_data_same_point_does_not_duplicate_annotation() -> None:
+    fig = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    click_data = {
+        "points": [
+            {
+                "x": 2,
+                "y": 3,
+                "curveNumber": 0,
+                "pointNumber": 1,
+            }
+        ]
+    }
+
+    fig_after_first_click = _display_click_data(
+        click_data,
+        fig,
+        DEFAULT_TEMPLATE,
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+    fig_after_second_click = _display_click_data(
+        click_data,
+        fig_after_first_click,
+        DEFAULT_TEMPLATE,
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+
+    assert len(fig_after_second_click.layout.annotations) == 1
+
+
+def test_display_click_data_different_point_adds_second_annotation() -> None:
+    fig = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    first_click_data = {
+        "points": [
+            {
+                "x": 2,
+                "y": 3,
+                "curveNumber": 0,
+                "pointNumber": 1,
+            }
+        ]
+    }
+    second_click_data = {
+        "points": [
+            {
+                "x": 3,
+                "y": 2,
+                "curveNumber": 0,
+                "pointNumber": 2,
+            }
+        ]
+    }
+
+    fig_after_first_click = _display_click_data(
+        first_click_data,
+        fig,
+        DEFAULT_TEMPLATE,
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+    fig_after_second_click = _display_click_data(
+        second_click_data,
+        fig_after_first_click,
+        DEFAULT_TEMPLATE,
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+
+    assert len(fig_after_second_click.layout.annotations) == 2
+
+
+def test_display_click_data_same_point_dedupes_with_fixed_template_text() -> None:
+    fig = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    click_data = {
+        "points": [
+            {
+                "x": 2,
+                "y": 3,
+                "curveNumber": 0,
+                "pointNumber": 1,
+            }
+        ]
+    }
+
+    fig_after_first_click = _display_click_data(
+        click_data,
+        fig,
+        "Selected point",
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+    fig_after_second_click = _display_click_data(
+        click_data,
+        fig_after_first_click,
+        "Selected point",
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+
+    assert len(fig_after_second_click.layout.annotations) == 1
+    assert fig_after_second_click.layout.annotations[0].text == "Selected point"
+
+
+def test_display_click_data_allows_user_supplied_annotation_name() -> None:
+    fig = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    click_data = {
+        "points": [
+            {
+                "x": 2,
+                "y": 3,
+                "curveNumber": 0,
+                "pointNumber": 1,
+            }
+        ]
+    }
+
+    fig_after_click = _display_click_data(
+        click_data,
+        fig,
+        DEFAULT_TEMPLATE,
+        {**DEFAULT_ANNOTATION_CONFIG, "name": "user-name"},
+        True,
+        False,
+    )
+
+    annotation = fig_after_click.layout.annotations[0]
+    assert annotation.name == "user-name"
+
+
+def test_display_click_data_same_anchor_dedupes_even_with_different_template() -> None:
+    fig = CustomFigure(data=[go.Scatter(x=[1, 2, 3], y=[1, 3, 2])])
+    click_data = {
+        "points": [
+            {
+                "x": 2,
+                "y": 3,
+                "curveNumber": 0,
+                "pointNumber": 1,
+            }
+        ]
+    }
+
+    fig_after_first_click = _display_click_data(
+        click_data,
+        fig,
+        "First label",
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+    fig_after_second_click = _display_click_data(
+        click_data,
+        fig_after_first_click,
+        "Second label",
+        DEFAULT_ANNOTATION_CONFIG,
+        True,
+        False,
+    )
+
+    assert len(fig_after_second_click.layout.annotations) == 1
+    assert fig_after_second_click.layout.annotations[0].text == "First label"

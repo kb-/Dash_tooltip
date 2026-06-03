@@ -15,6 +15,27 @@ from .custom_figure import CustomFigure
 logger = logging.getLogger("dash_tooltip")
 
 
+def _normalize_annotation_value(value: Any) -> Any:
+    if isinstance(value, float):
+        return format(value, ".15g")
+    return str(value)
+
+
+def _annotation_exists(fig: CustomFigure, x: Any, y: Any, xref: str, yref: str) -> bool:
+    annotations = fig.layout.annotations or []
+    for annotation in annotations:
+        if (
+            _normalize_annotation_value(getattr(annotation, "x", None))
+            == _normalize_annotation_value(x)
+            and _normalize_annotation_value(getattr(annotation, "y", None))
+            == _normalize_annotation_value(y)
+            and getattr(annotation, "xref", None) == xref
+            and getattr(annotation, "yref", None) == yref
+        ):
+            return True
+    return False
+
+
 def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
     """
     Adds a dcc.Store component to the layout to store annotations for tooltips.
@@ -282,6 +303,9 @@ def _display_click_data(
         tooltip_template = fig.layout._tooltip_template
         for placeholder, value in template_data.items():
             tooltip_template = tooltip_template.replace(f"%{{{placeholder}}}", value)
+
+        if _annotation_exists(fig, x_val, y_val, xaxis, yaxis):
+            return fig
 
         try:
             fig.add_annotation(
