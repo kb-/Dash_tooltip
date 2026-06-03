@@ -1,4 +1,5 @@
 import logging
+import re
 from string import Template
 from typing import Any, Dict, List, Optional, Union
 
@@ -32,6 +33,51 @@ logger.propagate = False
 logger.debug("dash_tooltip log active")
 
 registered_callbacks = set()
+ANNOTATION_RELAYOUT_KEY = re.compile(r"annotations\[(\d+)\]\.(.+)")
+
+
+def _apply_annotation_relayout(
+    current_figure: Dict[str, Any], relayout_data: Dict[str, Any]
+) -> bool:
+    """Persist client-side annotation edits back into the server-side figure."""
+    if not relayout_data:
+        return False
+
+    annotation_updates: Dict[int, Dict[str, Any]] = {}
+    for key, value in relayout_data.items():
+        match = ANNOTATION_RELAYOUT_KEY.fullmatch(key)
+        if not match:
+            continue
+
+        index = int(match.group(1))
+        property_name = match.group(2)
+        annotation_updates.setdefault(index, {})[property_name] = value
+
+    if not annotation_updates:
+        return False
+
+    layout = current_figure.get("layout")
+    if not isinstance(layout, dict):
+        return False
+
+    annotations = layout.get("annotations", [])
+    if not isinstance(annotations, list) or not annotations:
+        return False
+
+    changed = False
+    for index, properties in annotation_updates.items():
+        if index >= len(annotations):
+            continue
+        annotation = annotations[index]
+        if not isinstance(annotation, dict):
+            annotation = dict(annotation)
+        annotation.update(properties)
+        annotations[index] = annotation
+        changed = True
+
+    if changed:
+        layout["annotations"] = annotations
+    return changed
 
 
 class TooltipManager:
@@ -114,6 +160,22 @@ class TooltipManager:
                     return _display_click_data(
                         clickData, custom_figure, template, self.style
                     )
+
+            @self.app.callback(
+                Output(graph_id, "figure", allow_duplicate=True),
+                Input(graph_id, "relayoutData"),
+                State(graph_id, "figure"),
+                prevent_initial_call=True,
+            )
+            def persist_annotation_relayout(
+                relayout_data: Dict[str, Any], current_figure: Dict[str, Any]
+            ) -> Union[Dict[str, Any], dash._callback.NoUpdate]:
+                """Persist dragged or edited annotation properties."""
+                if current_figure and _apply_annotation_relayout(
+                    current_figure, relayout_data
+                ):
+                    return current_figure
+                return dash.no_update
 
             @self.app.callback(
                 Output(graph_id, "figure", allow_duplicate=True),
