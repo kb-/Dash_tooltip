@@ -4,7 +4,7 @@ repos:
     - id: ruff
       name: ruff
       description: "Run 'ruff' for extremely fast Python linting"
-      entry: ruff check --force-exclude
+      entry: ruff check --fix --force-exclude
       language: python
       types_or: [python, pyi]
       args: []
@@ -22,20 +22,6 @@ repos:
       require_serial: true
       additional_dependencies: []
       minimum_pre_commit_version: "2.9.2"
-
-    - id: isort-fix
-      name: isort (auto sort)
-      description: "Automatically sort imports using isort"
-      entry: isort
-      language: system
-      types: [python]
-
-    - id: isort
-      name: isort
-      description: "Run isort to check import order"
-      entry: isort
-      language: system
-      types: [python]
 
 #    - id: mypy
 #      name: mypy

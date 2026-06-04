@@ -6,35 +6,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install uv and dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install uv pre-commit
-          uv sync
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
 
-      - name: Run Ruff Checks
-        run: |
-          # Activate the virtual environment so that ruff is on PATH
-          source .venv/bin/activate
-          ruff check . --exit-zero --show-files
-          ruff check . --exit-zero --statistics
+      - name: Install dependencies
+        run: uv sync --group dev
 
-      - name: Run Pytest (excluding selenium tests)
-        run: |
-          source .venv/bin/activate
-          pytest tests/ -k "not selenium"
+      - name: Run Ruff
+        run: uv run ruff check . --output-format=github
+
+      - name: Run Pytest
+        run: uv run pytest tests/ -k "not selenium"

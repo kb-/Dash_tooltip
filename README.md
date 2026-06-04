@@ -13,6 +13,21 @@ A module to add interactive editable tooltips to your Dash applications. Inspire
 
 `pip install dash-tooltip`
 
+## Build And Publish
+
+With the current `pyproject.toml`-based setup, use `uv` for local builds and publishing:
+
+```bash
+# Build source distribution and wheel into dist/
+uv build
+
+# Install the built wheel locally
+uv pip install dist/*.whl
+
+# Publish to PyPI
+uv publish
+```
+
 ## Basic Usage
 
 ```python
