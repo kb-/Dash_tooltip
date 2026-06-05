@@ -64,35 +64,27 @@ def test_basic_usage(iteration: int, dash_duo: Any) -> None:
 
     # Tooltip template
     x_val, y_val = 2, 5  # The coordinates of the data point we're testing
-    expected_annotation_text = tooltip_template.replace("%{x}", str(x_val)).replace(
-        "%{y}", str(y_val)
-    )
+    expected_annotation_text = tooltip_template.replace("%{x}", str(x_val)).replace("%{y}", str(y_val))
 
     # Start the Dash app
     dash_duo.start_server(app)
 
     # Ensure the element is clickable before interacting
     WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)")
-        )
+        EC.element_to_be_clickable((By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)"))
     )
 
     success = False  # flag to indicate if the click was successful
 
     for _ in range(100):  # Try up to 100 times (clicks sometimes not detected)
-        element = driver.find_element(
-            By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)"
-        )
+        element = driver.find_element(By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)")
         ActionChains(driver).move_to_element(element).click().perform()
         time.sleep(0.01)
 
         # Check if the click was successful
         try:
             WebDriverWait(driver, 1).until(
-                EC.text_to_be_present_in_element(
-                    (By.ID, "output-div"), "You clicked on point (2, 5)"
-                )
+                EC.text_to_be_present_in_element((By.ID, "output-div"), "You clicked on point (2, 5)")
             )
             success = True  # update the flag
             break  # exit the loop
@@ -104,8 +96,6 @@ def test_basic_usage(iteration: int, dash_duo: Any) -> None:
     assert success, "Failed to successfully click the point after multiple attempts."
 
     # Remaining test steps
-    annotation_text_element = driver.find_element(
-        By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"
-    )
+    annotation_text_element = driver.find_element(By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
     actual_annotation_text = annotation_text_element.text
     assert actual_annotation_text == expected_annotation_text

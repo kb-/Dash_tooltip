@@ -106,8 +106,7 @@ def test_annotation_removal(iteration: int, dash_duo: Any) -> None:
                     EC.presence_of_element_located(
                         (
                             By.CSS_SELECTOR,
-                            f'g.annotation[data-index="{point_index - 1}"] '
-                            f"g.annotation-text-g text.annotation-text",
+                            f'g.annotation[data-index="{point_index - 1}"] g.annotation-text-g text.annotation-text',
                         )
                     )
                 )
@@ -116,18 +115,14 @@ def test_annotation_removal(iteration: int, dash_duo: Any) -> None:
             except TimeoutException:
                 continue
 
-        assert success, (
-            f"Failed to add tooltip for point {point_index} after multiple attempts."
-        )
+        assert success, f"Failed to add tooltip for point {point_index} after multiple attempts."
 
     # Count the number of tooltips before deletion
     initial_tooltips_count = len(driver.find_elements(By.CSS_SELECTOR, "g.annotation"))
 
     # Now, delete the second tooltip
     annotation_element = wait.until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, 'g.annotation[data-index="1"] text.annotation-text')
-        )
+        EC.visibility_of_element_located((By.CSS_SELECTOR, 'g.annotation[data-index="1"] text.annotation-text'))
     )
     ActionChains(driver).move_to_element(annotation_element).click().perform()
     ActionChains(driver).send_keys(Keys.DELETE).perform()
@@ -147,6 +142,4 @@ def test_annotation_removal(iteration: int, dash_duo: Any) -> None:
     final_tooltips_count = len(driver.find_elements(By.CSS_SELECTOR, "g.annotation"))
 
     # Verify that one tooltip was deleted
-    assert final_tooltips_count == initial_tooltips_count - 1, (
-        "Tooltip was not deleted."
-    )
+    assert final_tooltips_count == initial_tooltips_count - 1, "Tooltip was not deleted."

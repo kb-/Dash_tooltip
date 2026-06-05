@@ -250,15 +250,9 @@ x = np.arange(0, 50)
 fig4 = go.Figure()
 
 # Adding traces with custom data
-fig4.add_trace(
-    go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels4_1)
-)
-fig4.add_trace(
-    go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels4_2)
-)
-fig4.add_trace(
-    go.Scatter(x=x, y=y3, mode="markers", name="Trace 3", customdata=custom_labels4_3)
-)
+fig4.add_trace(go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels4_1))
+fig4.add_trace(go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels4_2))
+fig4.add_trace(go.Scatter(x=x, y=y3, mode="markers", name="Trace 3", customdata=custom_labels4_3))
 
 fig4.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
 
@@ -330,15 +324,9 @@ x = np.arange(0, 50)
 fig5 = go.Figure()
 
 # Adding traces with custom data
-fig5.add_trace(
-    go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels1)
-)
-fig5.add_trace(
-    go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels2)
-)
-fig5.add_trace(
-    go.Scatter(x=x, y=y3, mode="markers", name="Trace 3", customdata=custom_labels3)
-)
+fig5.add_trace(go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels1))
+fig5.add_trace(go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels2))
+fig5.add_trace(go.Scatter(x=x, y=y3, mode="markers", name="Trace 3", customdata=custom_labels3))
 
 fig5.update_layout(title_text="Multiple Traces with Tooltips", title_x=0.5)
 
@@ -432,12 +420,8 @@ custom_labels6_2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig6 = go.Figure()
-fig6.add_trace(
-    go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels6_1)
-)
-fig6.add_trace(
-    go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels6_2)
-)
+fig6.add_trace(go.Scatter(x=x, y=y1, mode="markers", name="Trace 1", customdata=custom_labels6_1))
+fig6.add_trace(go.Scatter(x=x, y=y2, mode="markers", name="Trace 2", customdata=custom_labels6_2))
 fig6.update_layout(title_text="Two Traces with Multiple Custom Data", title_x=0.5)
 
 app6.layout = dbc.Container(
@@ -476,9 +460,7 @@ app6.layout = dbc.Container(
     ]
 )
 
-template6 = (
-    "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
-)
+template6 = "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
 tooltip(app6, template=template6)
 
 if __name__ == "__main__":
@@ -498,18 +480,10 @@ x = np.arange(0, 50)
 
 fig7_1 = go.Figure()
 fig7_1.update_layout({"title": "With Tooltip"})
-fig7_1.add_trace(
-    go.Scatter(
-        x=x, y=y1, mode="markers", name="Graph 1 Trace 1", customdata=custom_labels7_1
-    )
-)
+fig7_1.add_trace(go.Scatter(x=x, y=y1, mode="markers", name="Graph 1 Trace 1", customdata=custom_labels7_1))
 fig7_2 = go.Figure()
 fig7_2.update_layout({"title": "Without Tooltip"})
-fig7_2.add_trace(
-    go.Scatter(
-        x=x, y=y2, mode="markers", name="Graph 2 Trace 1", customdata=custom_labels7_2
-    )
-)
+fig7_2.add_trace(go.Scatter(x=x, y=y2, mode="markers", name="Graph 2 Trace 1", customdata=custom_labels7_2))
 
 app7.layout = dbc.Container(
     [
@@ -518,8 +492,7 @@ app7.layout = dbc.Container(
                 dbc.Col(
                     [
                         html.H1(
-                            "Comparison of Graphs with and"
-                            " without Tooltip Functionality",
+                            "Comparison of Graphs with and without Tooltip Functionality",
                             style={"text-align": "center"},
                         )
                     ]
@@ -563,9 +536,7 @@ app7.layout = dbc.Container(
     ]
 )
 
-template7 = (
-    "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
-)
+template7 = "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
 tooltip(app7, template=template7, graph_ids=["app7-graph1"], debug=True)
 
 if __name__ == "__main__":
@@ -584,18 +555,10 @@ custom_labels8_2 = [[f"B {i}", f"Y {i * 3}"] for i in range(50)]
 x = np.arange(0, 50)
 
 fig8_1 = go.Figure()
-fig8_1.add_trace(
-    go.Scatter(
-        x=x, y=y1, mode="markers", name="Graph 1 Trace 1", customdata=custom_labels8_1
-    )
-)
+fig8_1.add_trace(go.Scatter(x=x, y=y1, mode="markers", name="Graph 1 Trace 1", customdata=custom_labels8_1))
 
 fig8_2 = go.Figure()
-fig8_2.add_trace(
-    go.Scatter(
-        x=x, y=y2, mode="markers", name="Graph 2 Trace 1", customdata=custom_labels8_2
-    )
-)
+fig8_2.add_trace(go.Scatter(x=x, y=y2, mode="markers", name="Graph 2 Trace 1", customdata=custom_labels8_2))
 
 app8.layout = dbc.Container(
     [
@@ -648,9 +611,7 @@ app8.layout = dbc.Container(
     ]
 )
 
-template8 = (
-    "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
-)
+template8 = "x: %{x},<br>y: %{y},<br>Label1: %{customdata[0]},<br>Label2: %{customdata[1]}"
 tooltip(app8, template=template8)
 
 if __name__ == "__main__":
@@ -667,27 +628,19 @@ if __name__ == "__main__":
 
 # Suppress the specific warning about the DatetimeProperties.to_pydatetime method
 # in pandas
-warnings.filterwarnings(
-    "ignore", category=FutureWarning, message=".*DatetimeProperties.to_pydatetime.*"
-)
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*DatetimeProperties.to_pydatetime.*")
 
 # Suppress the specific warning about the is_datetime64tz_dtype method
 # in plotly_resampler
-warnings.filterwarnings(
-    "ignore", category=FutureWarning, message=".*is_datetime64tz_dtype is deprecated.*"
-)
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*is_datetime64tz_dtype is deprecated.*")
 
 # Suppress the specific warning about H
 # in plotly_resampler
-warnings.filterwarnings(
-    "ignore", category=FutureWarning, message=".*'H' is deprecated.*"
-)
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*'H' is deprecated.*")
 
 # Suppress the specific warning about m
 # in plotly_resampler
-warnings.filterwarnings(
-    "ignore", category=FutureWarning, message=".*'m' is deprecated.*"
-)
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*'m' is deprecated.*")
 
 # Generate random time series data
 date_rng = pd.date_range(start="2020-01-01", end="2020-12-31", freq="h")
@@ -715,18 +668,13 @@ ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 df = pd.DataFrame({"Time Series 1": ts1, "Time Series 2": ts2})
 
 # Plotting the time series
-template = (
-    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
-    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
-)
+template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 
 fig10 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
 
 # Modify each trace to include the desired hovertemplate
 for i, trace in enumerate(fig10.data):
-    trace.customdata = np.column_stack(
-        (np.repeat(df.columns[i], len(df)), np.repeat("#{}".format(i + 1), len(df)))
-    )
+    trace.customdata = np.column_stack((np.repeat(df.columns[i], len(df)), np.repeat("#{}".format(i + 1), len(df))))
     trace.hovertemplate = template
 
 # Construct app & its layout
@@ -819,16 +767,11 @@ ts2 = pd.Series(np.random.randn(len(date_rng)), index=date_rng)
 # Create a DataFrame to hold the time series - hover and matching tooltip content
 df = pd.DataFrame({"Time Series 1": ts1, "Time Series 2": ts2})
 # Plotting the time series
-template = (
-    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
-    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
-)
+template = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 fig11 = FigureResampler(px.line(df, x=df.index, y=df.columns, title="Time Series Plot"))
 # Modify each trace to include the desired hovertemplate
 for i, trace in enumerate(fig11.data):
-    trace.customdata = np.column_stack(
-        (np.repeat(df.columns[i], len(df)), np.repeat("#{}".format(i + 1), len(df)))
-    )
+    trace.customdata = np.column_stack((np.repeat(df.columns[i], len(df)), np.repeat("#{}".format(i + 1), len(df))))
     trace.hovertemplate = template
 
 app11, fig11 = interactive_plot(fig11, graphid_11, template)
@@ -881,10 +824,7 @@ for i in range(1, 3):
         )
 
 # Modify each trace to include the desired hovertemplate
-template12 = (
-    "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>"
-    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
-)
+template12 = "x: %{x}<br>y: %{y}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 for i, trace in enumerate(fig12.data):
     trace.customdata = np.column_stack(
         (
@@ -961,10 +901,7 @@ app13.layout = dbc.Container(
                                         "name": "sin(x)",
                                     }
                                 ],
-                                "layout": {
-                                    "title": "Direct Data Injection into "
-                                    "dcc.Graph with Draggable Annotations"
-                                },
+                                "layout": {"title": "Direct Data Injection into dcc.Graph with Draggable Annotations"},
                             },
                             config={
                                 "editable": True,
@@ -995,12 +932,8 @@ x_data = np.linspace(1, 100, 100)  # Generating 100 points from 1 to 100
 
 ts_data = {}
 for i in range(4):
-    ts_data[f"ts{i + 1}_1"] = np.exp(
-        0.05 * x_data
-    )  # Exponential growth with a base of exp(1)
-    ts_data[f"ts{i + 1}_2"] = np.exp(
-        0.03 * x_data
-    )  # Slower exponential growth with a base of exp(1)
+    ts_data[f"ts{i + 1}_1"] = np.exp(0.05 * x_data)  # Exponential growth with a base of exp(1)
+    ts_data[f"ts{i + 1}_2"] = np.exp(0.03 * x_data)  # Slower exponential growth with a base of exp(1)
 
 
 # Create 2x2 subplots
@@ -1046,19 +979,12 @@ fig14.update_layout(
 )
 
 # Modify each trace to include the desired hovertemplate
-template14 = (
-    "x: %{x}<br>y: %{y:0.2f}<br>ID: %{pointNumber}<br>"
-    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
-)
+template14 = "x: %{x}<br>y: %{y:0.2f}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 for i, trace in enumerate(fig14.data):
     trace.customdata = np.column_stack(
         (
-            np.repeat(
-                trace.name, len(x_data)
-            ),  # Updated from len(date_rng) to len(x_data)
-            np.repeat(
-                "#{}".format(i + 1), len(x_data)
-            ),  # Updated from len(date_rng) to len(x_data)
+            np.repeat(trace.name, len(x_data)),  # Updated from len(date_rng) to len(x_data)
+            np.repeat("#{}".format(i + 1), len(x_data)),  # Updated from len(date_rng) to len(x_data)
         )
     )
     trace.hovertemplate = template14
@@ -1110,12 +1036,8 @@ x_data = np.linspace(1, 100, 100)  # Generating 100 points from 1 to 100
 
 ts_data = {}
 for i in range(4):
-    ts_data[f"ts{i + 1}_1"] = np.exp(
-        0.05 * x_data
-    )  # Exponential growth with a base of exp(1)
-    ts_data[f"ts{i + 1}_2"] = np.exp(
-        0.03 * x_data
-    )  # Slower exponential growth with a base of exp(1)
+    ts_data[f"ts{i + 1}_1"] = np.exp(0.05 * x_data)  # Exponential growth with a base of exp(1)
+    ts_data[f"ts{i + 1}_2"] = np.exp(0.03 * x_data)  # Slower exponential growth with a base of exp(1)
 
 
 # Create 2x2 subplots
@@ -1161,19 +1083,12 @@ fig15.update_layout(
 )
 
 # Modify each trace to include the desired hovertemplate
-template15 = (
-    "x: %{x}<br>y: %{y:0.2f}<br>ID: %{pointNumber}<br>"
-    "name: %{customdata[0]}<br>unit: %{customdata[1]}"
-)
+template15 = "x: %{x}<br>y: %{y:0.2f}<br>ID: %{pointNumber}<br>name: %{customdata[0]}<br>unit: %{customdata[1]}"
 for i, trace in enumerate(fig15.data):
     trace.customdata = np.column_stack(
         (
-            np.repeat(
-                trace.name, len(x_data)
-            ),  # Updated from len(date_rng) to len(x_data)
-            np.repeat(
-                "#{}".format(i + 1), len(x_data)
-            ),  # Updated from len(date_rng) to len(x_data)
+            np.repeat(trace.name, len(x_data)),  # Updated from len(date_rng) to len(x_data)
+            np.repeat("#{}".format(i + 1), len(x_data)),  # Updated from len(date_rng) to len(x_data)
         )
     )
     trace.hovertemplate = template15
@@ -1277,13 +1192,9 @@ def update_scatter_plot(x_column, y_column):
     if not x_column or not y_column:
         raise PreventUpdate  # Prevent update if either dropdown is not selected
 
-    non_selected_columns = [
-        col for col in df.columns if col not in [x_column, y_column]
-    ]
+    non_selected_columns = [col for col in df.columns if col not in [x_column, y_column]]
     customdata = df[non_selected_columns].apply(
-        lambda row: "<br>".join(
-            f"{col}: {val}" for col, val in zip(non_selected_columns, row)
-        ),
+        lambda row: "<br>".join(f"{col}: {val}" for col, val in zip(non_selected_columns, row)),
         axis=1,
     )
     # gives (depending on selected entries):
@@ -1291,11 +1202,7 @@ def update_scatter_plot(x_column, y_column):
     # 2022-01-02     x: 2<br>z: 6<br>b: 10
     # ...
 
-    template = (
-        "<b>Date</b>: %{customdata}<br>"
-        + f"<b>{x_column}: %{{x}}<br>"
-        + f"{y_column}: %{{y}}</b><br>"
-    )
+    template = "<b>Date</b>: %{customdata}<br>" + f"<b>{x_column}: %{{x}}<br>" + f"{y_column}: %{{y}}</b><br>"
     # gives (depending on selected entries):
     # <b>Date</b>: %{customdata}<br><b>x: %{x}<br><b>a</b>: %{y}<br>
 

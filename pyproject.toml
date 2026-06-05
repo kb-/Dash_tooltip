@@ -68,6 +68,9 @@ include = ["dash_tooltip*"]
 [tool.setuptools_scm]
 write_to = "dash_tooltip/_version.py"
 
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 

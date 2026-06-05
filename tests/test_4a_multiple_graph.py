@@ -64,9 +64,7 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
         success = False  # flag to indicate if the tooltip was successfully triggered
 
         for _ in range(100):  # Try up to 100 times
-            element = driver.find_element(
-                By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path"
-            )
+            element = driver.find_element(By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path")
             ActionChains(driver).move_to_element(element).click().perform()
             time.sleep(0.01)
 
@@ -87,7 +85,4 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
 
         # Check if the loop exited due to a successful tooltip trigger or if all
         # attempts were exhausted
-        assert success, (
-            f"Failed to successfully trigger the tooltip for {graph_id}"
-            f" after multiple attempts."
-        )
+        assert success, f"Failed to successfully trigger the tooltip for {graph_id} after multiple attempts."

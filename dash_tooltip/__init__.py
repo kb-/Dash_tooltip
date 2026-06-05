@@ -36,9 +36,7 @@ registered_callbacks = set()
 ANNOTATION_RELAYOUT_KEY = re.compile(r"annotations\[(\d+)\]\.(.+)")
 
 
-def _apply_annotation_relayout(
-    current_figure: Dict[str, Any], relayout_data: Dict[str, Any]
-) -> bool:
+def _apply_annotation_relayout(current_figure: Dict[str, Any], relayout_data: Dict[str, Any]) -> bool:
     """Persist client-side annotation edits back into the server-side figure."""
     if not relayout_data:
         return False
@@ -152,14 +150,10 @@ class TooltipManager:
 
                     # Construct the CustomFigure(go.Figure) using data and layout
                     custom_figure = CustomFigure(data=data, layout=layout)
-                    return _display_click_data(
-                        clickData, custom_figure, template, self.style
-                    )
+                    return _display_click_data(clickData, custom_figure, template, self.style)
                 else:
                     custom_figure = CustomFigure(figure)
-                    return _display_click_data(
-                        clickData, custom_figure, template, self.style
-                    )
+                    return _display_click_data(clickData, custom_figure, template, self.style)
 
             @self.app.callback(
                 Output(graph_id, "figure", allow_duplicate=True),
@@ -171,9 +165,7 @@ class TooltipManager:
                 relayout_data: Dict[str, Any], current_figure: Dict[str, Any]
             ) -> Union[Dict[str, Any], dash._callback.NoUpdate]:
                 """Persist dragged or edited annotation properties."""
-                if current_figure and _apply_annotation_relayout(
-                    current_figure, relayout_data
-                ):
+                if current_figure and _apply_annotation_relayout(current_figure, relayout_data):
                     return current_figure
                 return dash.no_update
 
@@ -190,11 +182,7 @@ class TooltipManager:
                 if indices_to_remove:
                     annotations = current_figure["layout"].get("annotations", [])
                     logger.debug(f"Original Annotations: {annotations}")
-                    updated_annotations = [
-                        anno
-                        for idx, anno in enumerate(annotations)
-                        if idx not in indices_to_remove
-                    ]
+                    updated_annotations = [anno for idx, anno in enumerate(annotations) if idx not in indices_to_remove]
                     logger.debug(f"Indices to Remove: {indices_to_remove}")
                     logger.debug(f"Updated Annotations: {updated_annotations}")
                     current_figure["layout"]["annotations"] = updated_annotations
@@ -253,9 +241,7 @@ def tooltip(
     if graph_ids is None:
         graph_ids = _find_all_graph_ids(app.layout)
         if not graph_ids:
-            raise ValueError(
-                "No graphs found in the app layout. Please provide a graph ID."
-            )
+            raise ValueError("No graphs found in the app layout. Please provide a graph ID.")
     return TooltipManager(app, style, template, graph_ids, apply_log_fix, debug)
 
 

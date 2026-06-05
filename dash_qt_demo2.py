@@ -135,9 +135,7 @@ def create_dash_app():
                 config=graph_config,
                 style=graph_style,
             ),
-            dcc.Graph(
-                id="example-graph2", figure=fig2, config=graph_config, style=graph_style
-            ),
+            dcc.Graph(id="example-graph2", figure=fig2, config=graph_config, style=graph_style),
         ],
         style={
             "display": "flex",

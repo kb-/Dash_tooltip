@@ -114,9 +114,7 @@ def test_display_click_data_custom_style() -> None:
             }
         ]
     }
-    fig_after = _display_click_data(
-        click_data, fig_before, DEFAULT_TEMPLATE, custom_style, True, False
-    )
+    fig_after = _display_click_data(click_data, fig_before, DEFAULT_TEMPLATE, custom_style, True, False)
     annotation = fig_after.layout.annotations[0]
     assert annotation.arrowcolor == "red", "Arrow color mismatch."
     # Add additional assertions for other styles.

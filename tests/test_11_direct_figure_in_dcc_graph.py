@@ -44,8 +44,7 @@ app13.layout = dbc.Container(
                                     }
                                 ],
                                 "layout": {
-                                    "title": "Direct np.array Injection into dcc."
-                                    "Graph with Draggable Annotations"
+                                    "title": "Direct np.array Injection into dcc.Graph with Draggable Annotations"
                                 },
                             },
                             config={
@@ -82,26 +81,20 @@ def test_direct_data_injection(iteration: int, dash_duo: Any) -> None:
 
     # Ensure the element is clickable before interacting
     WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(11)")
-        )
+        EC.element_to_be_clickable((By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(11)"))
     )
 
     success = False  # flag to indicate if the click was successful
 
     for _ in range(100):  # Try up to 100 times (clicks sometimes not detected)
-        element = driver.find_element(
-            By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(11)"
-        )
+        element = driver.find_element(By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(11)")
         ActionChains(driver).move_to_element(element).click().perform()
         time.sleep(0.01)
 
         # Check if the tooltip annotation appears
         try:
             WebDriverWait(driver, 1).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
-                )
+                EC.presence_of_element_located((By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"))
             )
             success = True  # update the flag
             break  # exit the loop
@@ -113,8 +106,6 @@ def test_direct_data_injection(iteration: int, dash_duo: Any) -> None:
     assert success, "Failed to successfully click the point after multiple attempts."
 
     # Check if the tooltip annotation has the expected text
-    annotation_text_element = driver.find_element(
-        By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"
-    )
+    annotation_text_element = driver.find_element(By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
     actual_annotation_text = annotation_text_element.text
     assert actual_annotation_text == expected_annotation_text

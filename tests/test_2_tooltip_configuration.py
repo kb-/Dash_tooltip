@@ -104,16 +104,12 @@ def test_tooltip_configuration(dash_duo: Any) -> None:
 
     # Interact with a data point to trigger the tooltip
     idx = 1
-    element = driver.find_element(
-        By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx + 1})"
-    )
+    element = driver.find_element(By.CSS_SELECTOR, f".scatterlayer .trace .points path:nth-of-type({idx + 1})")
     ActionChains(driver).move_to_element(element).click().perform()
 
     # Check the tooltip's stylistic properties
     annotation_element = wait.until(
-        EC.visibility_of_element_located(
-            (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
-        )
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"))
     )
 
     # Pause to inspect the DOM

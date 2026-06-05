@@ -80,10 +80,7 @@ app.layout = dbc.Container(
 )
 
 # Tooltip template from dash_tooltip_demo.py
-tooltip_template = (
-    "%{name},<br>%{meta[1]},<br>x: %{x},<br>y: %{y:.2f},<br>%{"
-    "customdata[0]},<br>2y=%{customdata[1]:.3f}"
-)
+tooltip_template = "%{name},<br>%{meta[1]},<br>x: %{x},<br>y: %{y:.2f},<br>%{customdata[0]},<br>2y=%{customdata[1]:.3f}"
 tooltip(app, template=tooltip_template, debug=True)
 
 
@@ -129,13 +126,9 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
         # Check if the tooltip is visible
         try:
             annotation_element = wait.until(
-                EC.visibility_of_element_located(
-                    (By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text")
-                )
+                EC.visibility_of_element_located((By.CSS_SELECTOR, "g.annotation-text-g text.annotation-text"))
             )
-            actual_annotation_text = (
-                annotation_element.text
-            )  # Get the text content of the annotation element
+            actual_annotation_text = annotation_element.text  # Get the text content of the annotation element
             success = True  # update the flag
             break  # exit the loop
         except TimeoutException:
@@ -143,9 +136,7 @@ def test_customdata_tooltip(dash_duo: Any) -> None:
 
     # Check if the loop exited due to a successful tooltip trigger or if all attempts
     # were exhausted
-    assert success, (
-        "Failed to successfully trigger the tooltip after multiple attempts."
-    )
+    assert success, "Failed to successfully trigger the tooltip after multiple attempts."
 
     # Check if the actual annotation text matches the expected text based on the
     # customdata

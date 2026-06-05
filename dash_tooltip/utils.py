@@ -25,10 +25,8 @@ def _annotation_exists(fig: CustomFigure, x: Any, y: Any, xref: str, yref: str) 
     annotations = fig.layout.annotations or []
     for annotation in annotations:
         if (
-            _normalize_annotation_value(getattr(annotation, "x", None))
-            == _normalize_annotation_value(x)
-            and _normalize_annotation_value(getattr(annotation, "y", None))
-            == _normalize_annotation_value(y)
+            _normalize_annotation_value(getattr(annotation, "x", None)) == _normalize_annotation_value(x)
+            and _normalize_annotation_value(getattr(annotation, "y", None)) == _normalize_annotation_value(y)
             and getattr(annotation, "xref", None) == xref
             and getattr(annotation, "yref", None) == yref
         ):
@@ -51,10 +49,7 @@ def add_annotation_store(layout: Div, graph_id: Optional[str] = None) -> str:
     if graph_id:
         store_id += f"-{graph_id}"
 
-    if not any(
-        isinstance(child, dcc.Store) and child.id == store_id
-        for child in layout.children
-    ):
+    if not any(isinstance(child, dcc.Store) and child.id == store_id for child in layout.children):
         if isinstance(layout.children, list):
             layout.children.append(dcc.Store(id=store_id))
 
@@ -214,9 +209,7 @@ def _display_click_data(
     elif isinstance(figure, CustomFigure):
         fig = figure
     else:
-        raise TypeError(
-            "The figure provided must be of type 'CustomFigure' or a dictionary."
-        )
+        raise TypeError("The figure provided must be of type 'CustomFigure' or a dictionary.")
 
     fig.update_template(template)
 
@@ -262,20 +255,12 @@ def _display_click_data(
             logger.error(f"An unexpected error occurred: {e}")
 
         if debug:
-            logger.debug(
-                f"clickData: {truncate_json_arrays(json.dumps(clickData, indent=4), 2)}"
-            )
-            logger.debug(
-                f"figure: {truncate_json_arrays(json.dumps(fig, indent=4), 2)}"
-            )
-            logger.debug(
-                "Point data:\n%s", truncate_json_arrays(json.dumps(point, indent=4), 2)
-            )
+            logger.debug(f"clickData: {truncate_json_arrays(json.dumps(clickData, indent=4), 2)}")
+            logger.debug(f"figure: {truncate_json_arrays(json.dumps(fig, indent=4), 2)}")
+            logger.debug("Point data:\n%s", truncate_json_arrays(json.dumps(point, indent=4), 2))
             logger.debug(
                 "Trace data:\n%s",
-                truncate_json_arrays(
-                    json.dumps(fig["data"][point["curveNumber"]], indent=4), 2
-                ),
+                truncate_json_arrays(json.dumps(fig["data"][point["curveNumber"]], indent=4), 2),
             )
 
         placeholders = re.findall(r"%{(.*?)}", fig.layout._tooltip_template)
@@ -293,9 +278,7 @@ def _display_click_data(
                         # Applying the format specifier directly
                         template_data[placeholder] = f"{value:{format_spec}}"
                     except ValueError as e:
-                        logger.error(
-                            f"Error formatting value {value}, with format {format_spec}. Error: {e}"
-                        )
+                        logger.error(f"Error formatting value {value}, with format {format_spec}. Error: {e}")
                         template_data[placeholder] = str(value)
                 else:
                     template_data[placeholder] = str(value)
@@ -317,8 +300,6 @@ def _display_click_data(
                 **merged_config,
             )
         except ValueError as e:
-            logger.error(
-                f"Failed to add annotation due to invalid properties in {merged_config}. Error: {e}"
-            )
+            logger.error(f"Failed to add annotation due to invalid properties in {merged_config}. Error: {e}")
             raise e
     return fig

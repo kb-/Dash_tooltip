@@ -37,9 +37,7 @@ fig2 = go.Figure(data=[go.Scatter(x=x2, y=y2, mode="markers")])
 
 # Generate data and create 2x2 subplots
 x = np.arange(10)
-fig = make_subplots(
-    rows=2, cols=2, subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4")
-)
+fig = make_subplots(rows=2, cols=2, subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4"))
 
 fig1.update_layout(height=250, width=400)
 fig2.update_layout(height=250, width=400)
@@ -130,22 +128,16 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
                         )
                     )
                 )
-                assert perform_retry_click(element), (
-                    f"Failed to click on {subplot} in {graph_id}"
-                )
+                assert perform_retry_click(element), f"Failed to click on {subplot} in {graph_id}"
 
                 # Wait for the tooltip's annotation to appear and ensure it's visible
                 annotation_element = wait.until(
-                    EC.visibility_of_element_located(
-                        (By.CSS_SELECTOR, f"#{graph_id} .{subplot}")
-                    )
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, f"#{graph_id} .{subplot}"))
                 )
                 assert annotation_element.is_displayed()
 
         else:
-            element = driver.find_element(
-                By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path"
-            )
+            element = driver.find_element(By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path")
             assert perform_retry_click(element), f"Failed to click on {graph_id}"
 
             # Check the tooltip's presence
