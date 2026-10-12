@@ -1,11 +1,10 @@
 """
-Test4b: Multiple Graphs Test:
+Multiple Graphs and Subplots Test:
 Call the tooltip function for an app with multiple graphs and verify that tooltips are
 functional for all graphs.
 This ensures that the function can handle multiple graphs correctly.
 """
 
-import time
 from typing import Any
 
 import dash
@@ -16,7 +15,6 @@ from dash import dcc, html
 from plotly.subplots import make_subplots
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -98,55 +96,32 @@ def test_multiple_graph_tooltips(dash_duo: Any) -> None:
     # Start the Dash app
     dash_duo.start_server(app)
 
-    # Helper function to perform the retry click
-    def perform_retry_click(element: WebElement) -> bool:
-        success = False
-        for _ in range(100):
-            ActionChains(driver).move_to_element(element).click().perform()
-            time.sleep(0.01)  # This ensures the UI has a moment to update
-
-            # Check if the annotation appeared to confirm the click was successful
-            if element.is_displayed():
-                success = True
-                break
-
-        return success
-
-    # For each graph, interact with a data point to trigger the tooltip
     for graph_id in ["graph-1b", "graph-2b", "subplot-graph"]:
-        if graph_id == "subplot-graph":
-            # Handle subplots differently. Interact with each subplot.
-            subplots = ["xy", "x2y2", "x3y3", "x4y4"]
-
-            for subplot in subplots:
-                # Interact with a data point in the current subplot
-                element = WebDriverWait(driver, 1).until(
-                    EC.presence_of_element_located(
-                        (
-                            By.CSS_SELECTOR,
-                            f"#{graph_id} .{subplot} .scatterlayer .trace .points path",
-                        )
-                    )
-                )
-                assert perform_retry_click(element), f"Failed to click on {subplot} in {graph_id}"
-
-                # Wait for the tooltip's annotation to appear and ensure it's visible
-                annotation_element = wait.until(
-                    EC.visibility_of_element_located((By.CSS_SELECTOR, f"#{graph_id} .{subplot}"))
-                )
-                assert annotation_element.is_displayed()
-
-        else:
-            element = driver.find_element(By.CSS_SELECTOR, f"#{graph_id} .scatterlayer .trace .points path")
-            assert perform_retry_click(element), f"Failed to click on {graph_id}"
-
-            # Check the tooltip's presence
-            annotation_element = wait.until(
-                EC.visibility_of_element_located(
-                    (
-                        By.CSS_SELECTOR,
-                        f"#{graph_id} g.annotation-text-g text.annotation-text",
-                    )
+        subplots = ["xy", "x2y2", "x3y3", "x4y4"] if graph_id == "subplot-graph" else ["xy"]
+        for index, subplot in enumerate(subplots):
+            element = wait.until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, f"#{graph_id} .{subplot} .scatterlayer .trace .points path")
                 )
             )
-            assert annotation_element.is_displayed()
+            annotation_count = driver.execute_script(
+                "return document.querySelector(arguments[0]).layout.annotations?.length || 0",
+                f"#{graph_id} .js-plotly-plot",
+            )
+            ActionChains(driver).move_to_element(element).perform()
+            wait.until(
+                lambda browser: browser.execute_script(
+                    "const gd = document.querySelector(arguments[0]); "
+                    "return gd._hoverdata?.some(p => p.x === 0 && p.curveNumber === arguments[1]);",
+                    f"#{graph_id} .js-plotly-plot",
+                    index * 2 if graph_id == "subplot-graph" else 0,
+                )
+            )
+            ActionChains(driver).click().perform()
+            wait.until(
+                lambda browser: browser.execute_script(
+                    "return (document.querySelector(arguments[0]).layout.annotations?.length || 0) === arguments[1]",
+                    f"#{graph_id} .js-plotly-plot",
+                    annotation_count + 1,
+                )
+            )

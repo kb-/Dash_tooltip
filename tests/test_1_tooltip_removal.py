@@ -1,5 +1,5 @@
 """
-Test 7: Test tooltip annotation
+Demo 1: Test tooltip annotation removal
 
 This test aims to validate the tooltip annotation functionality of a Dash app.
 The primary objectives are:

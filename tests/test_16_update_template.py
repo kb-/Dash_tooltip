@@ -61,7 +61,15 @@ def test_customdata_tooltip(dash_duo):
     first_point = WebDriverWait(dash_duo.driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(1)"))
     )
-    ActionChains(dash_duo.driver).move_to_element(first_point).click().perform()
+    ActionChains(dash_duo.driver).move_to_element(first_point).perform()
+    WebDriverWait(dash_duo.driver, 10).until(
+        lambda driver: driver.execute_script(
+            "return document.querySelector(arguments[0])._hoverdata?.some(p => p.x === arguments[1]);",
+            f"#{GRAPH_ID} .js-plotly-plot",
+            1,
+        )
+    )
+    ActionChains(dash_duo.driver).click().perform()
 
     # Wait for the first tooltip to appear
     WebDriverWait(dash_duo.driver, 10).until(
@@ -78,7 +86,15 @@ def test_customdata_tooltip(dash_duo):
     second_point = WebDriverWait(dash_duo.driver, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, ".scatterlayer .trace .points path:nth-of-type(2)"))
     )
-    ActionChains(dash_duo.driver).move_to_element(second_point).click().perform()
+    ActionChains(dash_duo.driver).move_to_element(second_point).perform()
+    WebDriverWait(dash_duo.driver, 10).until(
+        lambda driver: driver.execute_script(
+            "return document.querySelector(arguments[0])._hoverdata?.some(p => p.x === arguments[1]);",
+            f"#{GRAPH_ID} .js-plotly-plot",
+            2,
+        )
+    )
+    ActionChains(dash_duo.driver).click().perform()
 
     # Wait for the second tooltip to appear
     WebDriverWait(dash_duo.driver, 10).until(

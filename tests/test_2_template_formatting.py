@@ -1,5 +1,5 @@
 """
-Test 3: Template Formatting Test:
+Demo 2: Template Formatting Test:
 Call the tooltip function with a custom template and check if the tooltips are formatted
 according to the template.
 This ensures that the function respects custom formatting.
