@@ -229,8 +229,8 @@ def _display_click_data(
         y_val = point["y"]
 
         trace = fig.data[point["curveNumber"]]
-        xaxis = trace.xaxis or "x"
-        yaxis = trace.yaxis or "y"
+        xaxis = getattr(trace, "xaxis", None) or "x"
+        yaxis = getattr(trace, "yaxis", None) or "y"
         point["meta"] = trace.meta
         point["name"] = trace.name
 

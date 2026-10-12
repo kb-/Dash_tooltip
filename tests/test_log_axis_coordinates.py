@@ -50,6 +50,29 @@ def test_missing_axis_type_is_non_logarithmic(reference):
     assert get_axis_type(CustomFigure(), reference) == "linear"
 
 
+@pytest.mark.parametrize("representation", ["custom", "dict"])
+@pytest.mark.parametrize("axis_type", ["linear", "log"])
+def test_splom_without_scalar_axis_properties_uses_default_axes(representation, axis_type):
+    figure = CustomFigure(
+        go.Splom(
+            dimensions=[dict(label="X", values=[100]), dict(label="Y", values=[1000])],
+            meta=["metadata"],
+            name="Matrix",
+        )
+    )
+    figure.update_xaxes(type=axis_type)
+    figure.update_yaxes(type=axis_type)
+    if representation == "dict":
+        figure = figure.to_dict()
+
+    result = _display_click_data(click_data(), figure, "%{name}: %{meta[0]} x: %{x} y: %{y}", {})
+
+    annotation = result.layout.annotations[0]
+    assert (annotation.xref, annotation.yref) == ("x", "y")
+    assert (annotation.x, annotation.y) == ((2, 3) if axis_type == "log" else (100, 1000))
+    assert annotation.text == "Matrix: metadata x: 100 y: 1000"
+
+
 @pytest.mark.parametrize("axis", ["x", "y"])
 @pytest.mark.parametrize("value", [0, -1, float("nan"), float("inf"), -float("inf")])
 def test_invalid_log_coordinate_does_not_add_partial_annotation(axis, value, caplog, monkeypatch):
