@@ -20,7 +20,7 @@
 # Click on data points to add annotations. Annotations are draggable and editable.
 # To delete and annotation, just delete its text: Click on text, delete and press enter
 
-# %% jupyter={"source_hidden": true}
+# %%
 import warnings
 
 import dash
@@ -32,7 +32,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
-from dash import Dash, Input, Output, dcc, html
+from dash import Dash, Input, Output, State, dcc, html
 from dash.exceptions import PreventUpdate
 from plotly.subplots import make_subplots
 from plotly_resampler import FigureResampler
@@ -307,7 +307,6 @@ if __name__ == "__main__":
 
 # %% jupyter={"source_hidden": true}
 # ---- Test 5: Multiple Traces with Toggable Tooltip function ----
-# ---- Test 5: Multiple Traces with Toggable Tooltip function ----
 app5 = Dash(__name__)
 
 # Random data for three traces
@@ -406,7 +405,7 @@ if __name__ == "__main__":
     app5.run(debug=False, port=8085)
 
 
-# %% jupyter={"source_hidden": true}
+# %%
 # ---- Test 6: Two Traces with Multiple Custom Data ----
 
 app6 = Dash(__name__)
@@ -924,7 +923,7 @@ tooltip(app13, debug=True)
 if __name__ == "__main__":
     app13.run(debug=False, port=8093)
 
-# %% jupyter={"source_hidden": true}
+# %%
 # ---- Test 14: log axis ----
 
 # Generate exponential data
@@ -1026,10 +1025,11 @@ fig14.register_update_graph_callback(app14, "graph-id14", "trace-updater14")
 app14.run(debug=False, port=8094, jupyter_height=800)
 
 
-# %% jupyter={"source_hidden": true}
-# ---- Test 15: log axis (placement should fail if Plotly bug still present)----
+# %%
+# ---- Test 15: log axis with coordinate conversion deliberately disabled ----
 
-# Plotly bug https://github.com/plotly/plotly.py/issues/2580
+# Raw annotation coordinates on log axes intentionally demonstrate misplaced tooltips.
+# Plotly coordinate convention: https://plotly.com/python/reference/layout/annotations/
 
 # Generate exponential data
 x_data = np.linspace(1, 100, 100)  # Generating 100 points from 1 to 100
@@ -1122,7 +1122,7 @@ tooltip(
 
 # Update layout title
 fig15.update_layout(
-    title_text="2x2 Subplots with 2 Traces Each (tooltip placement should work after Plotly issue fix)",
+    title_text="2x2 Subplots (log conversion disabled: tooltips are intentionally misplaced)",
     height=800,
 )
 
@@ -1232,4 +1232,57 @@ def update_scatter_plot(x_column, y_column):
 if __name__ == "__main__":
     app16.run(debug=False, port=8196)
 
-# %% jupyter={"source_hidden": true}
+# %%
+# ---- Test 17: Change a lin-lin plot to y-log, then add tooltips ----
+graphid_17 = "graph-id17"
+x17 = np.linspace(0, 100, 51)
+fig17 = go.Figure(go.Scatter(x=x17, y=np.exp(0.05 * x17), mode="lines+markers", name="Exponential growth"))
+fig17.update_layout(
+    title_text="Change from lin-lin to y-log, then click a point to add a tooltip",
+    xaxis=dict(type="linear", title="x"),
+    yaxis=dict(type="linear", title="y"),
+)
+
+app17 = Dash(__name__)
+app17.layout = html.Div(
+    [
+        html.P("Start with linear axes, select y-log, then click data points to add editable tooltips."),
+        dcc.RadioItems(
+            id="y-scale17",
+            options=[
+                {"label": "lin-lin", "value": "linear"},
+                {"label": "y-log", "value": "log"},
+            ],
+            value="linear",
+            inline=True,
+        ),
+        dcc.Graph(
+            id=graphid_17,
+            figure=fig17,
+            config={
+                "editable": True,
+                "edits": {"shapePosition": True, "annotationPosition": True},
+            },
+        ),
+    ]
+)
+
+tooltip(app17, graph_ids=[graphid_17], template="x: %{x}<br>y: %{y:.2f}")
+
+
+@app17.callback(
+    Output(graphid_17, "figure", allow_duplicate=True),
+    Input("y-scale17", "value"),
+    State(graphid_17, "figure"),
+    prevent_initial_call=True,
+)
+def update_y_scale17(scale, current_figure):
+    figure = go.Figure(current_figure)
+    figure.update_yaxes(type=scale, autorange=True, range=None)
+    return figure
+
+
+if __name__ == "__main__":
+    app17.run(debug=True, port=8097)
+
+# %%

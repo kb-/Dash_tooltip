@@ -11,6 +11,13 @@ from .config import DEFAULT_ANNOTATION_CONFIG, DEFAULT_TEMPLATE
 from .custom_figure import CustomFigure
 from .utils import _display_click_data, _find_all_graph_ids, add_annotation_store
 
+try:
+    from ._version import __version__ as __version__
+except ModuleNotFoundError as exc:
+    if exc.name != __name__ + "._version":
+        raise
+    __version__ = "0+unknown"
+
 # Logger setup
 logger = logging.getLogger("dash_tooltip")
 logger.setLevel(logging.DEBUG)
@@ -134,7 +141,9 @@ class TooltipManager:
 
                 template = self.templates[graph_id]
                 if isinstance(figure, CustomFigure):
-                    return _display_click_data(clickData, figure, template, self.style)
+                    return _display_click_data(
+                        clickData, figure, template, self.style, apply_log_fix=self.apply_log_fix
+                    )
                 # Check if figure is a dictionary
                 elif isinstance(figure, dict):
                     # Extract data and layout from the figure dictionary
@@ -150,10 +159,14 @@ class TooltipManager:
 
                     # Construct the CustomFigure(go.Figure) using data and layout
                     custom_figure = CustomFigure(data=data, layout=layout)
-                    return _display_click_data(clickData, custom_figure, template, self.style)
+                    return _display_click_data(
+                        clickData, custom_figure, template, self.style, apply_log_fix=self.apply_log_fix
+                    )
                 else:
                     custom_figure = CustomFigure(figure)
-                    return _display_click_data(clickData, custom_figure, template, self.style)
+                    return _display_click_data(
+                        clickData, custom_figure, template, self.style, apply_log_fix=self.apply_log_fix
+                    )
 
             @self.app.callback(
                 Output(graph_id, "figure", allow_duplicate=True),
@@ -232,7 +245,9 @@ def tooltip(
                         Default is a basic string template.
         graph_ids (list, optional): List of graph IDs to apply tooltips to.
                                     If not provided, will try to auto-detect from the layout.
-        apply_log_fix (bool): If True, applies a fix for logging issues.
+        apply_log_fix (bool): Convert new annotation coordinates with log10 on log axes.
+                              Defaults to True. False deliberately disables conversion.
+                              Existing annotations are not converted when axis types change.
         debug (bool): If True, enables debugging mode.
 
     Returns:

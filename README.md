@@ -15,7 +15,17 @@ A module to add interactive editable tooltips to your Dash applications. Inspire
 
 ## Build And Publish
 
-With the current `pyproject.toml`-based setup, use `uv` for local builds and publishing:
+Versions are derived from Git tags by `setuptools-scm`; do not edit a version number in
+`pyproject.toml`. A clean `vX.Y.Z` tag produces version `X.Y.Z`. Commits after a tag
+produce development versions, with a local suffix for the commit and dirty working tree.
+
+For development, run `uv sync --group dev` before importing from a fresh checkout.
+The build generates `dash_tooltip/_version.py`, which is ignored by Git and exposes
+`dash_tooltip.__version__`. An unbuilt checkout without that file reports `0+unknown`;
+this is only a runtime placeholder and is never used as the distribution version.
+
+For a release, commit all release changes, create a `vX.Y.Z` tag, and build from that
+clean tagged checkout. Use `uv` for local builds and publishing:
 
 ```bash
 # Build source distribution and wheel into dist/
@@ -27,6 +37,10 @@ uv pip install dist/*.whl
 # Publish to PyPI
 uv publish
 ```
+
+Source distributions retain their version when rebuilt without Git. Arbitrary source
+copies without Git history or source-distribution metadata cannot determine a version
+and fail to build. See [the release guide](RELEASING.md) for the release steps.
 
 ## Basic Usage
 
@@ -263,7 +277,48 @@ app16.run(debug=False, port=8196)
 
 ## Handling Log Axes
 
-Due to a long-standing bug in Plotly (see [Plotly Issue #2580](https://github.com/plotly/plotly.py/issues/2580)), annotations (`fig.add_annotation`) may not be placed correctly on log-scaled axes. The `dash_tooltip` module provides an option to automatically correct the tooltip placement on log-scaled axes via the `apply_log_fix` argument in the `tooltip` function. By default, `apply_log_fix` is set to `True` to enable the fix.
+Plotly's [annotation coordinate convention](https://plotly.com/python/reference/layout/annotations/) requires logarithmic coordinates on log axes: a point at `y=100` needs an annotation anchor at `y=2`. By default, `tooltip(..., apply_log_fix=True)` performs this conversion for new tooltips while retaining the original data values in their text. The module reads the current figure's axis types on each click, including after `update_yaxes(type="log")` or `update_xaxes(type="log")`.
+
+Setting `apply_log_fix=False` deliberately disables conversion and can produce misplaced annotations on log axes, as demonstrated by demo 15. Nonpositive or nonfinite coordinates on a log axis are skipped with a warning when conversion is enabled.
+
+Existing annotations are **not** converted when an axis type changes. This support covers tooltips added after the change; remove existing tooltips before switching scales if their anchors must remain aligned with the data.
+
+## Demo and Test Mapping
+
+Numbered pytest modules correspond to cases in `dash_tooltip_demo.py`. Tests without a corresponding demo use descriptive names without numbers. A matching test covers the listed behavior; it does not execute the notebook cell itself.
+
+| Demo | Behavior | Automated coverage in `tests/` |
+| --- | --- | --- |
+| 1 | Single trace, editable annotations | `test_1_tooltip_function.py`, `test_1_go_scatter.py`, `test_1_tooltip_removal.py` |
+| 2 | Custom data, styles, formatting | `test_2_tooltip_configuration.py`, `test_2_template_formatting.py` |
+| 3 | Multiple traces | Manual demo only |
+| 4 | Multiple traces with custom data | Manual demo only |
+| 5 | Toggle tooltip functionality | Manual demo only |
+| 6 | Multiple custom-data fields | Manual demo only |
+| 7 | Enable tooltips on selected graphs | Manual demo only |
+| 8 | Tooltips on multiple graphs | `test_8_multiple_graph.py` |
+| 9 | Noneditable resampled time series | Manual demo only |
+| 10 | Editable resampled time series | Manual demo only |
+| 11 | Resampler wrapper | Manual demo only |
+| 12 | Resampled 2x2 subplots | Manual demo only |
+| 13 | Figure dictionary supplied to `dcc.Graph` | `test_13_direct_figure_in_dcc_graph.py` |
+| 14 | Static log axes with conversion enabled | Shared coordinate/callback tests in `test_log_axis_coordinates.py`; subplot/resampler rendering is manual |
+| 15 | Static log axes with conversion disabled | Shared coordinate/callback tests in `test_log_axis_coordinates.py`; intentionally misplaced rendering is manual |
+| 16 | Update tooltip template | `test_16_update_template.py` |
+| 17 | Add tooltips after changing the y scale | `test_17_log_axis_update.py`, `test_log_axis_coordinates.py` |
+
+Additional tests cover annotation relayout persistence, display/deduplication logic, invalid graph IDs, bar/line charts, and combinations of multiple graphs and subplots.
+
+Run the unit tests and the demo 17 browser regression locally with the project environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests/ -m "not selenium"
+.\.venv\Scripts\python.exe -m pytest tests/test_17_log_axis_update.py --webdriver Firefox --headless
+# Run all browser tests:
+.\.venv\Scripts\python.exe -m pytest tests/ -m selenium --webdriver Firefox --headless
+```
+
+The Selenium tests require Firefox and a compatible `geckodriver` on `PATH`. Demo 17 checks both annotation coordinates and the rendered arrowhead's distance from the clicked marker. GitHub Actions continues to run the non-Selenium suite.
 
 ## Debugging
 

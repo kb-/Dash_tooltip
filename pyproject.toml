@@ -1,9 +1,9 @@
 [project]
 name = "Dash_tooltip"
-version = "0.5.1"
+dynamic = ["version"]
 description = "A tooltip functionality for Dash."
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "dash>=2.13.0",
     "plotly>=5.17.0"
@@ -13,7 +13,6 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -21,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
@@ -55,8 +55,8 @@ dev = [
 
 [build-system]
 requires = [
-    "setuptools>=42",
-    "setuptools_scm",
+    "setuptools>=61",
+    "setuptools-scm>=8",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
@@ -66,7 +66,10 @@ where = ["."]
 include = ["dash_tooltip*"]
 
 [tool.setuptools_scm]
-write_to = "dash_tooltip/_version.py"
+version_file = "dash_tooltip/_version.py"
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { git = { commit = true, tags = true } }]
 
 [tool.ruff]
 line-length = 120

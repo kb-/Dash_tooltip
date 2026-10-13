@@ -154,14 +154,18 @@ def get_axis_type(fig: go.Figure, axis: str) -> str:
     Returns:
         str: The type of the specified axis, e.g., 'linear' or 'log'.
     """
-    # Check if the axis identifier has a number at the end
-    axis_number = axis[-1]
-    if axis_number.isnumeric():
-        axis_key = axis[:-1] + "axis" + axis_number
-    else:
-        axis_key = axis + "axis"
+    axis_key = axis[0] + "axis" + axis[1:]
+    axis_layout = getattr(fig.layout, axis_key, None)
+    return getattr(axis_layout, "type", None) or "linear"
 
-    return fig.layout[axis_key].type
+
+def _annotation_coordinate(value: Any, axis_type: str, apply_log_fix: bool) -> Any:
+    """Convert a data value to Plotly's annotation coordinates."""
+    if not apply_log_fix or axis_type != "log":
+        return value
+    if not math.isfinite(value) or value <= 0:
+        raise ValueError("Log annotation coordinates must be finite and positive.")
+    return math.log10(value)
 
 
 def _display_click_data(
@@ -180,7 +184,8 @@ def _display_click_data(
         figure (Union[CustomFigure, Dict[str, Any]]): The figure to update.
         template (str): The template for the tooltip.
         config (Dict[Any, Any]): The configuration for the tooltip.
-        apply_log_fix (bool, optional): Whether to apply the log axis fix. Defaults to True.
+        apply_log_fix (bool, optional): Convert new log-axis anchors with log10. Defaults to True.
+            False deliberately disables conversion. Existing annotations are not reprojected.
         debug (bool, optional): Whether to enable debugging. Defaults to False.
 
     Returns:
@@ -223,36 +228,18 @@ def _display_click_data(
         x_val = point["x"]
         y_val = point["y"]
 
+        trace = fig.data[point["curveNumber"]]
+        xaxis = getattr(trace, "xaxis", None) or "x"
+        yaxis = getattr(trace, "yaxis", None) or "y"
+        point["meta"] = trace.meta
+        point["name"] = trace.name
+
         try:
-            # Extract the clicked axis information from the curve data
-            if "xaxis" in fig["data"][point["curveNumber"]]:
-                xaxis = fig["data"][point["curveNumber"]]["xaxis"]
-            else:
-                xaxis = "x"
-
-            if "yaxis" in fig["data"][point["curveNumber"]]:
-                yaxis = fig["data"][point["curveNumber"]]["yaxis"]
-            else:
-                yaxis = "y"
-
-            if "meta" in fig["data"][point["curveNumber"]]:
-                point["meta"] = fig["data"][point["curveNumber"]]["meta"]
-
-            if "name" in fig["data"][point["curveNumber"]]:
-                point["name"] = fig["data"][point["curveNumber"]]["name"]
-
-            # If the x-axis is logarithmic, adjust `x_val`
-            if apply_log_fix and get_axis_type(fig, xaxis) == "log":
-                x_val = math.log10(x_val)
-
-            # If the y-axis is logarithmic, adjust `y_val`
-            if apply_log_fix and get_axis_type(fig, yaxis) == "log":
-                y_val = math.log10(y_val)
-
-        except KeyError as e:
-            logger.error(f"Error: {e}, key not found")
-        except Exception as e:
-            logger.error(f"An unexpected error occurred: {e}")
+            x_val = _annotation_coordinate(x_val, get_axis_type(fig, xaxis), apply_log_fix)
+            y_val = _annotation_coordinate(y_val, get_axis_type(fig, yaxis), apply_log_fix)
+        except (TypeError, ValueError, OverflowError) as e:
+            logger.warning("Skipping tooltip with invalid log coordinates (%r, %r): %s", point["x"], point["y"], e)
+            return fig
 
         if debug:
             logger.debug(f"clickData: {truncate_json_arrays(json.dumps(clickData, indent=4), 2)}")

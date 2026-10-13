@@ -1,5 +1,5 @@
 """
-Test 8: Tooltip Display Logic with `_display_click_data` Function
+Tooltip Display Logic with `_display_click_data` Function
 ===========================================================
 
 Description:
