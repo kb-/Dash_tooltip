@@ -11,6 +11,13 @@ from .config import DEFAULT_ANNOTATION_CONFIG, DEFAULT_TEMPLATE
 from .custom_figure import CustomFigure
 from .utils import _display_click_data, _find_all_graph_ids, add_annotation_store
 
+try:
+    from ._version import __version__ as __version__
+except ModuleNotFoundError as exc:
+    if exc.name != __name__ + "._version":
+        raise
+    __version__ = "0+unknown"
+
 # Logger setup
 logger = logging.getLogger("dash_tooltip")
 logger.setLevel(logging.DEBUG)

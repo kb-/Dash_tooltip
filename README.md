@@ -15,7 +15,17 @@ A module to add interactive editable tooltips to your Dash applications. Inspire
 
 ## Build And Publish
 
-With the current `pyproject.toml`-based setup, use `uv` for local builds and publishing:
+Versions are derived from Git tags by `setuptools-scm`; do not edit a version number in
+`pyproject.toml`. A clean `vX.Y.Z` tag produces version `X.Y.Z`. Commits after a tag
+produce development versions, with a local suffix for the commit and dirty working tree.
+
+For development, run `uv sync --group dev` before importing from a fresh checkout.
+The build generates `dash_tooltip/_version.py`, which is ignored by Git and exposes
+`dash_tooltip.__version__`. An unbuilt checkout without that file reports `0+unknown`;
+this is only a runtime placeholder and is never used as the distribution version.
+
+For a release, commit all release changes, create a `vX.Y.Z` tag, and build from that
+clean tagged checkout. Use `uv` for local builds and publishing:
 
 ```bash
 # Build source distribution and wheel into dist/
@@ -27,6 +37,10 @@ uv pip install dist/*.whl
 # Publish to PyPI
 uv publish
 ```
+
+Source distributions retain their version when rebuilt without Git. Arbitrary source
+copies without Git history or source-distribution metadata cannot determine a version
+and fail to build. See [the release guide](RELEASING.md) for the release steps.
 
 ## Basic Usage
 
